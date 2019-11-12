@@ -25,14 +25,53 @@ class SectorShape:
     airway_width_nm = 10 # Class attribute: constant airway width of 10 nm
     offset_nm = 10 # Class attribute: constant exterior waypoint offset
 
-    # Default fix names:
+    ###
+    ### Default fix names:
+    ###
+
+    # I fixes from top to bottom:
+    #
+    #   'spirt'
+    #   'air'
+    #   'water'
+    #   'earth'
+    #   'fiyre'
+    #
     i_fix_names = ['spirt', 'air', 'water', 'earth', 'fiyre']
+
+    # X fixes anticlockwise from the top:
+    #
+    #                  'sin'
+    #                 'gates'
+    # 'siren' 'witch' 'abyss' 'demon' 'satan'
+    #                 'haunt'
+    #                 'limbo'
+    #
     x_fix_names = ['sin', 'gates', 'siren', 'witch', 'abyss', 'haunt', 'limbo', 'demon', 'satan']
+
+    # Y fixes from the centre outwards starting in the top-left branch:
+    #
+    #       'ghost'              'god'
+    #            'bishp'   'canon'
+    #                  'tri'
+    #                  'son'
+    #                 'deacn'
+    #
     y_fix_names = ['ghost', 'bishp', 'god', 'canon', 'tri', 'son', 'deacn']
 
-    # Default route names:
+    ###
+    ###  Default route names:
+    ###
+
+    # I routes: 1) increasing in y-coordinate 2) decreasing in y-coordinate
     i_route_names = ['ascension', 'fallen']
+
+    # X routes: 1) vertical increasing in y-coordinate 2) vertical descreasing in y-coordinate
+    #           3) horizontal increasing in x-coordinate 4) horizontal descreasing in x-coordinate
     x_route_names = ['purgatory', 'blasphemer', 'damnation', 'redemption']
+
+    # Y routes: 1) increasing in y-coordinate through left branch 2) decreasing in y-coordinate through left branch
+    #           3) increasing in y-coordinate through right branch 4) decreasing in y-coordinate through right branch
     y_route_names = ['almighty', 'ethereal', 'everlasting', 'divine']
 
     def __init__(self, sector_type: SectorType, polygon: geom.base.BaseGeometry, fix_names, route_names):
@@ -165,8 +204,8 @@ class XShape(SectorShape):
 
         fix_points = [geom.Point(x_mid, y_max + self.offset_nm), # top exterior
                       geom.Point(x_mid, y_max), # top
-                      geom.Point(x_min, y_mid), # left
                       geom.Point(x_min - self.offset_nm, y_mid), # left exterior
+                      geom.Point(x_min, y_mid), # left
                       geom.Point(x_mid, y_mid), # middle
                       geom.Point(x_mid, y_min), # bottom
                       geom.Point(x_mid, y_min - self.offset_nm), # bottom exterior
@@ -221,10 +260,10 @@ class YShape(SectorShape):
         bottom_outer = geom.Point(_x, _y - self.offset_nm)
 
         origin = self.polygon.centroid
-        fix_points = [rotate(bottom, -120, origin=origin), # left
-                      rotate(bottom_outer, angle=-120, origin=origin), # left exterior
-                      rotate(bottom, 120, origin=origin), # right
+        fix_points = [rotate(bottom_outer, angle=-120, origin=origin), # left exterior
+                      rotate(bottom, -120, origin=origin), # left
                       rotate(bottom_outer, angle=120, origin=origin), # right exterior
+                      rotate(bottom, 120, origin=origin), # right
                       origin, # middle
                       bottom, # bottom
                       bottom_outer] # bottom exterior
