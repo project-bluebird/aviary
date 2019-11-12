@@ -218,5 +218,3 @@ def test_y_named_routes():
     assert len(result[y.route_names[1]]) == len(y.routes()[1])
     assert len(result[y.route_names[0]]) == len(y.routes()[2])
     assert len(result[y.route_names[1]]) == len(y.routes()[3])
-
-    print(result)
