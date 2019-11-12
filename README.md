@@ -3,7 +3,7 @@ Air traffic scenario generation for the [Simurgh](https://github.com/alan-turing
 
 ## Installation
 
-Install:
+Install from the repository root directory:
 ```bash
 pip install .
 ```
