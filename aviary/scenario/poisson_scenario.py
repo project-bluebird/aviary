@@ -15,6 +15,7 @@ class PoissonScenario(ScenarioAlgorithm):
 
     def __init__(self, arrival_rate, **kwargs):
 
+        # Pass the keyword args (including the random seed) to the superclass constructor.
         super().__init__(**kwargs)
         self.arrival_rate = arrival_rate
 
@@ -36,26 +37,3 @@ class PoissonScenario(ScenarioAlgorithm):
                 sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.flight_level()),
                 sg.ROUTE_KEY: self.route(sector)
             }
-
-
-    # def aircraft(self, callsign, aircraft_type, start_time, current_flight_level,
-    #              cleared_flight_level, requested_flight_level, route_index) -> dict:
-    #     """Returns all info required to create an aircraft, including its route."""
-    #
-    #     # Infer the start position from the route (i.e. take the first fix).
-    #     route = self.sector_element.shape.routes()[route_index]
-    #     start_position = route[0][0]
-    #
-    #     ret = {
-    #         CALLSIGN_KEY: callsign,
-    #         TYPE_KEY: aircraft_type,
-    #         DEPARTURE_KEY: ScenarioGenerator.departure,
-    #         DESTINATION_KEY: ScenarioGenerator.destination,
-    #         START_POSITION_KEY: start_position,
-    #         START_TIME_KEY: int(start_time),
-    #         CURRENT_FLIGHT_LEVEL_KEY: int(current_flight_level),
-    #         CLEARED_FLIGHT_LEVEL_KEY: int(cleared_flight_level),
-    #         REQUESTED_FLIGHT_LEVEL_KEY: int(requested_flight_level),
-    #         ROUTE_KEY: self.aircraft_route(route_index, level = requested_flight_level)
-    #     }
-    #     return ret
