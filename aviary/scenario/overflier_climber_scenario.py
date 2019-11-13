@@ -4,61 +4,57 @@ Scenario generation algorithm with a single overflier and a single climber.
 # author: Tim Hobson
 # email: thobson@turing.ac.uk
 
-# import os.path
-import time
-import numpy as np
-
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
 import aviary.scenario.scenario_generator as sg
-
-# from json import dump
-#
-# import aviary.sector.sector_element as se
-#
-# # JSON keys
-# CALLSIGN_KEY = "callsign"
-# TYPE_KEY = "type"
-# DEPARTURE_KEY = "departure"
-# DESTINATION_KEY = "destination"
-# START_POSITION_KEY = "startPosition"
-# START_TIME_KEY = "startTime"
-# CURRENT_FLIGHT_LEVEL_KEY = "currentFlightLevel"
-# CLEARED_FLIGHT_LEVEL_KEY = "clearedFlightLevel"
-# REQUESTED_FLIGHT_LEVEL_KEY = "requestedFlightLevel"
-# ROUTE_KEY = "route"
-# ROUTE_ELEMENT_NAME_KEY = "ROUTE_ELEMENT_NAME"
-# ROUTE_ELEMENT_TYPE_KEY = "ROUTE_ELEMENT_TYPE"
-# ROUTE_ELEMENT_SPEED_KEY = "ROUTE_ELEMENT_SPEED"
-# ROUTE_ELEMENT_LEVEL_KEY = "ROUTE_ELEMENT_LEVEL"
-# AIRCRAFT_KEY = "aircraft"
 
 class OverflierClimberScenario(ScenarioAlgorithm):
     """An overflier-climber scenario generator for I, X, Y airspace sectors"""
 
 
-    def __init__(self):
+    def __init__(self, **kwargs):
 
-        super().__init__()
+        # Pass the keyword args (including the random seed) to the superclass constructor.
+        super().__init__(**kwargs)
 
 
     # Overriding abstract method
-    def generate_aircraft(self, sector) -> dict:
+    def aircraft_generator(self, sector) -> dict:
         """Generates a sequence of aircraft constituting a scenario."""
 
         # TODO:
         # - expect kwargs for the time to conflict
-        # - check for an I sector (for now)
         # -
 
+        # Construct the overflier.
+        route = self.route(sector)
+        overflier_flight_level = int(0) # TODO: pick any except the lowest flight level
         yield {
             sg.START_TIME_KEY: 0,
-            sg.CALLSIGN_KEY: self.callsign(),
+            sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
-            # TODO: generate random flight levels
-            # sg.CURRENT_FLIGHT_LEVEL_KEY: int(current_flight_level),
-            # sg.CLEARED_FLIGHT_LEVEL_KEY: int(cleared_flight_level),
-            # sg.REQUESTED_FLIGHT_LEVEL_KEY: int(requested_flight_level),
-            sg.ROUTE_KEY: self.aircraft_route(route_index, level=requested_flight_level)
+            sg.DEPARTURE_KEY: '',  # ScenarioGenerator.departure, # TODO.
+            sg.DESTINATION_KEY: '',  # ScenarioGenerator.destination, # TODO.
+            sg.CURRENT_FLIGHT_LEVEL_KEY: overflier_flight_level,
+            sg.CLEARED_FLIGHT_LEVEL_KEY: overflier_flight_level,
+            sg.REQUESTED_FLIGHT_LEVEL_KEY: overflier_flight_level,
+            sg.ROUTE_KEY: route
+        }
+
+        # Construct the climber, which flies the reverse route, starting below the overflier and whose requested
+        # flight level is greater than or equal to that of the overflier.
+        climber_current_flight_level = int(0) # TODO: pick any below the overflier_flight_level
+        climber_requested_flight_level = int(0)  # TODO: pick any equal to or above the overflier_flight_level
+        route.reverse()
+        yield {
+            sg.START_TIME_KEY: 0,
+            sg.CALLSIGN_KEY: next(self.callsign_generator()),
+            sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
+            sg.DEPARTURE_KEY: '',  # ScenarioGenerator.departure, # TODO.
+            sg.DESTINATION_KEY: '',  # ScenarioGenerator.destination, # TODO.
+            sg.CURRENT_FLIGHT_LEVEL_KEY: climber_current_flight_level,
+            sg.CLEARED_FLIGHT_LEVEL_KEY: climber_current_flight_level,
+            sg.REQUESTED_FLIGHT_LEVEL_KEY: climber_requested_flight_level,
+            sg.ROUTE_KEY: route
         }
 
 
