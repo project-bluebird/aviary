@@ -24,6 +24,22 @@ def target():
 #     # With this seed, there are 11 arrivals.
 #     assert len(result) == 11
 #
+# def test_poisson_scenario(x_target):
+#
+#     arrival_rate = 2 / 60 # Two arrivals per minute on average
+#     duration = 5 * 60 # Five minute scenario
+#     seed = 74
+#     result = x_target.poisson_scenario(arrival_rate = arrival_rate, duration = duration, seed = seed)
+#
+#     assert isinstance(result, dict)
+#     assert 'startTime' in result
+#     assert 'aircraft' in result
+#
+#     assert isinstance(result['aircraft'], list)
+#
+#     # With this seed, there are 11 arrivals.
+#     assert len(result['aircraft']) == 11
+
 #
 # def test_poisson_scenario(target):
 #
