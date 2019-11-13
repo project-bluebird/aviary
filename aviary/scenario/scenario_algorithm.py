@@ -41,7 +41,7 @@ class ScenarioAlgorithm(ABC):
         pass
 
     @staticmethod
-    def set_seed(self, seed):
+    def set_seed(seed):
         random.seed(seed)
 
     def route_generator(self, sector):
