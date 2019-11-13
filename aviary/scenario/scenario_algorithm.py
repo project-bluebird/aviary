@@ -44,25 +44,22 @@ class ScenarioAlgorithm(ABC):
     def set_seed(seed):
         random.seed(seed)
 
-    def route_generator(self, sector):
-        """Generates a random sequence of routes"""
+    def route(self, sector):
+        """Return a random route"""
 
-        while True:
-            yield random.choice(sector.shape.routes())
-
-
-    def flight_level_generator(self):
-        """Generates a random sequence of flight levels"""
-
-        while True:
-            yield random.choice(self.flight_levels)
+        return random.choice(sector.shape.routes())
 
 
-    def aircraft_type_generator(self):
-        """Generates a random sequence of aircraft types"""
+    def flight_level(self):
+        """Returns a random flight level"""
 
-        while True:
-            yield random.choice(self.aircraft_types)
+        return random.choice(self.flight_levels)
+
+
+    def aircraft_type(self):
+        """Returns a random aircraft type"""
+
+        return random.choice(self.aircraft_types)
 
 
     def callsign_generator(self):
