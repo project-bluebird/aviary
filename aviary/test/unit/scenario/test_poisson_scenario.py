@@ -2,7 +2,7 @@
 import pytest
 
 import aviary.scenario.poisson_scenario as ps
-# import aviary.scenario.scenario_generator as sg
+import aviary.scenario.scenario_generator as sg
 # import aviary.sector.sector_shape as ss
 # import aviary.sector.sector_element as se
 
@@ -14,31 +14,31 @@ def target():
     return ps.PoissonScenario(arrival_rate = arrival_rate)
 
 
-def test_exponential_interarrival_times(target):
-
-    duration = 5 * 60 # Five minute scenario
-    seed = 74
-
-    result = target.exponential_interarrival_times(duration = duration, seed = seed)
-
-    # With this seed, there are 11 arrivals.
-    assert len(result) == 11
-
-
-def test_poisson_scenario(target):
-
-    duration = 5 * 60 # Five minute scenario
-    seed = 74
-    result = target.generate_scenario(duration = duration, seed = seed)
-
-    assert isinstance(result, dict)
-    assert 'startTime' in result
-    assert 'aircraft' in result
-
-    assert isinstance(result['aircraft'], list)
-
-    # With this seed, there are 11 arrivals.
-    assert len(result['aircraft']) == 11
+# def test_exponential_interarrival_times(target):
+#
+#     duration = 5 * 60 # Five minute scenario
+#     seed = 74
+#
+#     result = target.exponential_interarrival_times(duration = duration, seed = seed)
+#
+#     # With this seed, there are 11 arrivals.
+#     assert len(result) == 11
+#
+#
+# def test_poisson_scenario(target):
+#
+#     duration = 5 * 60 # Five minute scenario
+#     seed = 74
+#     result = target.generate_scenario(duration = duration, seed = seed)
+#
+#     assert isinstance(result, dict)
+#     assert 'startTime' in result
+#     assert 'aircraft' in result
+#
+#     assert isinstance(result['aircraft'], list)
+#
+#     # With this seed, there are 11 arrivals.
+#     assert len(result['aircraft']) == 11
 
 
 
