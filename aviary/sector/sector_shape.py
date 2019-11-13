@@ -13,6 +13,7 @@ from enum import Enum
 import shapely.geometry as geom
 from shapely.ops import cascaded_union
 from shapely.affinity import rotate
+from abc import abstractmethod
 
 class SectorType(Enum):
     I = "I",
@@ -73,6 +74,12 @@ class SectorShape:
     # Y routes: 1) increasing in y-coordinate through left branch 2) decreasing in y-coordinate through left branch
     #           3) increasing in y-coordinate through right branch 4) decreasing in y-coordinate through right branch
     y_route_names = ['almighty', 'ethereal', 'everlasting', 'divine']
+
+    @abstractmethod
+    def routes(self, epsilon = 1e-10) -> dict:
+        """Compute the valid routes through the sector """
+        pass
+
 
     def __init__(self, sector_type: SectorType, polygon: geom.base.BaseGeometry, fix_names, route_names):
 
@@ -174,7 +181,7 @@ class IShape(SectorShape):
         return fix_points
 
     def routes(self):
-        """Compute the routes through the sector """
+        """Compute the valid routes through the sector """
 
         # Order by increasing y-coordinate to get the "ascending" route.
         ascending_y = sorted(list(self.fixes.items()), key = lambda item : item[1].coords[0][1])
@@ -215,7 +222,7 @@ class XShape(SectorShape):
         return fix_points
 
     def routes(self, epsilon = 1e-10):
-        """Compute the routes through the sector """
+        """Compute the valid routes through the sector """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
         vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < epsilon, self.fixes.items()))
@@ -282,7 +289,7 @@ class YShape(SectorShape):
         return geom.Point(geom.GeometryCollection(coords).centroid.coords[0])
 
     def routes(self, epsilon = 1e-10):
-        """Compute the routes through the sector """
+        """Compute the valid routes through the sector """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
         vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < epsilon, self.fixes.items()))
