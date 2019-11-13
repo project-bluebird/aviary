@@ -7,10 +7,7 @@ Abstract base class representing a scenario generation algorithm.
 
 from abc import ABC, abstractmethod
 
-import time
 import random
-import itertools
-import numpy as np
 
 class ScenarioAlgorithm(ABC):
     """A scenario generation algorithm"""

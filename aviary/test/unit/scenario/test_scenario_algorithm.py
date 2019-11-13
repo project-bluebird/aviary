@@ -2,7 +2,6 @@
 import pytest
 
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
-# import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
 
@@ -51,53 +50,67 @@ def test_callsign_generator(target):
         ctr = ctr + 1
 
 
-def test_aircraft_type_generator(target):
+def test_aircraft_type(target):
 
-    ctr = 0
-    for x in target.aircraft_type_generator():
-        if ctr == 0:
-            assert x == 'B747'
-        if ctr == 1:
-            assert x == 'B747'
-        if ctr == 2:
-            assert x == 'B747'
-        if ctr == 3:
-            assert x == 'B777'
-        if ctr > 3:
-            break
-        ctr = ctr + 1
+    result = target.aircraft_type()
+    assert result == 'B747'
 
-def test_flight_level_generator(target):
+    result = target.aircraft_type()
+    assert result == 'B747'
 
-    ctr = 0
-    for x in target.flight_level_generator():
-        if ctr == 0:
-            assert x == 240
-        if ctr == 1:
-            assert x == 240
-        if ctr == 2:
-            assert x == 200
-        if ctr == 3:
-            assert x == 360
-        if ctr > 3:
-            break
-        ctr = ctr + 1
+    result = target.aircraft_type()
+    assert result == 'B747'
+
+    result = target.aircraft_type()
+    assert result == 'B777'
 
 
-def test_route_generator(target, i_element):
+def test_flight_level(target):
 
-    # TODO: make this a real test
+    result =  target.flight_level()
+    assert result == 240
 
-    ctr = 0
-    for x in target.route_generator(sector = i_element):
-        if ctr == 0:
-            assert isinstance(x, list)
-        if ctr == 1:
-            assert isinstance(x, list)
-        if ctr == 2:
-            assert isinstance(x, list)
-        if ctr == 3:
-            assert isinstance(x, list)
-        if ctr > 3:
-            break
-        ctr = ctr + 1
+    result =  target.flight_level()
+    assert result == 240
+
+    result =  target.flight_level()
+    assert result == 200
+
+
+def test_route(target, i_element):
+
+    result = target.route(sector = i_element)
+    assert isinstance(result, list)
+
+    assert result[0][0] == 'E'
+    assert result[1][0] == 'D'
+    assert result[2][0] == 'C'
+    assert result[3][0] == 'B'
+    assert result[4][0] == 'A'
+
+    result = target.route(sector = i_element)
+    assert isinstance(result, list)
+
+    assert result[0][0] == 'E'
+    assert result[1][0] == 'D'
+    assert result[2][0] == 'C'
+    assert result[3][0] == 'B'
+    assert result[4][0] == 'A'
+
+    result = target.route(sector = i_element)
+    assert isinstance(result, list)
+
+    assert result[0][0] == 'E'
+    assert result[1][0] == 'D'
+    assert result[2][0] == 'C'
+    assert result[3][0] == 'B'
+    assert result[4][0] == 'A'
+
+    result = target.route(sector = i_element)
+    assert isinstance(result, list)
+
+    assert result[0][0] == 'A'
+    assert result[1][0] == 'B'
+    assert result[2][0] == 'C'
+    assert result[3][0] == 'D'
+    assert result[4][0] == 'E'
