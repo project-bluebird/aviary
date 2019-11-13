@@ -55,23 +55,18 @@ class ScenarioGenerator():
         self.sector_element = sector_element
         self.scenario_algorithm = scenario_algorithm
 
-        if aircraft_types is None:
-            aircraft_types = ScenarioGenerator.default_aircraft_types
-        self.aircraft_types = aircraft_types
-
-        if flight_levels is None:
-            flight_levels = ScenarioGenerator.default_flight_levels
-        self.flight_levels = flight_levels
+        # if aircraft_types is None:
+        #     aircraft_types = ScenarioGenerator.default_aircraft_types
+        # self.aircraft_types = aircraft_types
+        #
+        # if flight_levels is None:
+        #     flight_levels = ScenarioGenerator.default_flight_levels
+        # self.flight_levels = flight_levels
 
         if start_time is None:
             start_time = ScenarioGenerator.default_scenario_start_time
         self.start_time = start_time
 
-
-
-
-
-    # TODO: move this back to scenario_generator:
     # TODO: add an argument to specify which routes to be included in the scenario.
     def generate_scenario(self, duration, seed = None) -> dict:
         """Generates a list of aircraft creation data whose arrivals in the sector form a Poisson process."""
@@ -79,18 +74,15 @@ class ScenarioGenerator():
         # Format the scenario start time.
         start_time = time.strftime("%H:%M:%S", self.start_time)
 
-        ret = { START_TIME_KEY: start_time}
+        ret = { START_TIME_KEY: start_time, AIRCRAFT_KEY: []}
 
         total_time = 0
         for aircraft in self.scenario_algorithm.aircraft_generator():
-
-            # generator an aircraft
-            # add aircraft start_time to total_time
-            # if total_time > duration:
-            #   add the aircraft list to ret
-            #   return ret
-            # add to the running list
-
+            total_time += aircraft[START_TIME_KEY]
+            if total_time > duration:
+                return ret
+            ret[AIRCRAFT_KEY].append(aircraft)
+        return ret
 
         # ret = {
         #     START_TIME_KEY: start_time,
@@ -169,20 +161,20 @@ class ScenarioGenerator():
 
     # TO BE MOVED?:
     @staticmethod
-    def aircraft_route(self, route, level = 0) -> list:
+    def aircraft_route(route, level = 0) -> list:
         """Represents an aircraft's route as a list of route elements with target flight levels."""
 
         # Get the names of the fixes on the requested route.
         fix_names = [fix_items[0] for fix_items in route]
 
         # Target flight level is always applied to the last two route elements only.
-        ret = [self.route_element(fix_name) for fix_name in fix_names[:len(fix_names) - 2]]
-        ret.extend([self.route_element(fix_name, level) for fix_name in fix_names[-2:]])
+        ret = [ScenarioGenerator.route_element(fix_name) for fix_name in fix_names[:len(fix_names) - 2]]
+        ret.extend([ScenarioGenerator.route_element(fix_name, level) for fix_name in fix_names[-2:]])
         return ret
 
 
     @staticmethod
-    def route_element(self, fix_name, level = 0) -> dict:
+    def route_element(fix_name, level = 0) -> dict:
         """Returns a dictionary representing a route element.
         Each route element has a name, a type (always 'FIX') and a target flight level."""
 
@@ -220,7 +212,7 @@ class ScenarioGenerator():
 
 
     @staticmethod
-    def write_json_scenario(self, scenario, filename, path="."):
+    def write_json_scenario(scenario, filename, path="."):
         """Write the JSON scenario object to a file"""
 
         extension = os.path.splitext(filename)[1]
