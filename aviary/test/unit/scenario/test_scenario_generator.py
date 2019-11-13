@@ -18,16 +18,25 @@ def x_target():
     lower_limit = 140
     upper_limit = 400
     x_sector = se.SectorElement(name, origin, shape, lower_limit, upper_limit)
+
     arrival_rate = 2 / 60 # Two arrivals per minute on average
-    poisson_scenario = ps.PoissonScenario(arrival_rate = arrival_rate)
+    seed = 74
+    poisson_scenario = ps.PoissonScenario(arrival_rate = arrival_rate, seed=seed)
 
     return sg.ScenarioGenerator(x_sector, poisson_scenario)
 
 
 def test_generate_scenario(x_target):
-    scenario = x_target.generate_scenario(50)
-    print(scenario)
+    seed = 50
+    duration = 100
+    scenario = x_target.generate_scenario(duration, seed=seed)
 
+    assert sg.START_TIME_KEY in scenario.keys()
+    assert sg.AIRCRAFT_KEY in scenario.keys()
+
+    for i in range(10):
+        scenario2 = x_target.generate_scenario(duration, seed=seed)
+        assert scenario == scenario2
 
 
 

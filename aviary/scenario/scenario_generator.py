@@ -59,6 +59,8 @@ class ScenarioGenerator():
     def generate_scenario(self, duration, seed = None) -> dict:
         """Generates a list of aircraft creation data whose arrivals in the sector form a Poisson process."""
 
+        self.scenario_algorithm.set_seed(seed)
+
         # Format the scenario start time.
         start_time = time.strftime("%H:%M:%S", self.start_time)
 
