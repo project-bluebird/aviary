@@ -22,7 +22,7 @@ class ScenarioAlgorithm(ABC):
 
     def __init__(self, aircraft_types = None, flight_levels = None, callsign_prefixes = None, seed = None):
 
-        random.seed(seed)
+        ScenarioAlgorithm.set_seed(seed)
 
         if aircraft_types is None:
             aircraft_types = ScenarioAlgorithm.default_aircraft_types
@@ -37,18 +37,35 @@ class ScenarioAlgorithm(ABC):
         self.callsign_prefixes = callsign_prefixes
 
     @abstractmethod
-    def generate_aircraft(self, sector) -> dict:
+    def aircraft_generator(self, sector) -> dict:
         pass
 
+    @staticmethod
+    def set_seed(self, seed):
+        random.seed(seed)
 
-    def aircraft_type(self):
+    def route_generator(self, sector):
+        """Generates a random sequence of routes"""
+
+        while True:
+            yield random.choice(sector.shape.routes())
+
+
+    def flight_level_generator(self):
+        """Generates a random sequence of flight levels"""
+
+        while True:
+            yield random.choice(self.flight_levels)
+
+
+    def aircraft_type_generator(self):
         """Generates a random sequence of aircraft types"""
 
         while True:
             yield random.choice(self.aircraft_types)
 
 
-    def callsign(self):
+    def callsign_generator(self):
         """Generates a random sequence of unique callsigns"""
 
         seen = set()
