@@ -75,3 +75,17 @@ class ScenarioAlgorithm(ABC):
             else:
                 yield ret
                 seen.add(ret)
+
+
+    def departure_airport(self, route):
+        """Returns a suitable departure airport for the given route"""
+
+        # TODO: currently a dummy implementation
+        return "DEP"
+
+
+    def destination_airport(self, route):
+        """Returns a suitable destination airport for the given route"""
+
+        # TODO: currently a dummy implementation
+        return "DEST"
