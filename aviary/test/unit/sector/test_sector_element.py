@@ -3,43 +3,8 @@ import pytest
 
 import geojson
 
-import aviary.sector.sector_shape as ss
+
 import aviary.sector.sector_element as se
-
-@pytest.fixture(scope="function")
-def i_element():
-
-    name = "EARTH"
-    origin = (51.5, -0.1275)
-    shape = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = ['up', 'down'])
-
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
-
-
-@pytest.fixture(scope="function")
-def x_element():
-
-    name = "HELL"
-    origin = (51.5, -0.1275)
-    shape = ss.XShape()
-
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
-
-
-@pytest.fixture(scope="function")
-def y_element():
-
-    name = "HEAVEN"
-    origin = (51.5, -0.1275)
-    shape = ss.YShape()
-
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
 
 
 def test_boundary_geojson(i_element):

@@ -25,18 +25,6 @@ def target():
                              seed = 22)
 
 
-@pytest.fixture(scope="function")
-def i_element():
-
-    name = "EARTH"
-    origin = (51.5, -0.1275)
-    shape = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = ['up', 'down'])
-
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
-
-
 def test_callsign_generator(target):
 
     ctr = 0
