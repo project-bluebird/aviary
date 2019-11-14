@@ -56,3 +56,11 @@ def test_aircraft_generator(target, i_element):
 
         assert overflier[sg.CURRENT_FLIGHT_LEVEL_KEY] > climber[sg.CURRENT_FLIGHT_LEVEL_KEY]
         assert overflier[sg.CURRENT_FLIGHT_LEVEL_KEY] <= climber[sg.REQUESTED_FLIGHT_LEVEL_KEY]
+
+
+def test_overflier_flight_level(target):
+
+    for i in range(0, 100):
+        result = target.overflier_flight_level()
+        assert result in target.flight_levels
+        assert result > min(target.flight_levels)
