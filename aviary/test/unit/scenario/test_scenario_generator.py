@@ -3,6 +3,7 @@ import pytest
 
 import os
 import json
+import time
 
 import aviary.scenario.scenario_generator as sg
 
@@ -28,6 +29,15 @@ def test_generate_scenario(target_sector, target_scenario):
 
     assert sg.START_TIME_KEY in scenario.keys()
     assert sg.AIRCRAFT_KEY in scenario.keys()
+    assert isinstance(scenario[sg.START_TIME_KEY], str)
+    assert isinstance(scenario[sg.AIRCRAFT_KEY], list)
+    assert len(scenario[sg.AIRCRAFT_KEY]) > 0
+
+    total_time = 0
+    for aircraft in scenario[sg.AIRCRAFT_KEY]:
+        assert sg.START_TIME_KEY in aircraft.keys()
+        total_time += aircraft[sg.START_TIME_KEY]
+    assert total_time <= duration
 
     for i in range(10):
         scenario2 = scen_gen.generate_scenario(duration=duration, seed=seed)
@@ -48,7 +58,6 @@ def test_serialisation(target_sector, target_scenario):
 
     assert isinstance(deserialised, dict)
     assert sorted(deserialised.keys()) == sorted([sg.AIRCRAFT_KEY, sg.START_TIME_KEY])
-
 
 
 def test_write_json_scenario(target_sector, target_scenario):
