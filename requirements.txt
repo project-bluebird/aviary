@@ -2,6 +2,6 @@
 numpy>=1.17.*
 Shapely>=1.6.*
 geojson>=2.5.*
-geopy==1.13.0
+geographiclib>=1.5.*
 pyproj>=2.2.*
 pytest>=4.1.*
