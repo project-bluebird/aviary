@@ -1,10 +1,10 @@
 
 import pytest
 
-import aviary.scenario.poisson_scenario as ps
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
-
+import aviary.scenario.poisson_scenario as ps
+import aviary.scenario.overflier_climber_scenario as ocs
 
 @pytest.fixture(scope="function")
 def x_element():
