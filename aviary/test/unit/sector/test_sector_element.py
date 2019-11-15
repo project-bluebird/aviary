@@ -2,10 +2,21 @@
 import pytest
 
 import geojson
-
+import shapely.geometry as geom
 
 import aviary.sector.sector_element as se
 
+
+def test_centre_point(i_element):
+
+    result = i_element.centre_point()
+    assert result == pytest.approx((51.5, -0.1275), 0.0001)
+
+def test_fix_location(i_element):
+
+    assert i_element.fix_location(fix_name = 'C') == pytest.approx((51.5, -0.1275), 0.0001)
+    assert i_element.fix_location(fix_name = 'A') == pytest.approx((52.08, -0.1275), 0.0001)
+    assert i_element.fix_location(fix_name = 'E') == pytest.approx((50.92, -0.1275), 0.0001)
 
 def test_boundary_geojson(i_element):
 

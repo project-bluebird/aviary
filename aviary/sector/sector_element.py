@@ -58,14 +58,28 @@ class SectorElement():
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
+    def centre_point(self):
+        """The lat/lon coordinates of the centre point of the sector"""
+
+        return tuple(i for i in reversed(self.__inv_project__(self.shape.polygon.centroid).coords[0]))
+
+    def fix_location(self, fix_name):
+        """The lat/lon coordinates of a named fix"""
+
+        fixes = self.shape.fixes
+        if not fix_name in list(fixes.keys()):
+            raise ValueError(f'No fix exists named {fix_name}')
+
+        return tuple(i for i in reversed(self.__inv_project__(fixes[fix_name]).coords[0]))
+
     @property
     def __geo_interface__(self) -> dict:
         """
-        Implement the geo interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
+        Implements the geo interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
         Returns a GeoJSON dictionary. For serialisation and deserialisation, use geojson.dumps and geojson.loads.
         """
 
-        # Build the list of features: one for the boundary, one for each waypoint and one for each route.
+        # Build the list of features: one for the boundary, one for each fix and one for each route.
         geojson = {FEATURES_KEY: []}
         geojson[FEATURES_KEY].append(self.boundary_geojson())
         geojson[FEATURES_KEY].extend([self.route_geojson(route_index) for route_index in range(0, len(self.shape.route_names))])
