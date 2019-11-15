@@ -9,8 +9,11 @@ Takes a sector element and a scenario generation algorithm. The latter is an obj
 
 import os.path
 import time
+
 import numpy as np
+
 from json import dump
+from shapely.geometry import mapping, point
 
 import aviary.sector.sector_element as se
 
@@ -76,14 +79,30 @@ class ScenarioGenerator():
 
 
     @staticmethod
+    def serialize_route(scenario):
+        """Make shapely.geometry.point.Point objects in scenario aircraft route serializable"""
+
+        for aircraft in scenario[AIRCRAFT_KEY]:
+            for i, _ in enumerate(aircraft[ROUTE_KEY]):
+                aircraft[ROUTE_KEY][i] = tuple(
+                    mapping(x) if isinstance(x, point.Point) else x
+                    for x in aircraft[ROUTE_KEY][i]
+                )
+        return scenario
+
+
+    @staticmethod
     def write_json_scenario(scenario, filename, path="."):
         """Write the JSON scenario object to a file"""
+
+        scenario = ScenarioGenerator.serialize_route(scenario)
 
         extension = os.path.splitext(filename)[1]
         if extension.upper() != JSON_EXTENSION:
             filename = filename + "." + JSON_EXTENSION
 
         file = os.path.join(path, filename)
+
 
         with open(file, 'w') as f:
             dump(scenario, f, indent = 4)
