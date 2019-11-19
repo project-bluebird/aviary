@@ -1,5 +1,6 @@
 
 numpy>=1.17.*
+pandas>=0.23.*
 Shapely>=1.6.*
 geojson>=2.5.*
 geographiclib>=1.5.*
