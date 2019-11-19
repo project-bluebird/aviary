@@ -5,9 +5,9 @@ from setuptools import setup, find_packages
 
 NAME = "aviary"
 DESCRIPTION = "Air traffic scenario generation for the Simurgh project."
-URL = ""
-AUTHOR = ""
-EMAIL = ""
+URL = "https://github.com/alan-turing-institute/aviary"
+AUTHOR = "Tim Hobson and Radka Jersakova"
+EMAIL = "thobson@turing.ac.uk"
 REQUIRES_PYTHON = ">=3.5.0"
 VERSION = None
 LICENSE = "MIT"
