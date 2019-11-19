@@ -9,15 +9,18 @@ from abc import ABC, abstractmethod
 
 import random
 
+
 class ScenarioAlgorithm(ABC):
     """A scenario generation algorithm"""
 
     # Default parameters:
-    default_aircraft_types = ["B747"] # Types of aircraft available (by default).
+    default_aircraft_types = ["B747"]  # Types of aircraft available (by default).
     default_flight_levels = [200, 240, 280, 320, 360, 400]
     callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"]
 
-    def __init__(self, aircraft_types = None, flight_levels = None, callsign_prefixes = None, seed = None):
+    def __init__(
+        self, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
+    ):
 
         ScenarioAlgorithm.set_seed(seed)
 
@@ -33,6 +36,48 @@ class ScenarioAlgorithm(ABC):
             callsign_prefixes = ScenarioAlgorithm.callsign_prefixes
         self.callsign_prefixes = callsign_prefixes
 
+    @property
+    def aircraft_types(self):
+        return self._aircraft_types
+
+    @aircraft_types.setter
+    def aircraft_types(self, aircraft_types):
+        assert (
+            aircraft_types
+            and isinstance(aircraft_types, list)
+            and all(isinstance(at, str) for at in aircraft_types)
+        ), "Incorrect input {} for aircraft_types".format(aircraft_types)
+        self._aircraft_types = aircraft_types
+
+    @property
+    def flight_levels(self):
+        return self._flight_levels
+
+    @flight_levels.setter
+    def flight_levels(self, flight_levels):
+        assert (
+            flight_levels
+            and isinstance(flight_levels, list)
+            and all(
+                (isinstance(fl, int) and fl % 10 == 0 and fl > 0)
+                for fl in flight_levels
+            )
+        ), "Incorrect input {} for flight_levels".format(flight_levels)
+        self._flight_levels = flight_levels
+
+    @property
+    def callsign_prefixes(self):
+        return self._callsign_prefixes
+
+    @callsign_prefixes.setter
+    def callsign_prefixes(self, callsign_prefixes):
+        assert (
+            callsign_prefixes
+            and isinstance(callsign_prefixes, list)
+            and all((isinstance(cp, str) and len(cp) >= 2) for cp in callsign_prefixes)
+        ), "Incorrect input {} for callsign_prefixes".format(callsign_prefixes)
+        self._callsign_prefixes = callsign_prefixes
+
     @abstractmethod
     def aircraft_generator(self, sector) -> dict:
         pass
@@ -46,18 +91,15 @@ class ScenarioAlgorithm(ABC):
 
         return random.choice(sector.shape.routes())
 
-
     def flight_level(self):
         """Returns a random flight level"""
 
         return random.choice(self.flight_levels)
 
-
     def aircraft_type(self):
         """Returns a random aircraft type"""
 
         return random.choice(self.aircraft_types)
-
 
     def callsign_generator(self):
         """Generates a random sequence of unique callsigns"""
@@ -66,7 +108,7 @@ class ScenarioAlgorithm(ABC):
 
         k = 3
         while True:
-            suffix = ''.join([str(x) for x in random.sample(range(0, 10), k = k)])
+            suffix = "".join([str(x) for x in random.sample(range(0, 10), k=k)])
             prefix = random.choice(self.callsign_prefixes)
             ret = prefix + suffix
 
@@ -76,13 +118,11 @@ class ScenarioAlgorithm(ABC):
                 yield ret
                 seen.add(ret)
 
-
     def departure_airport(self, route):
         """Returns a suitable departure airport for the given route"""
 
         # TODO: currently a dummy implementation
         return "DEP"
-
 
     def destination_airport(self, route):
         """Returns a suitable destination airport for the given route"""
