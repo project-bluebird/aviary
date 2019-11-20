@@ -14,7 +14,7 @@ class ScenarioAlgorithm(ABC):
     """A scenario generation algorithm"""
 
     # Default parameters:
-    default_aircraft_types = ["B747"]  # Types of aircraft available (by default).
+    default_aircraft_types = ["B77W", "A320", "A346"] # Types of aircraft available (by default).
     default_flight_levels = [200, 240, 280, 320, 360, 400]
     callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"]
 
