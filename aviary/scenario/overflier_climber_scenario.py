@@ -11,14 +11,23 @@ import aviary.scenario.scenario_generator as sg
 from aviary.geo.geo_helper import GeoHelper
 
 class OverflierClimberScenario(ScenarioAlgorithm):
-    """An overflier-climber scenario generator for I, X, Y airspace sectors"""
+    """
+    An overflier-climber scenario generator for I, X, Y airspace sectors
+
+    Args:
+        trajectory_predictor: Simple trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
+
+    Attributes:
+        trajectory_predictor: Simple trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
+    """
 
 
-    # TODO: take three lookup tables on construction.
-    def __init__(self, **kwargs):
+    def __init__(self, trajectory_predictor, **kwargs):
 
         # Pass the keyword args (including the random seed) to the superclass constructor.
         super().__init__(**kwargs)
+
+        self.trajectory_predictor = trajectory_predictor
 
 
     # Overriding abstract method
@@ -37,29 +46,32 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         # Compute the time taken for the climber to reach the overflier's flight level
         climber_aircraft_type = self.aircraft_type()
-        climb_time_to_conflict_level = self.climb_time_between_levels(lower_level=climber_current_flight_level,
+        climb_time_to_conflict_level = self.trajectory_predictor.climb_time_between_levels(lower_level=climber_current_flight_level,
                                                                       upper_level=overflier_flight_level,
                                                                       aircraft_type=climber_aircraft_type)
 
         # Compute the distance travelled by the overflier during the climber's climb.
         overflier_aircraft_type = self.aircraft_type()
-        overflier_true_airspeed = self.cruise_speed(overflier_flight_level, overflier_aircraft_type)
+        overflier_true_airspeed = self.trajectory_predictor.cruise_speed(overflier_flight_level, overflier_aircraft_type)
 
         # Get the horizontal distances travelled prior to the conflict.
         overflier_horizontal_distance = climb_time_to_conflict_level * overflier_true_airspeed
-        climber_horizontal_distance = self.downtrack_distance_between_levels(lower_level=climber_current_flight_level,
+        climber_horizontal_distance = self.trajectory_predictor.downtrack_distance_between_levels(lower_level=climber_current_flight_level,
                                                                                       upper_level=overflier_flight_level,
                                                                                       aircraft_type=climber_aircraft_type)
 
         # Location of the central fix of the sector (which is the conflict point).
         lat1, lon1 = sector.centre_point()
 
-        # Compute the initial position of the overflier. Note lon/lat order!
-        o_lon2, o_lat2 = overflier_route[0][1].coords[0] # Initial waypoint position on the overflier's route
+        # Get the position of the first fix on the overflier's route. Note lon/lat order!
+        o_lon2, o_lat2 = overflier_route[0][1].coords[0]
+
+        # Compute the initial position of the overflier.
+        # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
         overflier_lat_lon = GeoHelper.waypoint_location(lat1, lon1, o_lat2, o_lon2, overflier_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        overflier_truncated_route = self.truncate_route(overflier_route, overflier_lat_lon[0], overflier_lat_lon[1])
+        overflier_truncated_route = sector.truncate_route(overflier_route, overflier_lat_lon[0], overflier_lat_lon[1])
 
         # Construct the overflier.
         yield {
@@ -80,12 +92,15 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         climber_route = overflier_route.copy()
         climber_route.reverse()
 
-        # Compute the initial position of the climber. Note lon/lat order!
-        c_lon2, c_lat2 = climber_route[0][1].coords[0] # Initial waypoint position on the climber's route
+        # Get the position of the first fix on the climber's route. Note lon/lat order!
+        c_lon2, c_lat2 = climber_route[0][1].coords[0]
+
+        # Compute the initial position of the climber.
+        # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
         climber_lat_lon = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        climber_truncated_route = self.truncate_route(climber_route, climber_lat_lon[0], climber_lat_lon[1])
+        climber_truncated_route = sector.truncate_route(climber_route, climber_lat_lon[0], climber_lat_lon[1])
 
         yield {
             sg.START_TIME_KEY: 0,
@@ -100,13 +115,6 @@ class OverflierClimberScenario(ScenarioAlgorithm):
             sg.ROUTE_KEY: climber_truncated_route
         }
 
-    def truncate_route(self, route, initial_lat, initial_lon):
-        """Truncates a route in light of a given start position by removing fixes that are already passed."""
-
-        # Retain only those route elements that are closer to the final fix than the start_position.
-        final_lon, final_lat = route[-1][1].coords[0] # Note lon/lat order!
-        return [i for i in route if GeoHelper.distance(final_lat, final_lon, i[1].coords[0][1], i[1].coords[0][0]) <
-                GeoHelper.distance(final_lat, final_lon, initial_lat, initial_lon)]
 
     def overflier_flight_level(self):
         """Returns a random flight level, excluding the minimum level"""
@@ -117,31 +125,3 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         return random.choice([x for x in self.flight_levels if x > min(self.flight_levels)])
 
 
-    def climb_time_between_levels(self, lower_level, upper_level, aircraft_type):
-        """Computes the time taken to climb between two levels"""
-
-        return self.climb_time_to_level(upper_level, aircraft_type) - self.climb_time_to_level(lower_level, aircraft_type)
-
-
-    def climb_time_to_level(self, level, aircraft_type):
-        """Looks up the climb time in seconds for a given aircraft type"""
-        # TODO: from the lookup table.
-        return 0
-
-
-    def downtrack_distance_between_levels(self, lower_level, upper_level, aircraft_type):
-        """Computes the downtrack distance in metres between two levels in the climb"""
-
-        return self.downtrack_distance_to_level(upper_level, aircraft_type) - self.downtrack_distance_to_level(lower_level, aircraft_type)
-
-
-    def downtrack_distance_to_level(self, level, aircraft_type):
-        """Looks up the downtrack distance in metres for a given aircraft type"""
-        # TODO: from the lookup table.
-        return 0
-
-
-    def cruise_speed(self, flight_level, aircraft_type):
-        """Looks up the cruise speed in metres per second for a given flight level and aircraft type"""
-        # TODO: from the lookup table.
-        return 0
