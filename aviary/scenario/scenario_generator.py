@@ -15,8 +15,6 @@ import numpy as np
 from json import dump
 from shapely.geometry import mapping, point
 
-import aviary.sector.sector_element as se
-
 # CONSTANTS
 JSON_EXTENSION = "json"
 
@@ -48,7 +46,7 @@ class ScenarioGenerator():
     departure = "DEP"
     destination = "DEST"
 
-    def __init__(self, sector_element, scenario_algorithm, aircraft_types = None, flight_levels = None, start_time = None):
+    def __init__(self, sector_element, scenario_algorithm, start_time = None):
 
         self.sector_element = sector_element
         self.scenario_algorithm = scenario_algorithm
@@ -106,3 +104,5 @@ class ScenarioGenerator():
 
         with open(file, 'w') as f:
             dump(scenario, f, indent = 4)
+
+        return file

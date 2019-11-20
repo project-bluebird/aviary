@@ -14,7 +14,7 @@ def target_sector(request):
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(params=['poisson_scenario', 'overflier_climber_scenario'])
+@pytest.fixture(params=['poisson_scenario'])
 def target_scenario(request):
     """Test fixture: used to test scenario generation for each scenario fixture in params"""
     return request.getfixturevalue(request.param)
