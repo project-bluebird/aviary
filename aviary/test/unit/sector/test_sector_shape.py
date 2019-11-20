@@ -91,7 +91,7 @@ def test_i_routes():
     assert len(result[0]) == 5
     assert len(result[1]) == 5
 
-    # Each element of 'result' is a list of dictionary items (representing fixes) of the form: (name, Point).
+    # Each route is a list of dictionary items (representing fixes) of the form: (name, Point).
 
     # result[0] is ascending along the y-axis
     assert result[0][0][1].coords[0][1] == -1 * (i.offset_nm + (length_nm / 2))

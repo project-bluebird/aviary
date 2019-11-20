@@ -2,7 +2,6 @@
 import pytest
 
 import geojson
-import shapely.geometry as geom
 
 import aviary.sector.sector_element as se
 
@@ -17,6 +16,46 @@ def test_fix_location(i_element):
     assert i_element.fix_location(fix_name = 'C') == pytest.approx((51.5, -0.1275), 0.0001)
     assert i_element.fix_location(fix_name = 'A') == pytest.approx((52.08, -0.1275), 0.0001)
     assert i_element.fix_location(fix_name = 'E') == pytest.approx((50.92, -0.1275), 0.0001)
+
+def test_routes(i_element):
+
+    result = i_element.routes()
+
+    # Route 1 goes from 'A' to 'E'.
+    assert len(result[1]) == 5
+    assert result[1][0][0] == 'A'
+    assert result[1][0][1].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
+
+    assert result[1][4][0] == 'E'
+    assert result[1][4][1].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
+
+    # Route 0 goes from 'E' to 'A'.
+    assert len(result[0]) == 5
+    assert result[0][0][0] == 'E'
+    assert result[0][0][1].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
+
+    assert result[0][4][0] == 'A'
+    assert result[0][4][1].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
+
+
+def test_truncate_route(i_element):
+
+    # Get the A to E route for the I sector.
+    route = i_element.routes()[1]
+
+    lonA, latA = route[0][1].coords[0]
+    lonB, latB = route[1][1].coords[0]
+    lonC, latC = route[2][1].coords[0]
+
+    assert latB < latA # Sanity check: the route is due south.
+    assert latC < latB # Sanity check: the route is due south.
+
+    # If we start from halfway between fixes A and B, the truncated route omits only fix A.
+    assert i_element.truncate_route(route, initial_lat = (latA + latB)/2, initial_lon = lonA) == route[1:]
+
+    # If we start from halfway between fixes B and C, the truncated route omits both fixes A and B.
+    assert i_element.truncate_route(route, initial_lat = (latB + latC)/2, initial_lon = lonA) == route[2:]
+
 
 def test_boundary_geojson(i_element):
 

@@ -15,6 +15,8 @@ from geojson import dump
 
 import os.path
 
+from aviary.geo.geo_helper import GeoHelper
+
 # CONSTANTS
 ELLIPSOID = "WGS84"
 GEOJSON_EXTENSION = "geojson"
@@ -71,6 +73,28 @@ class SectorElement():
             raise ValueError(f'No fix exists named {fix_name}')
 
         return tuple(i for i in reversed(self.__inv_project__(fixes[fix_name]).coords[0]))
+
+    def routes(self):
+        """Returns the valid routes through the sector
+
+        Each route is a list of fixes, and each fix is a (string, Point) pair
+        where the string is the name of the fix and the Point is its geographical longitude-latitude coordinate.
+
+        Note: the order of coordinates in a Point is longitude then latitude.
+        """
+
+        shape_routes = self.shape.routes()
+        return [[(i[0], self.__inv_project__(i[1])) for i in route] for route in shape_routes]
+
+
+    @staticmethod
+    def truncate_route(route, initial_lat, initial_lon):
+        """Truncates a route in light of a given start position by removing fixes that are already passed."""
+
+        # Retain only those route elements that are closer to the final fix than the start_position.
+        final_lon, final_lat = route[-1][1].coords[0] # Note lon/lat order!
+        return [i for i in route if GeoHelper.distance(final_lat, final_lon, i[1].coords[0][1], i[1].coords[0][0]) <
+                GeoHelper.distance(final_lat, final_lon, initial_lat, initial_lon)]
 
     @property
     def __geo_interface__(self) -> dict:

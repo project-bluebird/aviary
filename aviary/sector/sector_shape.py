@@ -181,7 +181,12 @@ class IShape(SectorShape):
         return fix_points
 
     def routes(self):
-        """Compute the valid routes through the sector """
+        """
+        Compute the valid routes through the sector shape.
+
+        Each route is a list of fixes, and each fix is a (string, Point) pair
+        where the string is the name of the fix and the Point is its x-y coordinate.
+        """
 
         # Order by increasing y-coordinate to get the "ascending" route.
         ascending_y = sorted(list(self.fixes.items()), key = lambda item : item[1].coords[0][1])
