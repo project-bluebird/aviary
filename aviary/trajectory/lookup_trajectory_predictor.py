@@ -28,18 +28,24 @@ class LookupTrajectoryPredictor():
     def cruise_speed(self, flight_level, aircraft_type):
         """Looks up the cruise speed in metres per second for a given flight level and aircraft type"""
 
+        if not aircraft_type in self.cruise_speed_lookup.columns:
+            raise ValueError(f'Aircraft type {aircraft_type} not found in cruise speed lookup table.')
         return self.cruise_speed_lookup.at[flight_level, aircraft_type]
 
 
     def climb_time_to_level(self, flight_level, aircraft_type):
         """Looks up the climb time in seconds for a given aircraft type"""
 
+        if not aircraft_type in self.cruise_speed_lookup.columns:
+            raise ValueError(f'Aircraft type {aircraft_type} not found in climb time lookup table.')
         return self.climb_time_lookup.at[flight_level, aircraft_type]
 
 
     def downtrack_distance_to_level(self, flight_level, aircraft_type):
         """Looks up the downtrack distance in metres for a given aircraft type"""
 
+        if not aircraft_type in self.cruise_speed_lookup.columns:
+            raise ValueError(f'Aircraft type {aircraft_type} not found in downtrack distance lookup table.')
         return self.downtrack_distance_lookup.at[flight_level, aircraft_type]
 
 
