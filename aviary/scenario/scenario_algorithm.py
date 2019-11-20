@@ -87,9 +87,10 @@ class ScenarioAlgorithm(ABC):
         random.seed(seed)
 
     def route(self, sector):
-        """Return a random route"""
+        """Returns a random route"""
 
-        return random.choice(sector.shape.routes())
+        # Note: use the sector routes() method, *not* the shape routes().
+        return random.choice(sector.routes())
 
     def flight_level(self):
         """Returns a random flight level"""
