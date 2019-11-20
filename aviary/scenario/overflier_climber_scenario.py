@@ -76,7 +76,7 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         # Construct the overflier.
         yield {
             sg.START_TIME_KEY: 0,
-            sg.START_POSITION_KEY: overflier_lat_lon,
+            sg.START_POSITION_KEY: tuple(i for i in reversed(overflier_lat_lon)), # Order is (lon, lat).
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: overflier_aircraft_type,
             sg.DEPARTURE_KEY: overflier_departure,
@@ -104,7 +104,7 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         yield {
             sg.START_TIME_KEY: 0,
-            sg.START_POSITION_KEY: climber_lat_lon,
+            sg.START_POSITION_KEY: tuple(i for i in reversed(climber_lat_lon)), # Order is (lon, lat)
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: climber_aircraft_type,
             sg.DEPARTURE_KEY: overflier_destination, # Reversed overflier departure/destination.
