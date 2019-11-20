@@ -69,12 +69,13 @@ def test_write_json_scenario(target_sector, target_scenario):
 
     filename = "test_scenario"
     here = os.path.abspath(os.path.dirname(__file__))
-    scen_gen.write_json_scenario(
+    file = scen_gen.write_json_scenario(
         scenario = scenario,
         filename = filename,
         path = here
         )
 
-    assert os.path.exists(
-        os.path.join(here, "{}.{}".format(filename, sg.JSON_EXTENSION))
-        )
+    assert os.path.exists(file)
+
+    # Clean up.
+    os.remove(file)
