@@ -41,8 +41,8 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         # Select the flight levels.
         overflier_flight_level = self.overflier_flight_level()
-        climber_current_flight_level = random.choice([x for x in self.flight_levels if x < overflier_flight_level])
-        climber_requested_flight_level = random.choice([x for x in self.flight_levels if x >= overflier_flight_level])
+        climber_current_flight_level = self.climber_current_flight_level(overflier_flight_level)
+        climber_requested_flight_level = self.climber_requested_flight_level(overflier_flight_level)
 
         # Compute the time taken for the climber to reach the overflier's flight level
         climber_aircraft_type = self.aircraft_type()
@@ -99,6 +99,7 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
         climber_lat_lon = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
 
+
         # Truncate the route in light of the modified starting position.
         climber_truncated_route = sector.truncate_route(climber_route, climber_lat_lon[0], climber_lat_lon[1])
 
@@ -124,4 +125,15 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         return random.choice([x for x in self.flight_levels if x > min(self.flight_levels)])
 
+
+    def climber_current_flight_level(self, overflier_flight_level):
+        """Returns a random flight level, exceeding the overflier flight level"""
+
+        return random.choice([x for x in self.flight_levels if x < overflier_flight_level])
+
+
+    def climber_requested_flight_level(self, overflier_flight_level):
+        """Returns a random flight level, equal to or exceeding the overflier flight level"""
+
+        return random.choice([x for x in self.flight_levels if x >= overflier_flight_level])
 
