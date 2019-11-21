@@ -77,7 +77,7 @@ def test_aircraft_generator(target, i_element):
     # Check that the aircraft will be in conflict at the centre point of the sector (assuming default trajectories).
 
     overflier_speed = 270.7942522 # From the dummy lookup tables in test/conftest.py (m/s)
-    lat1, lon1 = overflier[sg.START_POSITION_KEY]
+    lon1, lat1 = overflier[sg.START_POSITION_KEY]
     lat2, lon2 = i_element.centre_point()
     overflier_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
@@ -91,7 +91,7 @@ def test_aircraft_generator(target, i_element):
     assert time_to_conflict == pytest.approx(climber_time_to_conflict_level)
 
     # We also expect the climber to have reached the conflict location at the same time.
-    lat1, lon1 = climber[sg.START_POSITION_KEY]
+    lon1, lat1 = climber[sg.START_POSITION_KEY]
     lat2, lon2 = i_element.centre_point()
     climber_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
