@@ -209,3 +209,5 @@ class SectorElement():
 
         with open(file, 'w') as f:
             dump(self, f, indent = 4)
+
+        return file
