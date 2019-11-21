@@ -148,4 +148,4 @@ except Exception as ex:
 filename = args.filename_prefix + "-" + str(args.seed)
 file = scenario_generator.write_json_scenario(scenario = scenario, filename = filename, path = args.output_path)
 
-print(f'SUCCESS! Wrote scenario file to {file}')
+print(f'SUCCESS! Wrote scenario to {file}')
