@@ -22,6 +22,9 @@ class ScenarioAlgorithm(ABC):
         self, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
     ):
 
+        self.seed = seed
+        # TODO: make set_seed non-static and use the instance variable instead of an argument.
+        # TODO: Also make ScenarioGenerator independent of the seed, except via a set_seed method that sets the seed in the algorithm.
         ScenarioAlgorithm.set_seed(seed)
 
         if aircraft_types is None:
