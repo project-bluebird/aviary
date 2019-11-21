@@ -4,6 +4,7 @@ import pytest
 import os
 import json
 import time
+from datetime import datetime
 
 import aviary.scenario.scenario_generator as sg
 
@@ -36,12 +37,31 @@ def test_generate_scenario(target_sector, target_scenario):
     total_time = 0
     for aircraft in scenario[sg.AIRCRAFT_KEY]:
         assert sg.START_TIME_KEY in aircraft.keys()
-        total_time += aircraft[sg.START_TIME_KEY]
+        total_time += aircraft[sg.AIRCRAFT_TIMEDELTA_KEY]
     assert total_time <= duration
 
     for i in range(10):
         scenario2 = scen_gen.generate_scenario(duration=duration, seed=seed)
         assert scenario == scenario2
+
+
+def test_generate_scenario_with_start_time(target_sector, target_scenario):
+    seed = 83
+    duration = 1000
+    scenario_start_time = datetime.strptime("12:05:42", "%H:%M:%S")
+
+    scen_gen = sg.ScenarioGenerator(target_sector, target_scenario, scenario_start_time)
+    scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
+
+    total_time = 0
+    for aircraft in scenario[sg.AIRCRAFT_KEY]:
+        assert sg.AIRCRAFT_TIMEDELTA_KEY in aircraft.keys()
+        assert datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S") > scenario_start_time
+        inferred_aircraft_timedelta = (datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S") - scenario_start_time).total_seconds()
+        assert inferred_aircraft_timedelta == int(aircraft[sg.AIRCRAFT_TIMEDELTA_KEY])
+        total_time += aircraft[sg.AIRCRAFT_TIMEDELTA_KEY]
+
+    assert total_time <= duration
 
 
 def test_serialisation(target_sector, target_scenario):

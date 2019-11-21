@@ -27,7 +27,7 @@ class PoissonScenario(ScenarioAlgorithm):
         while True:
             current_flight_level = int(self.flight_level())
             yield {
-                sg.START_TIME_KEY: random.expovariate(lambd = self.arrival_rate),
+                sg.AIRCRAFT_TIMEDELTA_KEY: random.expovariate(lambd = self.arrival_rate),
                 sg.CALLSIGN_KEY: next(self.callsign_generator()),
                 sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
                 sg.DEPARTURE_KEY: '', # ScenarioGenerator.departure, # TODO.

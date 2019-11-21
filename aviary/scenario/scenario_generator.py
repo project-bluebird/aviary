@@ -9,6 +9,7 @@ Takes a sector element and a scenario generation algorithm. The latter is an obj
 
 import os.path
 import time
+from datetime import datetime, timedelta
 
 import numpy as np
 
@@ -34,12 +35,13 @@ ROUTE_ELEMENT_TYPE_KEY = "ROUTE_ELEMENT_TYPE"
 ROUTE_ELEMENT_SPEED_KEY = "ROUTE_ELEMENT_SPEED"
 ROUTE_ELEMENT_LEVEL_KEY = "ROUTE_ELEMENT_LEVEL"
 AIRCRAFT_KEY = "aircraft"
+AIRCRAFT_TIMEDELTA_KEY = "timedelta"
 
 class ScenarioGenerator():
     """A scenario generator for I, X, Y airspace sectors"""
 
     # Default parameters:
-    default_scenario_start_time = time.strptime("00:00:00", "%H:%M:%S") # Not to be confused with *aircraft* start time.
+    default_scenario_start_time = datetime.strptime("00:00:00", "%H:%M:%S") # Not to be confused with *aircraft* start time.
 
     # Fixed parameters:
     # TODO: update these based on the new lookup tables
@@ -63,15 +65,18 @@ class ScenarioGenerator():
         self.scenario_algorithm.set_seed(seed)
 
         # Format the scenario start time.
-        start_time = time.strftime("%H:%M:%S", self.start_time)
+        start_time = time.strftime("%H:%M:%S", self.start_time.timetuple())
 
         ret = { START_TIME_KEY: start_time, AIRCRAFT_KEY: []}
 
         total_time = 0
         for aircraft in self.scenario_algorithm.aircraft_generator(self.sector_element):
-            total_time += aircraft[START_TIME_KEY]
+            total_time += aircraft[AIRCRAFT_TIMEDELTA_KEY]
             if total_time > duration:
                 return ret
+            # Add the (absolute) aircraft start time.
+            aircraft_start_time = self.start_time + timedelta(seconds = aircraft[AIRCRAFT_TIMEDELTA_KEY])
+            aircraft[START_TIME_KEY] = time.strftime("%H:%M:%S", aircraft_start_time.timetuple())
             ret[AIRCRAFT_KEY].append(aircraft)
         return ret
 
