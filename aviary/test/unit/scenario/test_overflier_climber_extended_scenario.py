@@ -36,9 +36,11 @@ def test_aircraft_generator(target, i_element):
 
         assert isinstance(x, dict)
         assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
-                                    sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY,
-                                    sg.ROUTE_KEY,
+                                    sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY, sg.ROUTE_KEY,
                                     sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
+        assert isinstance(x[sg.START_POSITION_KEY], tuple)
+        assert not isinstance(x[sg.START_POSITION_KEY][0], tuple)
+        assert x[sg.START_POSITION_KEY][0] == -0.1275
 
         ctr = ctr + 1
         if ctr == 1:
