@@ -11,6 +11,7 @@ import pandas
 
 from aviary.trajectory.lookup_trajectory_predictor import LookupTrajectoryPredictor
 from aviary.scenario.overflier_climber_scenario import OverflierClimberScenario
+from aviary.scenario.overflier_climber_extended_scenario import OverflierClimberExtendedScenario
 from aviary.scenario.scenario_generator import ScenarioGenerator
 
 from aviary.sector.sector_shape import IShape
@@ -39,6 +40,8 @@ parser.add_argument('--downtrack_distance_index', type=str, help='Index column i
 
 parser.add_argument('--aircraft_types', type=str, help='Comma-separated list of aircraft types', required=False)
 parser.add_argument('--flight_levels', type=str, help='Comma-separated list of integer flight levels', required=False)
+
+parser.add_argument('--thinking_time', type=float, help='Extended scenario "thinking time" in seconds', required=False)
 
 parser.add_argument('--filename_prefix', type=str, help='Output filename prefix', default=FILENAME_PREFIX, required=False)
 parser.add_argument('--output_path', type=str, help='Output directory path', default=".", required=False)
@@ -103,16 +106,11 @@ else:
     except ValueError as ex:
         print(f'Invalid flight_levels argument: {flight_levels}')
 
-# Construct the overflier-climber scenario algorithm.
-# TODO: fix issue with callsign_prefixes = None (fails to get the default value for this argument)
-scenario_algorithm = OverflierClimberScenario(trajectory_predictor = trajectory_predictor,
-                                              aircraft_types = aircraft_types,
-                                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
-                                              flight_levels = flight_levels,
-                                              seed = args.seed)
-
+#
 # Construct the sector.
+#
 
+# TODO: Support different sector types (I, X and Y).
 # Default parameters:
 name = "EARTH"
 origin = (51.5, -0.1275)
@@ -128,7 +126,37 @@ if any([fl > upper_limit for fl in flight_levels]):
 
 sector_element = SectorElement(name, origin, shape, lower_limit, upper_limit)
 
+#
+# Construct the overflier-climber scenario algorithm.
+#
+
+# TODO: fix issue with callsign_prefixes = None (fails to get the default value for this argument)
+
+kwargs = {
+    "trajectory_predictor": trajectory_predictor,
+    "callsign_prefixes": ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+    "flight_levels": flight_levels,
+    "seed": args.seed
+}
+
+if not args.thinking_time:
+    algorithm = OverflierClimberScenario
+else:
+    kwargs["thinking_time"] = args.thinking_time
+    algorithm = OverflierClimberExtendedScenario
+
+scenario_algorithm = algorithm(**kwargs)
+
+# old:
+# scenario_algorithm = OverflierClimberScenario(trajectory_predictor = trajectory_predictor,
+#                                               aircraft_types = aircraft_types,
+#                                               callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+#                                               flight_levels = flight_levels,
+#                                               seed = args.seed)
+
+#
 # Construct the scenario generator.
+#
 scenario_generator = ScenarioGenerator(sector_element = sector_element,
                                        scenario_algorithm = scenario_algorithm)
 
@@ -145,6 +173,9 @@ except Exception as ex:
         print('Re-run with the debug flag -d for a stack trace.')
     exit()
 
+#
+# Generate the scenario.
+#
 filename = args.filename_prefix + "-" + str(args.seed)
 file = scenario_generator.write_json_scenario(scenario = scenario, filename = filename, path = args.output_path)
 
