@@ -8,7 +8,7 @@ DESCRIPTION = "Air traffic scenario generation for the Simurgh project."
 URL = "https://github.com/alan-turing-institute/aviary"
 AUTHOR = "Tim Hobson and Radka Jersakova"
 EMAIL = "thobson@turing.ac.uk"
-REQUIRES_PYTHON = ">=3.5.0"
+REQUIRES_PYTHON = ">=3.6.0"
 VERSION = None
 LICENSE = "MIT"
 
