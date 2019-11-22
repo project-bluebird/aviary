@@ -143,16 +143,10 @@ if not args.thinking_time:
     algorithm = OverflierClimberScenario
 else:
     kwargs["thinking_time"] = args.thinking_time
+    args.filename_prefix = args.filename_prefix + "-extended-" + str(int(args.thinking_time))
     algorithm = OverflierClimberExtendedScenario
 
 scenario_algorithm = algorithm(**kwargs)
-
-# old:
-# scenario_algorithm = OverflierClimberScenario(trajectory_predictor = trajectory_predictor,
-#                                               aircraft_types = aircraft_types,
-#                                               callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
-#                                               flight_levels = flight_levels,
-#                                               seed = args.seed)
 
 #
 # Construct the scenario generator.
