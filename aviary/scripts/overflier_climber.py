@@ -14,7 +14,7 @@ from aviary.scenario.overflier_climber_scenario import OverflierClimberScenario
 from aviary.scenario.overflier_climber_extended_scenario import OverflierClimberExtendedScenario
 from aviary.scenario.scenario_generator import ScenarioGenerator
 
-from aviary.sector.sector_shape import IShape
+import aviary.sector.sector_shape as ss
 from aviary.sector.sector_element import SectorElement
 
 FILENAME_PREFIX = "overflier-climber-scenario"
@@ -38,6 +38,7 @@ parser.add_argument('--climb_time_index', type=str, help='Index column in the cl
 parser.add_argument('--downtrack_distance', type=str, help='Aircraft downtrack distance lookup table in CSV format', required=True)
 parser.add_argument('--downtrack_distance_index', type=str, help='Index column in the downtrack distance lookup table', required=True)
 
+parser.add_argument('--sector_type', type=str, help='Sector type: I, X or Y', default="I", required=False)
 parser.add_argument('--aircraft_types', type=str, help='Comma-separated list of aircraft types', required=False)
 parser.add_argument('--flight_levels', type=str, help='Comma-separated list of integer flight levels', required=False)
 
@@ -110,14 +111,23 @@ else:
 # Construct the sector.
 #
 
-# TODO: Support different sector types (I, X and Y).
-# Default parameters:
-name = "EARTH"
-origin = (51.5, -0.1275)
-shape = IShape()
+# Construct the sector shape.
+if args.sector_type == 'I':
+    shape = ss.IShape()
+    name = "TERRAFIRMA"
+elif args.sector_type == 'X':
+    shape = ss.XShape()
+    name = "HELL"
+elif args.sector_type == 'Y':
+    shape = ss.YShape()
+    name = "HEAVEN"
+else:
+    raise ValueError(f'Invalid sector_type argument: {args.sector_type}.')
 
-lower_limit = 140
-upper_limit = 400
+# Default parameters:
+origin = (51.5, -0.1275)
+lower_limit = 60
+upper_limit = 460
 
 if any([fl < lower_limit for fl in flight_levels]):
     raise ValueError(f'Flight levels must not be less than the sector lower limit of {lower_limit}')
