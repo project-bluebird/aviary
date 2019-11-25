@@ -97,7 +97,7 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
         windback_distance = true_airspeed * self.thinking_time
 
         lon1, lat1 = aircraft[sg.START_POSITION_KEY]
-        lat2, lon2 = sector.centre_point()
+        lon2, lat2 = sector.centre_point()
 
         # Note: here it is assumed that the aircraft travels on a straight line
         # to the sector centre (as is the case in an I, X or Y sector element).

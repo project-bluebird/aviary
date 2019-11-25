@@ -65,7 +65,7 @@ class OverflierClimberScenario(ScenarioAlgorithm):
                                                                                       aircraft_type=climber_aircraft_type)
 
         # Location of the central fix of the sector (which is the conflict point).
-        lat1, lon1 = sector.centre_point()
+        lon1, lat1 = sector.centre_point()
 
         # Get the position of the first fix on the overflier's route. Note lon/lat order!
         o_lon2, o_lat2 = overflier_route.fix_points()[0].coords[0]

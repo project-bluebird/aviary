@@ -63,7 +63,8 @@ class SectorElement():
     def centre_point(self):
         """The lat/lon coordinates of the centre point of the sector"""
 
-        return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon.centroid).coords[0]))
+        # old: return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon.centroid).coords[0]))
+        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
 
 
     def fix_location(self, fix_name):
