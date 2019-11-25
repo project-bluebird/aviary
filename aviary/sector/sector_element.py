@@ -6,15 +6,11 @@ Construction of I, X, Y airspace sector elements with upper & lower vertical lim
 
 from pyproj import Proj
 
-from shapely.ops import transform
-from shapely.geometry import LineString
-
-from functools import partial
-
 from geojson import dump
 
 import os.path
 
+import aviary.geo.geo_helper as gh
 from aviary.geo.geo_helper import GeoHelper
 
 # CONSTANTS
@@ -30,7 +26,6 @@ LOWER_LIMIT_KEY = "lower_limit"
 UPPER_LIMIT_KEY = "upper_limit"
 ROUTES_KEY = "routes"
 GEOMETRY_KEY = "geometry"
-COORDINATES_KEY = "coordinates"
 LATITUDE_KEY = "latitude"
 LONGITUDE_KEY = "longitude"
 LATITUDES_KEY = "latitudes"
@@ -64,10 +59,12 @@ class SectorElement():
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
+
     def centre_point(self):
         """The lat/lon coordinates of the centre point of the sector"""
 
-        return tuple(i for i in reversed(self.__inv_project__(self.shape.polygon.centroid).coords[0]))
+        return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon.centroid).coords[0]))
+
 
     def fix_location(self, fix_name):
         """The lat/lon coordinates of a named fix"""
@@ -76,7 +73,8 @@ class SectorElement():
         if not fix_name in list(fixes.keys()):
             raise ValueError(f'No fix exists named {fix_name}')
 
-        return tuple(i for i in reversed(self.__inv_project__(fixes[fix_name]).coords[0]))
+        return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]))
+
 
     def routes(self):
         """Returns the valid routes through the sector
@@ -87,17 +85,13 @@ class SectorElement():
         Note: the order of coordinates in a Point is longitude then latitude.
         """
 
-        shape_routes = self.shape.routes()
-        return [[(i[0], self.__inv_project__(i[1])) for i in route] for route in shape_routes]
+        # Return route objects.
+        ret = self.shape.routes()
+        for route in ret:
+            route.projection = self.projection
 
-    @staticmethod
-    def truncate_route(route, initial_lat, initial_lon):
-        """Truncates a route in light of a given start position by removing fixes that are already passed."""
+        return ret
 
-        # Retain only those route elements that are closer to the final fix than the start_position.
-        final_lon, final_lat = route[-1][1].coords[0] # Note lon/lat order!
-        return [i for i in route if GeoHelper.distance(final_lat, final_lon, i[1].coords[0][1], i[1].coords[0][0]) <
-                GeoHelper.distance(final_lat, final_lon, initial_lat, initial_lon)]
 
     @property
     def __geo_interface__(self) -> dict:
@@ -110,14 +104,18 @@ class SectorElement():
         geojson = {FEATURES_KEY: []}
         geojson[FEATURES_KEY].append(self.sector_geojson())
         geojson[FEATURES_KEY].append(self.boundary_geojson())
-        geojson[FEATURES_KEY].extend([self.route_geojson(route_index) for route_index in range(0, len(self.shape.route_names))])
+        geojson[FEATURES_KEY].extend([route.geojson() for route in self.routes()])
         geojson[FEATURES_KEY].extend([self.waypoint_geojson(name) for name in self.shape.fixes.keys()])
 
         return geojson
 
+
     def hash_sector_coordinates(self) -> str:
         """Returns hash of the sector boundary coordinates as string"""
-        return str(hash(self.__inv_project__(self.shape.polygon).__geo_interface__[COORDINATES_KEY][0]))
+
+        coords = GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon).__geo_interface__[gh.COORDINATES_KEY][0]
+        return str(hash(coords))
+
 
     def sector_geojson(self) -> dict:
         """
@@ -152,6 +150,7 @@ class SectorElement():
 
         return geojson
 
+
     def boundary_geojson(self) -> dict:
         """
         Return a GeoJSON dictionary representing the sector boundary (volume).
@@ -169,7 +168,7 @@ class SectorElement():
 
         geojson = {
             TYPE_KEY : FEATURE_VALUE,
-            GEOMETRY_KEY : self.__inv_project__(self.shape.polygon).__geo_interface__,
+            GEOMETRY_KEY: GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon).__geo_interface__,
             PROPERTIES_KEY : {
                 NAME_KEY: self.hash_sector_coordinates(),
                 TYPE_KEY: SECTOR_VOLUME_VALUE,
@@ -179,7 +178,7 @@ class SectorElement():
             }
         }
 
-        geojson = self.fix_geometry_coordinates_tuple(geojson)
+        geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
         return geojson
 
 
@@ -201,57 +200,12 @@ class SectorElement():
                 NAME_KEY: name.upper(),
                 TYPE_KEY: FIX_VALUE
             },
-            GEOMETRY_KEY: self.__inv_project__(self.shape.fixes[name]).__geo_interface__
+            GEOMETRY_KEY: GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]).__geo_interface__
         }
 
-        geojson = self.fix_geometry_coordinates_tuple(geojson)
+        geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
         return geojson
 
-    def route_geojson(self, route_index) -> dict:
-        """
-        Returns a GeoJSON dictionary representing a route
-
-        :param route_index: the list index of the route within self.shape.routes()
-
-        A route includes elements:
-        - type: "Feature"
-        - geometry: a LineString feature whose properties are a list of points, with long/lat coordinates
-        - properties:
-           - name: e.g. "DAMNATION"
-           - type: "ROUTE"
-           - children: {"FIX": {"names": [<route fix names>]}}
-        """
-
-        route = self.shape.routes()[route_index]
-        fix_names = [fix_item[0] for fix_item in route]
-        geojson = {
-            TYPE_KEY: FEATURE_VALUE,
-            PROPERTIES_KEY: {
-                NAME_KEY: self.shape.route_names[route_index],
-                TYPE_KEY: ROUTE_VALUE,
-                CHILDREN_KEY: {
-                    FIX_VALUE: {
-                        CHILDREN_NAMES_KEY: fix_names
-                    }
-                }
-            },
-            GEOMETRY_KEY: self.__inv_project__(LineString([fix_item[1] for fix_item in route])).__geo_interface__
-        }
-
-        # Fix issue with __geo_interface__ unexpectedly returning a tuple of coordinates rather than a list.
-        geojson = self.fix_geometry_coordinates_tuple(geojson)
-        return geojson
-
-    def fix_geometry_coordinates_tuple(self, geojson):
-        """Works around an issue with __geo_interface__ unexpectedly returning a tuple of coordinates rather than a list"""
-
-        geojson[GEOMETRY_KEY][COORDINATES_KEY] = list(geojson[GEOMETRY_KEY][COORDINATES_KEY])
-        return geojson
-
-    def __inv_project__(self, geom):
-        """Helper for doing an inverse geometric projection"""
-
-        return transform(partial(self.projection, inverse=True), geom)
 
     def write_geojson(self, filename, path = "."):
         """Write the geojson object to a file"""

@@ -15,6 +15,8 @@ from shapely.ops import cascaded_union
 from shapely.affinity import rotate
 from abc import abstractmethod
 
+from aviary.sector.route import Route
+
 class SectorType(Enum):
     I = "I",
     X = "X",
@@ -96,11 +98,12 @@ class SectorShape:
 
         self._fixes = dict(zip([fix_name.upper() for fix_name in fix_names], fix_points))
 
+        self._route_names = [route_name.upper() for route_name in route_names]
+
         len_routes = len(self.routes())
         if len(route_names) != len_routes:
             raise ValueError(f'route_names must have length {len_routes}')
 
-        self._route_names = [route_name.upper() for route_name in route_names]
 
     @property
     def sector_type(self):
@@ -139,12 +142,13 @@ class SectorShape:
         raise Exception("route_names are immutable")
 
 
-    def named_routes(self) -> dict:
-        """Return a dictionary of routes, mapping from route name to a list of waypoints"""
-
-        routes = self.routes()
-        route_names = self.route_names
-        return dict((route_names[route_index], [item[0] for item in routes[route_index]]) for route_index in range(0, len(routes)))
+    # superfluous:
+    # def named_routes(self) -> dict:
+    #     """Return a dictionary of routes, mapping from route name to a list of waypoints"""
+    #
+    #     routes = self.routes()
+    #     route_names = self.route_names
+    #     return dict((route_names[route_index], [item[0] for item in routes[route_index]]) for route_index in range(0, len(routes)))
 
 
 class IShape(SectorShape):
@@ -189,9 +193,16 @@ class IShape(SectorShape):
         """
 
         # Order by increasing y-coordinate to get the "ascending" route.
-        ascending_y = sorted(list(self.fixes.items()), key = lambda item : item[1].coords[0][1])
+        ascending_fix_list = sorted(list(self.fixes.items()), key = lambda item : item[1].coords[0][1])
+        ascending_y = Route(
+            name = self.route_names[0],
+            fix_list = ascending_fix_list
+        )
         # Reverse the order of fixes to get the "descending" route.
-        descending_y = ascending_y[::-1]
+        descending_y = Route(
+            name = self.route_names[1],
+            fix_list = ascending_fix_list[::-1]
+        )
         return [ascending_y, descending_y]
 
 class XShape(SectorShape):
@@ -234,12 +245,26 @@ class XShape(SectorShape):
         horizontal_fixes = list(filter(lambda item : abs(item[1].coords[0][1]) < epsilon, self.fixes.items()))
 
         # Order by increasing y-coordinate to get the "ascending_y" route.
-        ascending_y = sorted(vertical_fixes, key = lambda item : item[1].coords[0][1])
-        descending_y = ascending_y[::-1]
+        ascending_y_fix_list = sorted(vertical_fixes, key = lambda item : item[1].coords[0][1])
+        ascending_y = Route(
+            name = self.route_names[0],
+            fix_list = ascending_y_fix_list
+        )
+        descending_y = Route(
+            name = self.route_names[1],
+            fix_list = ascending_y_fix_list[::-1]
+        )
 
         # Order by increasing x-coordinate to get the "ascending_x" route.
-        ascending_x = sorted(horizontal_fixes, key = lambda item : item[1].coords[0][0])
-        descending_x = ascending_x[::-1]
+        ascending_x_fix_list = sorted(horizontal_fixes, key = lambda item : item[1].coords[0][0])
+        ascending_x = Route(
+            name = self.route_names[2],
+            fix_list = ascending_x_fix_list
+        )
+        descending_x = Route(
+            name = self.route_names[3],
+            fix_list = ascending_x_fix_list[::-1]
+        )
 
         return [ascending_y, descending_y, ascending_x, descending_x]
 
@@ -313,10 +338,24 @@ class YShape(SectorShape):
         right_route_fixes = list(filter(lambda item : item[0] not in [it[0] for it in left_fixes], self.fixes.items()))
 
         # Order by increasing y-coordinate to get the "ascending_y" route.
-        left_ascending_y = sorted(left_route_fixes, key = lambda item : item[1].coords[0][1])
-        left_descending_y = left_ascending_y[::-1]
+        left_ascending_y_fix_list = sorted(left_route_fixes, key = lambda item : item[1].coords[0][1])
+        left_ascending_y = Route(
+            name = self.route_names[0],
+            fix_list = left_ascending_y_fix_list
+        )
+        left_descending_y = Route(
+            name = self.route_names[1],
+            fix_list = left_ascending_y_fix_list[::-1]
+        )
 
-        right_ascending_y = sorted(right_route_fixes, key = lambda item : item[1].coords[0][1])
-        right_descending_y = right_ascending_y[::-1]
+        right_ascending_y_fix_list = sorted(right_route_fixes, key = lambda item : item[1].coords[0][1])
+        right_ascending_y = Route(
+            name = self.route_names[2],
+            fix_list = right_ascending_y_fix_list
+        )
+        right_descending_y = Route(
+            name = self.route_names[3],
+            fix_list = right_ascending_y_fix_list[::-1]
+        )
 
         return [left_ascending_y, left_descending_y, right_ascending_y, right_descending_y]

@@ -2,8 +2,6 @@
 import pytest
 
 import os
-import json
-import time
 from datetime import datetime
 
 import aviary.scenario.scenario_generator as sg
@@ -40,7 +38,8 @@ def test_generate_scenario(target_sector, target_scenario):
         total_time += aircraft[sg.AIRCRAFT_TIMEDELTA_KEY]
     assert total_time <= duration
 
-    for i in range(10):
+    # Check that scenario's generated with the same random seed are identical.
+    for i in range(1):
         scenario2 = scen_gen.generate_scenario(duration=duration, seed=seed)
         assert scenario == scenario2
 
@@ -62,22 +61,6 @@ def test_generate_scenario_with_start_time(target_sector, target_scenario):
         total_time += aircraft[sg.AIRCRAFT_TIMEDELTA_KEY]
 
     assert total_time <= duration
-
-
-def test_serialisation(target_sector, target_scenario):
-    seed = 62
-    duration = 1000
-
-    scen_gen = sg.ScenarioGenerator(target_sector, target_scenario)
-    scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
-    scenario = scen_gen.serialize_route(scenario)
-
-    serialised = json.dumps(scenario, sort_keys=True)
-
-    deserialised = json.loads(serialised)
-
-    assert isinstance(deserialised, dict)
-    assert sorted(deserialised.keys()) == sorted([sg.AIRCRAFT_KEY, sg.START_TIME_KEY])
 
 
 def test_write_json_scenario(target_sector, target_scenario):

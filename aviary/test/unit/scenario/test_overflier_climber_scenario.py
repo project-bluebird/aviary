@@ -113,7 +113,7 @@ def test_aircraft_generator(target, i_element):
     assert overflier_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     # At the start of the scenario the overflier has not yet reached the first fix (A).
-    assert [i[0] for i in overflier[sg.ROUTE_KEY]] == ['A', 'B', 'C', 'D', 'E']
+    assert [i[0] for i in overflier[sg.ROUTE_KEY].keys()] == ['A', 'B', 'C', 'D', 'E']
 
     # Check the route assigned to the climber.
 
@@ -123,4 +123,4 @@ def test_aircraft_generator(target, i_element):
     assert climber_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     # At the start of the scenario the climber has not yet reached the first fix (E).
-    assert [i[0] for i in climber[sg.ROUTE_KEY]] == ['E', 'D', 'C', 'B', 'A']
+    assert [i[0] for i in climber[sg.ROUTE_KEY].keys()] == ['E', 'D', 'C', 'B', 'A']

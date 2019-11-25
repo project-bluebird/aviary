@@ -35,5 +35,5 @@ class PoissonScenario(ScenarioAlgorithm):
                 sg.CURRENT_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.CLEARED_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.flight_level()),
-                sg.ROUTE_KEY: self.route(sector)
+                sg.ROUTE_KEY: self.route(sector).serialize()
             }
