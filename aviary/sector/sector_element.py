@@ -61,13 +61,13 @@ class SectorElement():
 
 
     def centre_point(self):
-        """The lat/lon coordinates of the centre point of the sector"""
+        """The long/lat coordinates of the centre point of the sector"""
 
         return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
 
 
     def fix_location(self, fix_name):
-        """The lat/lon coordinates of a named fix"""
+        """The long/lat coordinates of a named fix"""
 
         fixes = self.shape.fixes
         if not fix_name in list(fixes.keys()):
