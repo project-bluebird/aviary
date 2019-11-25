@@ -63,7 +63,6 @@ class SectorElement():
     def centre_point(self):
         """The lat/lon coordinates of the centre point of the sector"""
 
-        # old: return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon.centroid).coords[0]))
         return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
 
 
@@ -74,7 +73,7 @@ class SectorElement():
         if not fix_name in list(fixes.keys()):
             raise ValueError(f'No fix exists named {fix_name}')
 
-        return tuple(i for i in reversed(GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]))
+        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]
 
 
     def routes(self):

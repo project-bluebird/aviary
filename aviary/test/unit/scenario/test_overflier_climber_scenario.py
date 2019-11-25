@@ -109,7 +109,7 @@ def test_aircraft_generator(target, i_element):
     # Check the aircraft routes.
 
     # Compare the distance between the fixes with the distance travelled by the overflier to the conflict point.
-    lat1, lon1 = i_element.fix_location(fix_name = "A")
+    lon1, lat1 = i_element.fix_location(fix_name = "A")
     lon2, lat2 = i_element.centre_point()
     assert overflier_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
@@ -119,7 +119,7 @@ def test_aircraft_generator(target, i_element):
     # Check the route assigned to the climber.
 
     # Compare the distance between the fixes with the distance travelled by the climber to the conflict point.
-    lat1, lon1 = i_element.fix_location(fix_name = "E")
+    lon1, lat1 = i_element.fix_location(fix_name = "E")
     lon2, lat2 = i_element.centre_point()
     assert climber_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
