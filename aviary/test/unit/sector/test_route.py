@@ -3,6 +3,7 @@ import pytest
 
 import json
 
+import aviary.sector.route as sr
 import aviary.sector.sector_element as se
 import aviary.geo.geo_helper as gh
 
@@ -63,13 +64,24 @@ def test_serialize(i_element):
     target = i_element.routes()[1]
     result = target.serialize()
 
-    serialized = json.dumps(result, sort_keys=True)
 
+    assert isinstance(result, list)
+    for x in result:
+        assert isinstance(x, dict)
+        assert list(x.keys()) == [sr.FIX_NAME_KEY, se.GEOMETRY_KEY]
+
+    for i in range(target.length()):
+        assert result[i][sr.FIX_NAME_KEY] == target.fix_names()[i]
+
+    serialized = json.dumps(result, sort_keys=True)
     deserialized = json.loads(serialized)
 
-    assert isinstance(deserialized, dict)
-    assert list(deserialized.keys()) == target.fix_names()
+    assert isinstance(deserialized, list)
+    assert len(deserialized) == target.length()
+    assert list(deserialized[0].keys()) == [sr.FIX_NAME_KEY, se.GEOMETRY_KEY]
 
+    for i in range(target.length()):
+        assert deserialized[i][sr.FIX_NAME_KEY] == target.fix_names()[i]
 
 def test_truncate(i_element):
 
