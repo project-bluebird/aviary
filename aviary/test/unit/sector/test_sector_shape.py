@@ -178,6 +178,6 @@ def test_y_routes():
     assert result[0].fix_points()[0].coords[0][1] == -1 * (y.offset_nm + (length_nm / 4))
     assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 4)
     assert result[0].fix_points()[2].coords[0][1] == pytest.approx(length_nm / 4)
-    assert result[0].fix_points()[3].coords[0][1] == length_nm / 2
+    assert result[0].fix_points()[3].coords[0][1] == pytest.approx(length_nm / 2)
     assert result[0].fix_points()[4].coords[0][1] == pytest.approx(y.offset_nm)
 
