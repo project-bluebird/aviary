@@ -9,6 +9,8 @@ from shapely.geometry import LineString, mapping
 import aviary.sector.sector_element as se
 from aviary.geo.geo_helper import GeoHelper
 
+FIX_NAME_KEY = "fixName"
+
 class Route():
     """A route through a sector.
 
@@ -115,7 +117,13 @@ class Route():
     def serialize(self):
         """Serialises the route instance as a JSON string"""
 
-        return {self.fix_names()[i]: self.fix_points()[i].__geo_interface__ for i in range(self.length())}
+        return [
+            {
+                FIX_NAME_KEY: self.fix_names()[i],
+                se.GEOMETRY_KEY: self.fix_points()[i].__geo_interface__
+            }
+            for i in range(self.length())
+        ]
 
 
     def truncate(self, initial_lat, initial_lon):
