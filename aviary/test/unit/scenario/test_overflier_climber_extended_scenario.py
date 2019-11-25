@@ -67,7 +67,7 @@ def test_aircraft_generator(target, i_element):
 
     overflier_speed = 250.4972923 # From the dummy lookup tables in test/conftest.py (m/s)
     lon1, lat1 = overflier[sg.START_POSITION_KEY]
-    lat2, lon2 = i_element.centre_point()
+    lon2, lat2 = i_element.centre_point()
     overflier_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     time_to_conflict = overflier_distance/overflier_speed
@@ -80,7 +80,7 @@ def test_aircraft_generator(target, i_element):
     assert time_to_conflict == pytest.approx(climber_time_to_conflict_level)
 
     lon1, lat1 = climber[sg.START_POSITION_KEY]
-    lat2, lon2 = i_element.centre_point()
+    lon2, lat2 = i_element.centre_point()
     climber_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     climber_cruise_speed = 180.5525891 # From the dummy lookup tables in test/conftest.py (m/s)

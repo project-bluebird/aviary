@@ -46,7 +46,7 @@ class GeoHelper():
 
         l = geod.InverseLine(lat1, lon1, lat2, lon2)
         g = l.Position(distance_m, Geodesic.STANDARD)
-        return g['lat2'], g['lon2']
+        return g['lon2'], g['lat2']
 
 
     @staticmethod

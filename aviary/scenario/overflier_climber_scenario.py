@@ -65,22 +65,22 @@ class OverflierClimberScenario(ScenarioAlgorithm):
                                                                                       aircraft_type=climber_aircraft_type)
 
         # Location of the central fix of the sector (which is the conflict point).
-        lat1, lon1 = sector.centre_point()
+        lon1, lat1 = sector.centre_point()
 
         # Get the position of the first fix on the overflier's route. Note lon/lat order!
         o_lon2, o_lat2 = overflier_route.fix_points()[0].coords[0]
 
         # Compute the initial position of the overflier.
         # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
-        overflier_lat_lon = GeoHelper.waypoint_location(lat1, lon1, o_lat2, o_lon2, overflier_horizontal_distance)
+        o_initial_lon, o_initial_lat = GeoHelper.waypoint_location(lat1, lon1, o_lat2, o_lon2, overflier_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        overflier_route.truncate(initial_lat = overflier_lat_lon[0], initial_lon = overflier_lat_lon[1])
+        overflier_route.truncate(initial_lat = o_initial_lat, initial_lon = o_initial_lon)
 
         # Construct the overflier.
         yield {
             sg.AIRCRAFT_TIMEDELTA_KEY: 0,
-            sg.START_POSITION_KEY: tuple(i for i in reversed(overflier_lat_lon)), # Order is (lon, lat).
+            sg.START_POSITION_KEY: (o_initial_lon, o_initial_lat), # Order is (lon, lat).
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: overflier_aircraft_type,
             sg.DEPARTURE_KEY: overflier_departure,
@@ -99,14 +99,14 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         # Compute the initial position of the climber.
         # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
-        climber_lat_lon = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
+        c_initial_lon, c_initial_lat = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        climber_route.truncate(initial_lat = climber_lat_lon[0], initial_lon = climber_lat_lon[1])
+        climber_route.truncate(initial_lat = c_initial_lat, initial_lon = c_initial_lon)
 
         yield {
             sg.AIRCRAFT_TIMEDELTA_KEY: 0,
-            sg.START_POSITION_KEY: tuple(i for i in reversed(climber_lat_lon)), # Order is (lon, lat)
+            sg.START_POSITION_KEY: (c_initial_lon, c_initial_lat), # Order is (lon, lat)
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: climber_aircraft_type,
             sg.DEPARTURE_KEY: overflier_destination, # Reversed overflier departure/destination.

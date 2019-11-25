@@ -97,14 +97,14 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
         windback_distance = true_airspeed * self.thinking_time
 
         lon1, lat1 = aircraft[sg.START_POSITION_KEY]
-        lat2, lon2 = sector.centre_point()
+        lon2, lat2 = sector.centre_point()
 
         # Note: here it is assumed that the aircraft travels on a straight line
         # to the sector centre (as is the case in an I, X or Y sector element).
 
-        lat_lon = GeoHelper.waypoint_location(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2, distance_m = -1 * windback_distance)
+        lon, lat = GeoHelper.waypoint_location(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2, distance_m = -1 * windback_distance)
 
-        aircraft[sg.START_POSITION_KEY] = tuple(i for i in reversed(lat_lon)) # Order is (lon, lat).
+        aircraft[sg.START_POSITION_KEY] = (lon, lat) # Order is (lon, lat).
 
         # If the aircraft is the climber, set the requested flight level to 'high'
         if not is_overflier:

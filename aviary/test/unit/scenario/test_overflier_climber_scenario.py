@@ -82,7 +82,7 @@ def test_aircraft_generator(target, i_element):
 
     overflier_speed = 270.7942522 # From the dummy lookup tables in test/conftest.py (m/s)
     lon1, lat1 = overflier[sg.START_POSITION_KEY]
-    lat2, lon2 = i_element.centre_point()
+    lon2, lat2 = i_element.centre_point()
     overflier_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     time_to_conflict = overflier_distance/overflier_speed
@@ -96,7 +96,7 @@ def test_aircraft_generator(target, i_element):
 
     # We also expect the climber to have reached the conflict location at the same time.
     lon1, lat1 = climber[sg.START_POSITION_KEY]
-    lat2, lon2 = i_element.centre_point()
+    lon2, lat2 = i_element.centre_point()
     climber_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     downtrack_distance = 400000.4376 - 70000.47755 # From the dummy lookup tables in test/conftest.py (metres)
@@ -109,8 +109,8 @@ def test_aircraft_generator(target, i_element):
     # Check the aircraft routes.
 
     # Compare the distance between the fixes with the distance travelled by the overflier to the conflict point.
-    lat1, lon1 = i_element.fix_location(fix_name = "A")
-    lat2, lon2 = i_element.centre_point()
+    lon1, lat1 = i_element.fix_location(fix_name = "A")
+    lon2, lat2 = i_element.centre_point()
     assert overflier_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     # At the start of the scenario the overflier has not yet reached the first fix (A).
@@ -119,8 +119,8 @@ def test_aircraft_generator(target, i_element):
     # Check the route assigned to the climber.
 
     # Compare the distance between the fixes with the distance travelled by the climber to the conflict point.
-    lat1, lon1 = i_element.fix_location(fix_name = "E")
-    lat2, lon2 = i_element.centre_point()
+    lon1, lat1 = i_element.fix_location(fix_name = "E")
+    lon2, lat2 = i_element.centre_point()
     assert climber_distance > GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     # At the start of the scenario the climber has not yet reached the first fix (E).
