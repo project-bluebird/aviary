@@ -288,7 +288,7 @@ class YShape(SectorShape):
 
     def __fix_points__(self):
 
-        coords = list(self.polygon.boundary.coords)
+        coords = list(self.polygon.exterior.coords)
         xy_min, xy_max = self.minmax_xy(coords)
         xmin, ymin = xy_min
         bottom = self.get_centre([geom.Point(pt) for pt in self.get_coords(coords, xmin)])
