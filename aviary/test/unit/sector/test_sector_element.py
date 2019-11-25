@@ -5,6 +5,7 @@ import os
 import geojson
 
 import aviary.sector.sector_element as se
+import aviary.geo.geo_helper as gh
 
 def test_centre_point(i_element):
     
@@ -22,39 +23,20 @@ def test_routes(i_element):
     result = i_element.routes()
 
     # Route 1 goes from 'A' to 'E'.
-    assert len(result[1]) == 5
-    assert result[1][0][0] == 'A'
-    assert result[1][0][1].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
+    assert result[1].length() == 5
+    assert result[1].fix_names()[0] == 'A'
+    assert result[1].fix_points()[0].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
 
-    assert result[1][4][0] == 'E'
-    assert result[1][4][1].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
+    assert result[1].fix_names()[4] == 'E'
+    assert result[1].fix_points()[4].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
 
     # Route 0 goes from 'E' to 'A'.
-    assert len(result[0]) == 5
-    assert result[0][0][0] == 'E'
-    assert result[0][0][1].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
+    assert result[0].length() == 5
+    assert result[0].fix_names()[0] == 'E'
+    assert result[0].fix_points()[0].coords[0] == pytest.approx((-0.1275, 50.92), 0.0001)
 
-    assert result[0][4][0] == 'A'
-    assert result[0][4][1].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
-
-
-def test_truncate_route(i_element):
-
-    # Get the A to E route for the I sector.
-    route = i_element.routes()[1]
-
-    lonA, latA = route[0][1].coords[0]
-    lonB, latB = route[1][1].coords[0]
-    lonC, latC = route[2][1].coords[0]
-
-    assert latB < latA # Sanity check: the route is due south.
-    assert latC < latB # Sanity check: the route is due south.
-
-    # If we start from halfway between fixes A and B, the truncated route omits only fix A.
-    assert i_element.truncate_route(route, initial_lat = (latA + latB)/2, initial_lon = lonA) == route[1:]
-
-    # If we start from halfway between fixes B and C, the truncated route omits both fixes A and B.
-    assert i_element.truncate_route(route, initial_lat = (latB + latC)/2, initial_lon = lonA) == route[2:]
+    assert result[0].fix_names()[4] == 'A'
+    assert result[0].fix_points()[4].coords[0] == pytest.approx((-0.1275, 52.08), 0.0001)
 
 
 def test_sector_geojson(i_element):
@@ -96,10 +78,10 @@ def test_boundary_geojson(i_element):
 
     assert result[se.TYPE_KEY] == se.FEATURE_VALUE
 
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([se.COORDINATES_KEY, se.TYPE_KEY])
+    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
 
     assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POLYGON_VALUE
-    assert isinstance(result[se.GEOMETRY_KEY][se.COORDINATES_KEY], list)
+    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
     # TODO: check length of coordinates
 
     assert sorted(result[se.PROPERTIES_KEY].keys()) == \
@@ -120,39 +102,14 @@ def test_waypoint_geojson(i_element):
 
     assert result[se.TYPE_KEY] == se.FEATURE_VALUE
 
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([se.COORDINATES_KEY, se.TYPE_KEY])
+    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
     assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POINT_VALUE
-    assert isinstance(result[se.GEOMETRY_KEY][se.COORDINATES_KEY], list)
-    assert len(result[se.GEOMETRY_KEY][se.COORDINATES_KEY]) == 2
+    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+    assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
 
     assert sorted(result[se.PROPERTIES_KEY].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY])
     assert result[se.PROPERTIES_KEY][se.NAME_KEY] == name.upper()
     assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.FIX_VALUE
-
-def test_route_geojson(i_element):
-
-    route_index = 1
-    result = i_element.route_geojson(route_index = route_index)
-
-    assert sorted(result.keys()) == sorted([se.GEOMETRY_KEY, se.PROPERTIES_KEY, se.TYPE_KEY])
-
-    assert result[se.TYPE_KEY] == se.FEATURE_VALUE
-
-    assert sorted(result[se.PROPERTIES_KEY]) == \
-           sorted([se.CHILDREN_KEY, se.NAME_KEY, se.TYPE_KEY])
-
-    assert result[se.PROPERTIES_KEY][se.NAME_KEY] == i_element.shape.route_names[route_index]
-    assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.ROUTE_VALUE
-    assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY].keys()) == [se.FIX_VALUE]
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.FIX_VALUE][se.CHILDREN_NAMES_KEY], list)
-    assert len(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.FIX_VALUE][se.CHILDREN_NAMES_KEY]) == len(i_element.shape.fixes)
-
-    assert isinstance(result[se.GEOMETRY_KEY], dict)
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([se.COORDINATES_KEY, se.TYPE_KEY])
-
-    assert isinstance(result[se.GEOMETRY_KEY][se.COORDINATES_KEY], list)
-    assert len(result[se.GEOMETRY_KEY][se.COORDINATES_KEY]) == len(i_element.shape.fixes)
-
 
 def test_geo_interface(y_element):
 

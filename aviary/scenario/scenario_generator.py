@@ -11,10 +11,7 @@ import os.path
 import time
 from datetime import datetime, timedelta
 
-import numpy as np
-
 from json import dump
-from shapely.geometry import mapping, point
 
 # CONSTANTS
 JSON_EXTENSION = "json"
@@ -60,7 +57,7 @@ class ScenarioGenerator():
 
     # TODO: add an argument to specify which routes to be included in the scenario.
     def generate_scenario(self, duration, seed = None) -> dict:
-        """Generates a list of aircraft creation data whose arrivals in the sector form a Poisson process."""
+        """Generates a list of aircraft creation data constituting a scenario."""
 
         self.scenario_algorithm.set_seed(seed)
 
@@ -82,23 +79,8 @@ class ScenarioGenerator():
 
 
     @staticmethod
-    def serialize_route(scenario):
-        """Make shapely.geometry.point.Point objects in scenario aircraft route serializable"""
-
-        for aircraft in scenario[AIRCRAFT_KEY]:
-            for i, _ in enumerate(aircraft[ROUTE_KEY]):
-                aircraft[ROUTE_KEY][i] = tuple(
-                    mapping(x) if isinstance(x, point.Point) else x
-                    for x in aircraft[ROUTE_KEY][i]
-                )
-        return scenario
-
-
-    @staticmethod
     def write_json_scenario(scenario, filename, path="."):
         """Write the JSON scenario object to a file"""
-
-        scenario = ScenarioGenerator.serialize_route(scenario)
 
         extension = os.path.splitext(filename)[1]
         if extension.upper() != JSON_EXTENSION:

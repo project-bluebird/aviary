@@ -21,6 +21,14 @@ def test_sector_type():
     assert i.sector_type == ss.SectorType.I
 
 
+def test_i_route_names():
+
+    route_names = ['up', 'down']
+    target = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = route_names)
+
+    assert target.route_names == [i.upper() for i in route_names]
+
+
 def test_i_fixes():
 
     fix_names = ['a', 'b', 'c', 'd', 'e']
@@ -88,24 +96,24 @@ def test_i_routes():
     assert len(result) == 2
 
     # Each route contains five fixes.
-    assert len(result[0]) == 5
-    assert len(result[1]) == 5
+    assert result[0].length() == 5
+    assert result[1].length() == 5
 
     # Each route is a list of dictionary items (representing fixes) of the form: (name, Point).
 
-    # result[0] is ascending along the y-axis
-    assert result[0][0][1].coords[0][1] == -1 * (i.offset_nm + (length_nm / 2))
-    assert result[0][1][1].coords[0][1] == -1 * (length_nm / 2)
-    assert result[0][2][1].coords[0][1] == 0
-    assert result[0][3][1].coords[0][1] == length_nm / 2
-    assert result[0][4][1].coords[0][1] == i.offset_nm + (length_nm / 2)
+    # result[0] is increasing along the y-axis
+    assert result[0].fix_points()[0].coords[0][1] == -1 * (i.offset_nm + (length_nm / 2))
+    assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 2)
+    assert result[0].fix_points()[2].coords[0][1] == 0
+    assert result[0].fix_points()[3].coords[0][1] == length_nm / 2
+    assert result[0].fix_points()[4].coords[0][1] == i.offset_nm + (length_nm / 2)
 
-    # result[1] is descending along the y-axis
-    assert result[1][0][1].coords[0][1] == i.offset_nm + (length_nm / 2)
-    assert result[1][1][1].coords[0][1] == length_nm / 2
-    assert result[1][2][1].coords[0][1] == 0
-    assert result[1][3][1].coords[0][1] == -1 * (length_nm / 2)
-    assert result[1][4][1].coords[0][1] == -1 * (i.offset_nm + (length_nm / 2))
+    # result[1] is decreasing along the y-axis
+    assert result[1].fix_points()[0].coords[0][1] == i.offset_nm + (length_nm / 2)
+    assert result[1].fix_points()[1].coords[0][1] == length_nm / 2
+    assert result[1].fix_points()[2].coords[0][1] == 0
+    assert result[1].fix_points()[3].coords[0][1] == -1 * (length_nm / 2)
+    assert result[1].fix_points()[4].coords[0][1] == -1 * (i.offset_nm + (length_nm / 2))
 
 
 def test_x_routes():
@@ -118,26 +126,26 @@ def test_x_routes():
     assert len(result) == 4
 
     # Each route contains five fixes.
-    assert len(result[0]) == 5
-    assert len(result[1]) == 5
-    assert len(result[2]) == 5
-    assert len(result[3]) == 5
+    assert result[0].length() == 5
+    assert result[1].length() == 5
+    assert result[2].length() == 5
+    assert result[3].length() == 5
 
     # Each element of 'result' is a list of dictionary items (representing fixes) of the form: (name, Point).
 
     # result[0] is increasing in the y-coordinate
-    assert result[0][0][1].coords[0][1] == -1 * (x.offset_nm + (length_nm / 2))
-    assert result[0][1][1].coords[0][1] == -1 * (length_nm / 2)
-    assert result[0][2][1].coords[0][1] == 0
-    assert result[0][3][1].coords[0][1] == length_nm / 2
-    assert result[0][4][1].coords[0][1] == x.offset_nm + (length_nm / 2)
+    assert result[0].fix_points()[0].coords[0][1] == -1 * (x.offset_nm + (length_nm / 2))
+    assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 2)
+    assert result[0].fix_points()[2].coords[0][1] == 0
+    assert result[0].fix_points()[3].coords[0][1] == length_nm / 2
+    assert result[0].fix_points()[4].coords[0][1] == x.offset_nm + (length_nm / 2)
 
     # result[1] is decreasing in the y-coordinate
-    assert result[1][0][1].coords[0][1] == x.offset_nm + (length_nm / 2)
-    assert result[1][1][1].coords[0][1] == length_nm / 2
-    assert result[1][2][1].coords[0][1] == 0
-    assert result[1][3][1].coords[0][1] == -1 * (length_nm / 2)
-    assert result[1][4][1].coords[0][1] == -1 * (x.offset_nm + (length_nm / 2))
+    assert result[1].fix_points()[0].coords[0][1] == x.offset_nm + (length_nm / 2)
+    assert result[1].fix_points()[1].coords[0][1] == length_nm / 2
+    assert result[1].fix_points()[2].coords[0][1] == 0
+    assert result[1].fix_points()[3].coords[0][1] == -1 * (length_nm / 2)
+    assert result[1].fix_points()[4].coords[0][1] == -1 * (x.offset_nm + (length_nm / 2))
 
 
 def test_y_routes():
@@ -150,71 +158,26 @@ def test_y_routes():
     assert len(result) == 4
 
     # Each route contains five fixes.
-    assert len(result[0]) == 5
-    assert len(result[1]) == 5
-    assert len(result[2]) == 5
-    assert len(result[3]) == 5
+    assert result[0].length() == 5
+    assert result[1].length() == 5
+    assert result[2].length() == 5
+    assert result[3].length() == 5
 
     # Each element of 'result' is a list of dictionary items (representing fixes) of the form: (name, Point).
 
     # result[0] is increasing in the y-coordinate and up the left branch of the Y.
 
     # x-coordinates:
-    assert result[0][0][1].coords[0][0] == pytest.approx(0)
-    assert result[0][1][1].coords[0][0] == pytest.approx(0)
-    assert result[0][2][1].coords[0][0] == pytest.approx(0)
-    assert result[0][3][1].coords[0][0] < 0
-    assert result[0][4][1].coords[0][0] < result[0][3][1].coords[0][0]
+    assert result[0].fix_points()[0].coords[0][0] == pytest.approx(0)
+    assert result[0].fix_points()[1].coords[0][0] == pytest.approx(0)
+    assert result[0].fix_points()[2].coords[0][0] == pytest.approx(0)
+    assert result[0].fix_points()[3].coords[0][0] < 0
+    assert result[0].fix_points()[4].coords[0][0] < result[0].fix_points()[3].coords[0][0]
 
     # y-coordinates:
-    assert result[0][0][1].coords[0][1] == -1 * (y.offset_nm + (length_nm / 4))
-    assert result[0][1][1].coords[0][1] == -1 * (length_nm / 4)
-    assert result[0][2][1].coords[0][1] == pytest.approx(length_nm / 4)
-    assert result[0][3][1].coords[0][1] == length_nm / 2
-    assert result[0][4][1].coords[0][1] == pytest.approx(y.offset_nm)
+    assert result[0].fix_points()[0].coords[0][1] == -1 * (y.offset_nm + (length_nm / 4))
+    assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 4)
+    assert result[0].fix_points()[2].coords[0][1] == pytest.approx(length_nm / 4)
+    assert result[0].fix_points()[3].coords[0][1] == length_nm / 2
+    assert result[0].fix_points()[4].coords[0][1] == pytest.approx(y.offset_nm)
 
-
-def test_i_named_routes():
-
-    i = ss.IShape()
-
-    result = i.named_routes()
-    assert isinstance(result, dict)
-
-    assert sorted(result.keys()) == sorted(i.route_names)
-
-    assert isinstance(result[i.route_names[0]], list)
-    assert len(result[i.route_names[0]]) == len(i.routes()[0])
-    assert len(result[i.route_names[1]]) == len(i.routes()[1])
-
-
-def test_x_named_routes():
-
-    x = ss.XShape()
-
-    result = x.named_routes()
-    assert isinstance(result, dict)
-
-    assert sorted(result.keys()) == sorted(x.route_names)
-
-    assert isinstance(result[x.route_names[0]], list)
-    assert len(result[x.route_names[0]]) == len(x.routes()[0])
-    assert len(result[x.route_names[1]]) == len(x.routes()[1])
-    assert len(result[x.route_names[0]]) == len(x.routes()[2])
-    assert len(result[x.route_names[1]]) == len(x.routes()[3])
-
-
-def test_y_named_routes():
-
-    y = ss.YShape()
-
-    result = y.named_routes()
-    assert isinstance(result, dict)
-
-    assert sorted(result.keys()) == sorted(y.route_names)
-
-    assert isinstance(result[y.route_names[0]], list)
-    assert len(result[y.route_names[0]]) == len(y.routes()[0])
-    assert len(result[y.route_names[1]]) == len(y.routes()[1])
-    assert len(result[y.route_names[0]]) == len(y.routes()[2])
-    assert len(result[y.route_names[1]]) == len(y.routes()[3])

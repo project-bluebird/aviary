@@ -1,16 +1,15 @@
 import pytest
 
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
-import aviary.sector.sector_shape as ss
-import aviary.sector.sector_element as se
 
+from aviary.sector.route import Route
 
 class ConcreteAlgorithm(ScenarioAlgorithm):
-    def __init__(self, aircraft_types, callsign_prefixes, flight_levels, seed):
+    def __init__(self, aircraft_types, flight_levels, callsign_prefixes, seed):
         super().__init__(
             aircraft_types=aircraft_types,
-            callsign_prefixes=callsign_prefixes,
             flight_levels=flight_levels,
+            callsign_prefixes=callsign_prefixes,
             seed=seed
         )
 
@@ -24,8 +23,8 @@ def target():
 
     return ConcreteAlgorithm(
         aircraft_types=["B747", "B777"],
-        callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
         flight_levels=[200, 240, 280, 320, 360, 400],
+        callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
         seed=22
     )
 
@@ -37,8 +36,8 @@ def test_aircraft_types_setter(aircraft_types):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
             aircraft_types=aircraft_types,
-            callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
             flight_levels=[200, 240, 280, 320, 360, 400],
+            callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
             seed=22
         )
 
@@ -50,8 +49,8 @@ def test_flight_levels_setter(flight_levels):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
             aircraft_types=["B747", "B777"],
-            callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
             flight_levels=flight_levels,
+            callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
             seed=22
         )
 
@@ -63,8 +62,8 @@ def test_callsign_prefixes_setter(callsign_prefixes):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
             aircraft_types=["B747", "B777"],
-            callsign_prefixes=callsign_prefixes,
             flight_levels=[200, 240, 280, 320, 360, 400],
+            callsign_prefixes=callsign_prefixes,
             seed=22
         )
 
@@ -112,37 +111,37 @@ def test_flight_level(target):
 def test_route(target, i_element):
 
     result = target.route(sector=i_element)
-    assert isinstance(result, list)
+    assert isinstance(result, Route)
 
-    assert result[0][0] == "E"
-    assert result[1][0] == "D"
-    assert result[2][0] == "C"
-    assert result[3][0] == "B"
-    assert result[4][0] == "A"
-
-    result = target.route(sector=i_element)
-    assert isinstance(result, list)
-
-    assert result[0][0] == "E"
-    assert result[1][0] == "D"
-    assert result[2][0] == "C"
-    assert result[3][0] == "B"
-    assert result[4][0] == "A"
+    assert result.fix_names()[0] == "E"
+    assert result.fix_names()[1] == "D"
+    assert result.fix_names()[2] == "C"
+    assert result.fix_names()[3] == "B"
+    assert result.fix_names()[4] == "A"
 
     result = target.route(sector=i_element)
-    assert isinstance(result, list)
+    assert isinstance(result, Route)
 
-    assert result[0][0] == "E"
-    assert result[1][0] == "D"
-    assert result[2][0] == "C"
-    assert result[3][0] == "B"
-    assert result[4][0] == "A"
+    assert result.fix_names()[0] == "E"
+    assert result.fix_names()[1] == "D"
+    assert result.fix_names()[2] == "C"
+    assert result.fix_names()[3] == "B"
+    assert result.fix_names()[4] == "A"
 
     result = target.route(sector=i_element)
-    assert isinstance(result, list)
+    assert isinstance(result, Route)
 
-    assert result[0][0] == "A"
-    assert result[1][0] == "B"
-    assert result[2][0] == "C"
-    assert result[3][0] == "D"
-    assert result[4][0] == "E"
+    assert result.fix_names()[0] == "E"
+    assert result.fix_names()[1] == "D"
+    assert result.fix_names()[2] == "C"
+    assert result.fix_names()[3] == "B"
+    assert result.fix_names()[4] == "A"
+
+    result = target.route(sector=i_element)
+    assert isinstance(result, Route)
+
+    assert result.fix_names()[0] == "A"
+    assert result.fix_names()[1] == "B"
+    assert result.fix_names()[2] == "C"
+    assert result.fix_names()[3] == "D"
+    assert result.fix_names()[4] == "E"
