@@ -1,0 +1,6 @@
+include setup.py
+include README.md
+include LICENSE
+recursive-include aviary *.py
+exclude .gitignore
+exclude .travis.yml
