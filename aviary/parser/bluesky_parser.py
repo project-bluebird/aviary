@@ -181,11 +181,11 @@ class ScenarioParser:
                 coords = coords[0]
 
             # Note: longitudes appear first!
-            longitudes = [coord[LONG_INDEX] for coord in coords]
-            latitudes = [coord[LAT_INDEX] for coord in coords]
-
-            # Interleave the latitudes and longitudes lists.
-            latlongs = [x for latlong in zip(latitudes, longitudes) for x in latlong]
+            latlongs = list(
+                chain.from_iterable(
+                    [[coord[LAT_INDEX], coord[LONG_INDEX]] for coord in coords]
+                )
+            )
 
             line = f'{line} {" ".join(str(latlong) for latlong in latlongs)}'
 
@@ -200,7 +200,7 @@ class ScenarioParser:
 
         aircraft = self.scenario[sg.AIRCRAFT_KEY]
 
-        # aircraft_initial_position() returns long/lat --> turn to lat/lon
+        # aircraft_initial_position() returns long/lat --> return to lat/lon order
         return [
             f'{self.aircraft_start_time(ac[sg.CALLSIGN_KEY]).strftime("%H:%M:%S") + ".00"}{BS_PROMPT}{BS_CREATE_AIRCRAFT} {ac[sg.CALLSIGN_KEY]} {ac[sg.AIRCRAFT_TYPE_KEY]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LAT_INDEX]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LONG_INDEX]} {self.aircraft_heading(ac[sg.CALLSIGN_KEY])} {BS_FLIGHT_LEVEL + str(ac[sg.CURRENT_FLIGHT_LEVEL_KEY])} {ScenarioParser.default_speed}'
             for ac in aircraft
@@ -211,13 +211,14 @@ class ScenarioParser:
         Parses a geoJSON sector definition for waypoint information and returns a list of BlueSky DEFWPT commands
         of the form:
         f'00:00:00.00>DEFWPT {wp_name} {lat} {lon} {wp_type}'
+        where {wp_type} is optional.
         """
 
         fixes = self.fix_features()
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][1]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][0]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 
@@ -341,7 +342,6 @@ class ScenarioParser:
 
         return self.aircraft_property(callsign, property_key=sg.START_POSITION_KEY)
 
-
     def aircraft_start_time(self, callsign):
         """
         Returns the datetime object representing the given aircraft's *absolute* start time.
@@ -361,7 +361,9 @@ class ScenarioParser:
 
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
-        route_coordinates = [wpt[se.GEOMETRY_KEY][se.COORDINATES_KEY] for wpt in self.route(callsign)]
+        route_coordinates = [
+            wpt[se.GEOMETRY_KEY][se.COORDINATES_KEY] for wpt in self.route(callsign)
+        ]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:
             to_wpt = route_coordinates[1]
@@ -375,7 +377,10 @@ class ScenarioParser:
 
         # Note: order of arguments is long, lat.
         fwd_azimuth, back_azimuth, distance = geodesic.inv(
-            from_waypoint[LONG_INDEX], from_waypoint[LAT_INDEX], to_waypoint[LONG_INDEX], to_waypoint[LAT_INDEX]
+            from_waypoint[LONG_INDEX],
+            from_waypoint[LAT_INDEX],
+            to_waypoint[LONG_INDEX],
+            to_waypoint[LAT_INDEX],
         )
 
         return fwd_azimuth
