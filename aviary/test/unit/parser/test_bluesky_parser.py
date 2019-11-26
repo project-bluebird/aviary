@@ -6,6 +6,8 @@ import aviary.parser.bluesky_parser as sp
 
 import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_element as se
+import aviary.sector.route as rt
+import aviary.geo.geo_helper as gh
 
 #TO DO - create geojson and json using fixtures in conftest ??
 
@@ -75,7 +77,7 @@ def test_geometris_of_type(target):
     assert len(result) == 5
     for fix in result:
         assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
+        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
 
 
 def test_polygon_geometries(target):
@@ -92,11 +94,11 @@ def test_sector_polygon(target):
     result = target.sector_polygon()
 
     assert isinstance(result, dict)
-    assert sorted(result.keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
+    assert sorted(result.keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
 
     # coordinates are nested list - at lowest level should have 5 coordinates
     # the first and last coordinate is the same
-    coords = result[sp.COORDINATES_KEY]
+    coords = result[gh.COORDINATES_KEY]
     while len(coords) == 1:
         coords = coords[0]
     assert len(coords) == 5
@@ -180,11 +182,11 @@ def test_route(target):
     assert isinstance(result, list)
     for fix in result:
         assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.GEOMETRY_KEY, sg.FIX_NAME_KEY])
-        assert isinstance(fix[sg.FIX_NAME_KEY], str)
-        assert fix[sg.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
+        assert sorted(fix.keys()) == sorted([se.GEOMETRY_KEY, rt.FIX_NAME_KEY])
+        assert isinstance(fix[rt.FIX_NAME_KEY], str)
+        assert fix[rt.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
         assert isinstance(fix[se.GEOMETRY_KEY], dict)
-        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
+        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
 
 
 def test_create_aircraft_lines(target):

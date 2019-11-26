@@ -3,7 +3,9 @@ Scenario parser for the BlueSky simulator.
 """
 
 import aviary.sector.sector_element as se
+import aviary.sector.route as rt
 import aviary.scenario.scenario_generator as sg
+import aviary.geo.geo_helper as gh
 
 from datetime import datetime, timedelta
 import os.path
@@ -33,7 +35,6 @@ BS_SCENARIO_EXTENSION = "scn"
 # --> make sure to pass correct values to BlueSky (as lat/lon)
 LONG_INDEX = 0
 LAT_INDEX = 1
-COORDINATES_KEY = "coordinates"
 
 class ScenarioParser:
     """A parser of geoJSON sectors and JSON scenarios for translation into BlueSky format"""
@@ -142,7 +143,7 @@ class ScenarioParser:
         """
 
         # Determine the centroid of the sector polygon.
-        coords = self.sector_polygon()[COORDINATES_KEY]
+        coords = self.sector_polygon()[gh.COORDINATES_KEY]
 
         while len(coords) == 1:
             coords = coords[0]
@@ -173,7 +174,7 @@ class ScenarioParser:
 
         # Parse lat/long info.
         polygon = self.sector_polygon()
-        for coords_list in polygon[COORDINATES_KEY]:
+        for coords_list in polygon[gh.COORDINATES_KEY]:
 
             # Coordinates list may be nested.
             coords = coords_list
@@ -218,7 +219,7 @@ class ScenarioParser:
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][COORDINATES_KEY][LONG_INDEX]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][gh.COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][gh.COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 
@@ -252,7 +253,7 @@ class ScenarioParser:
         start_time = add_waypoint_time.strftime("%H:%M:%S") + ".00"
 
         route = self.route(callsign)
-        waypoint_names = [route_element[sg.FIX_NAME_KEY] for route_element in route]
+        waypoint_names = [route_element[rt.FIX_NAME_KEY] for route_element in route]
 
         return [
             f"{start_time}{BS_PROMPT}{BS_ADD_WAYPOINT} {callsign} {waypoint_name}"
@@ -362,7 +363,7 @@ class ScenarioParser:
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
         route_coordinates = [
-            wpt[se.GEOMETRY_KEY][COORDINATES_KEY] for wpt in self.route(callsign)
+            wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in self.route(callsign)
         ]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:
