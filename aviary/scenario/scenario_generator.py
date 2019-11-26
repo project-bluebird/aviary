@@ -33,6 +33,7 @@ ROUTE_ELEMENT_SPEED_KEY = "ROUTE_ELEMENT_SPEED"
 ROUTE_ELEMENT_LEVEL_KEY = "ROUTE_ELEMENT_LEVEL"
 AIRCRAFT_KEY = "aircraft"
 AIRCRAFT_TIMEDELTA_KEY = "timedelta"
+FIX_NAME_KEY = "fixName"
 
 class ScenarioGenerator():
     """A scenario generator for I, X, Y airspace sectors"""
