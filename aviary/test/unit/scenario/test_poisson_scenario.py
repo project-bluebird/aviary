@@ -41,13 +41,17 @@ def test_aircraft_generator(target, i_element):
     for x in target.aircraft_generator(i_element):
 
         assert isinstance(x, dict)
-        assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
+        assert sorted(x.keys()) == sorted([sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
                                     sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY,
-                                    sg.ROUTE_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
+                                    sg.ROUTE_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY,
+                                    sg.START_POSITION_KEY])
+        assert isinstance(x[sg.START_POSITION_KEY], tuple)
+        assert len(x[sg.START_POSITION_KEY]) == 2
         interarrival_times.append(x[sg.AIRCRAFT_TIMEDELTA_KEY])
         if ctr > N:
             break
         ctr = ctr + 1
+
 
     # Check the mean interarrival time against the arrival rate parameter (with a 5% tolerance).
     mean = sum(interarrival_times) / N

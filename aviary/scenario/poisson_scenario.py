@@ -7,6 +7,7 @@ Scenario generation algorithm with Poisson aircraft arrivals.
 import random
 
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
+
 import aviary.scenario.scenario_generator as sg
 
 class PoissonScenario(ScenarioAlgorithm):
@@ -26,14 +27,17 @@ class PoissonScenario(ScenarioAlgorithm):
 
         while True:
             current_flight_level = int(self.flight_level())
+            route = self.route(sector)
+
             yield {
                 sg.AIRCRAFT_TIMEDELTA_KEY: random.expovariate(lambd = self.arrival_rate),
+                sg.START_POSITION_KEY: route.fix_points()[0].coords[0],
                 sg.CALLSIGN_KEY: next(self.callsign_generator()),
                 sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
-                sg.DEPARTURE_KEY: '', # ScenarioGenerator.departure, # TODO.
-                sg.DESTINATION_KEY: '', # ScenarioGenerator.destination, # TODO.
+                sg.DEPARTURE_KEY: self.departure_airport(route),
+                sg.DESTINATION_KEY: self.destination_airport(route),
                 sg.CURRENT_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.CLEARED_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.flight_level()),
-                sg.ROUTE_KEY: self.route(sector).serialize()
+                sg.ROUTE_KEY: route.serialize()[1:] #TODO: check this is the best thing to do
             }
