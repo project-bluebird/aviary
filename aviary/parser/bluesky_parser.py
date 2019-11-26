@@ -33,7 +33,7 @@ BS_SCENARIO_EXTENSION = "scn"
 # --> make sure to pass correct values to BlueSky (as lat/lon)
 LONG_INDEX = 0
 LAT_INDEX = 1
-
+COORDINATES_KEY = "coordinates"
 
 class ScenarioParser:
     """A parser of geoJSON sectors and JSON scenarios for translation into BlueSky format"""
@@ -142,7 +142,7 @@ class ScenarioParser:
         """
 
         # Determine the centroid of the sector polygon.
-        coords = self.sector_polygon()[se.COORDINATES_KEY]
+        coords = self.sector_polygon()[COORDINATES_KEY]
 
         while len(coords) == 1:
             coords = coords[0]
@@ -173,7 +173,7 @@ class ScenarioParser:
 
         # Parse lat/long info.
         polygon = self.sector_polygon()
-        for coords_list in polygon[se.COORDINATES_KEY]:
+        for coords_list in polygon[COORDINATES_KEY]:
 
             # Coordinates list may be nested.
             coords = coords_list
@@ -218,7 +218,7 @@ class ScenarioParser:
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][se.COORDINATES_KEY][LONG_INDEX]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 
@@ -362,7 +362,7 @@ class ScenarioParser:
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
         route_coordinates = [
-            wpt[se.GEOMETRY_KEY][se.COORDINATES_KEY] for wpt in self.route(callsign)
+            wpt[se.GEOMETRY_KEY][COORDINATES_KEY] for wpt in self.route(callsign)
         ]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:
