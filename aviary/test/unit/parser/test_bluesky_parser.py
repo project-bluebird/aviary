@@ -75,7 +75,7 @@ def test_geometris_of_type(target):
     assert len(result) == 5
     for fix in result:
         assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, se.COORDINATES_KEY])
+        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
 
 
 def test_polygon_geometries(target):
@@ -92,11 +92,11 @@ def test_sector_polygon(target):
     result = target.sector_polygon()
 
     assert isinstance(result, dict)
-    assert sorted(result.keys()) == sorted([se.TYPE_KEY, se.COORDINATES_KEY])
+    assert sorted(result.keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
 
     # coordinates are nested list - at lowest level should have 5 coordinates
     # the first and last coordinate is the same
-    coords = result[se.COORDINATES_KEY]
+    coords = result[sp.COORDINATES_KEY]
     while len(coords) == 1:
         coords = coords[0]
     assert len(coords) == 5
@@ -184,7 +184,7 @@ def test_route(target):
         assert isinstance(fix[sg.FIX_NAME_KEY], str)
         assert fix[sg.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
         assert isinstance(fix[se.GEOMETRY_KEY], dict)
-        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, se.COORDINATES_KEY])
+        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, sp.COORDINATES_KEY])
 
 
 def test_create_aircraft_lines(target):
