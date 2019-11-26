@@ -29,7 +29,7 @@ BS_ASAS_OFF = "ASAS OFF"
 BS_PAN = "PAN"
 BS_SCENARIO_EXTENSION = "scn"
 
-# Shapely returns coordinates as long/lat -
+# Shapely returns coordinates as [long, lat]
 # --> make sure to pass correct values to BlueSky (as lat/lon)
 LONG_INDEX = 0
 LAT_INDEX = 1
@@ -251,7 +251,7 @@ class ScenarioParser:
         start_time = add_waypoint_time.strftime("%H:%M:%S") + ".00"
 
         route = self.route(callsign)
-        waypoint_names = [route_element[0] for route_element in route]
+        waypoint_names = [route_element[sg.FIX_NAME_KEY] for route_element in route]
 
         return [
             f"{start_time}{BS_PROMPT}{BS_ADD_WAYPOINT} {callsign} {waypoint_name}"
@@ -361,7 +361,7 @@ class ScenarioParser:
 
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
-        route_coordinates = [wpt[1][se.COORDINATES_KEY] for wpt in self.route(callsign)]
+        route_coordinates = [wpt[se.GEOMETRY_KEY][se.COORDINATES_KEY] for wpt in self.route(callsign)]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:
             to_wpt = route_coordinates[1]

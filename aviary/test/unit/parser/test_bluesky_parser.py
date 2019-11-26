@@ -16,7 +16,7 @@ i_sector_geojson = """
 
 # JSON scenario obtained by calling json.dumps() on an overflier_climber scenario in an I-shaped sector generated using ScenarioGenerator.
 overflier_climber_scenario_json = """
-{"startTime": "00:00:00", "aircraft": [{"timedelta": 0, "startPosition": [-0.1275, 50.80104879383575], "callsign": "VJ159", "type": "A346", "departure": "DEP", "destination": "DEST", "currentFlightLevel": 360, "clearedFlightLevel": 360, "requestedFlightLevel": 360, "route": [["EARTH", {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}], ["WATER", {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}], ["AIR", {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}], ["SPIRT", {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}]], "startTime": "00:00:00"}, {"timedelta": 0, "startPosition": [-0.1275, 52.27304310000724], "callsign": "VJ405", "type": "B77W", "departure": "DEST", "destination": "DEP", "currentFlightLevel": 300, "clearedFlightLevel": 300, "requestedFlightLevel": 400, "route": [["SPIRT", {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}], ["AIR", {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}], ["WATER", {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}], ["EARTH", {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}], ["FIYRE", {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}]], "startTime": "00:00:00"}]}
+{"startTime": "00:00:00", "aircraft": [{"timedelta": 0, "startPosition": [-0.1275, 49.39138473926763], "callsign": "VJ159", "type": "A346", "departure": "DEP", "destination": "DEST", "currentFlightLevel": 400, "clearedFlightLevel": 400, "requestedFlightLevel": 400, "route": [{"fixName": "FIYRE", "geometry": {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}}, {"fixName": "EARTH", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}}, {"fixName": "WATER", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}}, {"fixName": "AIR", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}}, {"fixName": "SPIRT", "geometry": {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}}], "startTime": "00:00:00"}, {"timedelta": 0, "startPosition": [-0.1275, 53.57478111513239], "callsign": "VJ405", "type": "B77W", "departure": "DEST", "destination": "DEP", "currentFlightLevel": 200, "clearedFlightLevel": 200, "requestedFlightLevel": 400, "route": [{"fixName": "SPIRT", "geometry": {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}}, {"fixName": "AIR", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}}, {"fixName": "WATER", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}}, {"fixName": "EARTH", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}}, {"fixName": "FIYRE", "geometry": {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}}], "startTime": "00:00:00"}]}
 """
 
 @pytest.fixture(scope="function")
@@ -140,8 +140,8 @@ def test_all_lines(target):
 
     result = target.all_lines()
     assert isinstance(result, list)
-    # 1 PAN  + 1 POLYALT  + 5 DEFWPT + 2 CRE + 4 ADDWPT + 5 ADDWPT + 1 ASAS
-    assert len(result) == 1 + 1 + 5 + 2 + 4 + 5 + 1
+    # 1 PAN  + 1 POLYALT  + 5 DEFWPT + 2 CRE + 5 ADDWPT + 5 ADDWPT + 1 ASAS
+    assert len(result) == 1 + 1 + 5 + 2 + 5 + 5 + 1
 
 
 def test_aircraft_heading(target):
@@ -179,11 +179,12 @@ def test_route(target):
     # result is a list of lists, each one a route element (fix/waypoint)
     assert isinstance(result, list)
     for fix in result:
-        assert isinstance(fix, list)
-        assert isinstance(fix[0], str)
-        assert fix[0] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
-        assert isinstance(fix[1], dict)
-        assert sorted(fix[1].keys()) == sorted([se.TYPE_KEY, se.COORDINATES_KEY])
+        assert isinstance(fix, dict)
+        assert sorted(fix.keys()) == sorted([se.GEOMETRY_KEY, sg.FIX_NAME_KEY])
+        assert isinstance(fix[sg.FIX_NAME_KEY], str)
+        assert fix[sg.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
+        assert isinstance(fix[se.GEOMETRY_KEY], dict)
+        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, se.COORDINATES_KEY])
 
 
 def test_create_aircraft_lines(target):
@@ -204,7 +205,7 @@ def test_add_aircraft_waypoint_lines(target):
     result = target.add_aircraft_waypoint_lines(callsign = "VJ159")
 
     assert isinstance(result, list)
-    assert len(result) == 4
+    assert len(result) == 5
 
     result2 = target.add_aircraft_waypoint_lines(callsign = "VJ405")
     assert isinstance(result2, list)
@@ -216,7 +217,7 @@ def test_add_waypoint_lines(target):
     result = target.add_waypoint_lines()
 
     assert isinstance(result, list)
-    assert len(result) == 9
+    assert len(result) == 10
 
 
 def test_write_bluesky_scenario(target):
