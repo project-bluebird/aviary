@@ -102,15 +102,3 @@ def downtrack_distance_dataframe():
     index_col = "fl_bins"
 
     return pandas.read_csv(downtrack_distance_data, index_col = index_col)
-
-
-@pytest.fixture(scope="function")
-def poisson_scenario():
-    """Test fixture: a Poisson scenario object."""
-
-    arrival_rate = 2 / 60 # Two arrivals per minute on average
-    return ps.PoissonScenario(arrival_rate = arrival_rate,
-                              aircraft_types = ['B747', 'B777'],
-                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
-                              flight_levels = [200, 240, 280, 320, 360, 400],
-                              seed = 22)
