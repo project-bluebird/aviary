@@ -28,10 +28,13 @@ class PoissonScenario(ScenarioAlgorithm):
         while True:
             current_flight_level = int(self.flight_level())
             route = self.route(sector)
-
+            start_position = route.fix_points()[0].coords[0]
+            # truncate the route i.e. remove the starting position fix
+            # note coords of start_position are in lon/lat order
+            route.truncate(initial_lat=start_position[1], initial_lon=start_position[0])
             yield {
                 sg.AIRCRAFT_TIMEDELTA_KEY: random.expovariate(lambd = self.arrival_rate),
-                sg.START_POSITION_KEY: route.fix_points()[0].coords[0],
+                sg.START_POSITION_KEY: start_position,
                 sg.CALLSIGN_KEY: next(self.callsign_generator()),
                 sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
                 sg.DEPARTURE_KEY: self.departure_airport(route),
@@ -39,5 +42,5 @@ class PoissonScenario(ScenarioAlgorithm):
                 sg.CURRENT_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.CLEARED_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.flight_level()),
-                sg.ROUTE_KEY: route.serialize()[1:] #TODO: check this is the best thing to do
+                sg.ROUTE_KEY: route.serialize()
             }
