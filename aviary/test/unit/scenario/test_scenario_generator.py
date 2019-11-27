@@ -7,13 +7,13 @@ from datetime import datetime
 import aviary.scenario.scenario_generator as sg
 
 
-@pytest.fixture(params=['i_element', 'x_element'])
+@pytest.fixture(params=["i_element", "x_element"])
 def target_sector(request):
     """Test fixture: used to test scenario generation for each sector fixture in params"""
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(params=['poisson_scenario'])
+@pytest.fixture(params=["poisson_scenario"])
 def target_scenario(request):
     """Test fixture: used to test scenario generation for each scenario fixture in params"""
     return request.getfixturevalue(request.param)
@@ -31,6 +31,23 @@ def test_generate_scenario(target_sector, target_scenario):
     assert isinstance(scenario[sg.START_TIME_KEY], str)
     assert isinstance(scenario[sg.AIRCRAFT_KEY], list)
     assert len(scenario[sg.AIRCRAFT_KEY]) > 0
+
+    for aircraft in scenario[sg.AIRCRAFT_KEY]:
+        assert sorted(aircraft.keys()) == sorted(
+            [
+                sg.CALLSIGN_KEY,
+                sg.CLEARED_FLIGHT_LEVEL_KEY,
+                sg.CURRENT_FLIGHT_LEVEL_KEY,
+                sg.DEPARTURE_KEY,
+                sg.DESTINATION_KEY,
+                sg.REQUESTED_FLIGHT_LEVEL_KEY,
+                sg.ROUTE_KEY,
+                sg.AIRCRAFT_TIMEDELTA_KEY,
+                sg.AIRCRAFT_TYPE_KEY,
+                sg.START_POSITION_KEY,
+                sg.START_TIME_KEY
+            ]
+        )
 
     total_time = 0
     for aircraft in scenario[sg.AIRCRAFT_KEY]:
@@ -55,8 +72,14 @@ def test_generate_scenario_with_start_time(target_sector, target_scenario):
     total_time = 0
     for aircraft in scenario[sg.AIRCRAFT_KEY]:
         assert sg.AIRCRAFT_TIMEDELTA_KEY in aircraft.keys()
-        assert datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S") > scenario_start_time
-        inferred_aircraft_timedelta = (datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S") - scenario_start_time).total_seconds()
+        assert (
+            datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S")
+            > scenario_start_time
+        )
+        inferred_aircraft_timedelta = (
+            datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S")
+            - scenario_start_time
+        ).total_seconds()
         assert inferred_aircraft_timedelta == int(aircraft[sg.AIRCRAFT_TIMEDELTA_KEY])
         total_time += aircraft[sg.AIRCRAFT_TIMEDELTA_KEY]
 
@@ -72,11 +95,7 @@ def test_write_json_scenario(target_sector, target_scenario):
 
     filename = "test_scenario"
     here = os.path.abspath(os.path.dirname(__file__))
-    file = scen_gen.write_json_scenario(
-        scenario = scenario,
-        filename = filename,
-        path = here
-        )
+    file = scen_gen.write_json_scenario(scenario=scenario, filename=filename, path=here)
 
     assert os.path.exists(file)
 

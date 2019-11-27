@@ -114,13 +114,3 @@ def poisson_scenario():
                               callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
                               flight_levels = [200, 240, 280, 320, 360, 400],
                               seed = 22)
-
-
-@pytest.fixture(scope="function")
-def overflier_climber_scenario():
-    """Test fixture: an overflier-climber scenario object."""
-
-    return ocs.OverflierClimberScenario(aircraft_types = ['B747', 'B777'],
-                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
-                              flight_levels = [200, 240, 280, 320, 360, 400],
-                              seed = 22)
