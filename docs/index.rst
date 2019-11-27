@@ -3,14 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to aviary's documentation!
-==================================
+.. toctree::
+   :caption: Readme
+   :maxdepth: 2
+
+   source/readme_link
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+  :caption: Further Documentation
+  :maxdepth: 2
 
-
+  source/modules
 
 Indices and tables
 ==================

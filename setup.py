@@ -12,12 +12,21 @@ REQUIRES_PYTHON = ">=3.6.0"
 VERSION = None
 LICENSE = "MIT"
 
-REQUIRED = ["Shapely==1.6.*"]
+REQUIRED = [
+    "numpy>=1.17.*",
+    "pandas>=0.23.*",
+    "Shapely>=1.6.*",
+    "geojson>=2.5.*",
+    "geographiclib>=1.5.*",
+    "pyproj>=2.2.*",
+    "pytest>=4.1.*",
+    "jsonpath_rw_ext>=1.2.*"
+]
 
 EXTRAS = {
-    "docs": ["sphinx"],
+    "docs": ["sphinx", "m2r"],
     "tests": ["pytest"],
-    "dev": ["sphinx", "pytest"]
+    "dev": ["sphinx", "m2r",  "pytest"]
 }
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -29,10 +38,17 @@ except FileNotFoundError:
     long_description = DESCRIPTION
 
 # TODO: load package's version from __version__.py module
+about = {}
+if not VERSION:
+    project_slug = NAME.lower().replace("-", "_").replace(" ", "_")
+    with open(os.path.join(here, project_slug, "__version__.py")) as f:
+        exec(f.read(), about)
+else:
+    about["__version__"] = VERSION
 
 setup(
     name=NAME,
-    version=VERSION,
+    version=about['__version__'],
     description=DESCRIPTION,
     long_description=long_description,
     long_description_concent_type="text/markdown",
