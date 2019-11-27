@@ -144,6 +144,7 @@ sector_element = SectorElement(name, origin, shape, lower_limit, upper_limit)
 
 kwargs = {
     "trajectory_predictor": trajectory_predictor,
+    "aircraft_types": aircraft_types,
     "callsign_prefixes": ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
     "flight_levels": flight_levels,
     "seed": args.seed
