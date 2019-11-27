@@ -18,12 +18,12 @@ class CartesianScenario(ScenarioAlgorithm):
 
 
     # Overriding abstract method
-    def aircraft_generator(self, sector) -> dict:
+    def aircraft_generator(self) -> dict:
         """Generates a sequence of aircraft constituting a scenario."""
 
         for flight_level in self.flight_levels:
             for aircraft_type in self.aircraft_types:
-                route = self.route(sector)
+                route = self.route()
                 yield {
                     sg.AIRCRAFT_TIMEDELTA_KEY: 0,
                     sg.CALLSIGN_KEY: next(self.callsign_generator()),

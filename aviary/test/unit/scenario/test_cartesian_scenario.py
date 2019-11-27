@@ -5,19 +5,21 @@ import aviary.scenario.cartesian_scenario as cs
 import aviary.scenario.scenario_generator as sg
 
 @pytest.fixture(scope="function")
-def target():
+def target(i_element):
     """Test fixture: a Cartesian scenario object."""
 
-    return cs.CartesianScenario(aircraft_types = ['B747', 'B777'],
-                                flight_levels = [200, 240, 280, 320, 360, 400],
-                                callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
-                                seed = 22)
+    return cs.CartesianScenario(
+        sector_element = i_element,
+        aircraft_types = ['B747', 'B777'],
+        flight_levels = [200, 240, 280, 320, 360, 400],
+        callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+        seed = 22)
 
 
 def test_aircraft_generator(target, i_element):
 
     ctr = 0
-    for x in target.aircraft_generator(i_element):
+    for x in target.aircraft_generator():
 
         assert isinstance(x, dict)
         assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
