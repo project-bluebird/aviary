@@ -19,13 +19,15 @@ class ScenarioAlgorithm(ABC):
     callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"]
 
     def __init__(
-        self, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
+        self, sector_element, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
     ):
 
         self.seed = seed
         # TODO: make set_seed non-static and use the instance variable instead of an argument.
         # TODO: Also make ScenarioGenerator independent of the seed, except via a set_seed method that sets the seed in the algorithm.
         ScenarioAlgorithm.set_seed(seed)
+
+        self.sector_element = sector_element
 
         if aircraft_types is None:
             aircraft_types = ScenarioAlgorithm.default_aircraft_types
@@ -82,18 +84,18 @@ class ScenarioAlgorithm(ABC):
         self._callsign_prefixes = callsign_prefixes
 
     @abstractmethod
-    def aircraft_generator(self, sector) -> dict:
+    def aircraft_generator(self) -> dict:
         pass
 
     @staticmethod
     def set_seed(seed):
         random.seed(seed)
 
-    def route(self, sector):
+    def route(self):
         """Returns a random route"""
 
         # Note: use the sector routes() method, *not* the shape routes().
-        return random.choice(sector.routes())
+        return random.choice(self.sector_element.routes())
 
     def flight_level(self):
         """Returns a random flight level"""

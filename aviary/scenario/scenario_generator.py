@@ -45,9 +45,8 @@ class ScenarioGenerator():
     departure = "DEP"
     destination = "DEST"
 
-    def __init__(self, sector_element, scenario_algorithm, start_time = None):
+    def __init__(self, scenario_algorithm, start_time = None):
 
-        self.sector_element = sector_element
         self.scenario_algorithm = scenario_algorithm
 
         if start_time is None:
@@ -67,7 +66,7 @@ class ScenarioGenerator():
         ret = { START_TIME_KEY: start_time, AIRCRAFT_KEY: []}
 
         total_time = 0
-        for aircraft in self.scenario_algorithm.aircraft_generator(self.sector_element):
+        for aircraft in self.scenario_algorithm.aircraft_generator():
             total_time += aircraft[AIRCRAFT_TIMEDELTA_KEY]
             if total_time > duration:
                 return ret

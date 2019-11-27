@@ -9,14 +9,15 @@ from aviary.geo.geo_helper import GeoHelper
 THINKING_TIME = 60
 
 @pytest.fixture(scope="function")
-def target(cruise_speed_dataframe, climb_time_dataframe, downtrack_distance_dataframe):
+def target(i_element, cruise_speed_dataframe, climb_time_dataframe, downtrack_distance_dataframe):
     """Test fixture: a simple trajectory predictor object."""
 
     trajectory_predictor = tp.LookupTrajectoryPredictor(cruise_speed_lookup = cruise_speed_dataframe,
                                                         climb_time_lookup = climb_time_dataframe,
                                                         downtrack_distance_lookup = downtrack_distance_dataframe)
 
-    return oces.OverflierClimberExtendedScenario(trajectory_predictor = trajectory_predictor,
+    return oces.OverflierClimberExtendedScenario(sector_element = i_element,
+                                                 trajectory_predictor = trajectory_predictor,
                                                  thinking_time = THINKING_TIME,
                                                  aircraft_types = ['B744', 'B743'],
                                                  callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
@@ -30,11 +31,11 @@ def test_constructor(target):
     assert target.mid == 360
     assert target.high == 400
 
-def test_aircraft_generator(target, i_element):
+def test_aircraft_generator(target):
 
     # Test across multiple generated scenarios.
     ctr = 0
-    for x in target.aircraft_generator(i_element):
+    for x in target.aircraft_generator():
 
         assert isinstance(x, dict)
         assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
@@ -67,7 +68,7 @@ def test_aircraft_generator(target, i_element):
 
     overflier_speed = 250.4972923 # From the dummy lookup tables in test/conftest.py (m/s)
     lon1, lat1 = overflier[sg.START_POSITION_KEY]
-    lon2, lat2 = i_element.centre_point()
+    lon2, lat2 = target.sector_element.centre_point()
     overflier_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     time_to_conflict = overflier_distance/overflier_speed
@@ -80,7 +81,7 @@ def test_aircraft_generator(target, i_element):
     assert time_to_conflict == pytest.approx(climber_time_to_conflict_level)
 
     lon1, lat1 = climber[sg.START_POSITION_KEY]
-    lon2, lat2 = i_element.centre_point()
+    lon2, lat2 = target.sector_element.centre_point()
     climber_distance = GeoHelper.distance(lat1 = lat1, lon1 = lon1, lat2 = lat2, lon2 = lon2)
 
     climber_cruise_speed = 180.5525891 # From the dummy lookup tables in test/conftest.py (m/s)

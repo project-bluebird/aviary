@@ -4,26 +4,29 @@ import pytest
 import os
 from datetime import datetime
 
+import aviary.scenario.poisson_scenario as ps
 import aviary.scenario.scenario_generator as sg
 
 
-@pytest.fixture(params=["i_element", "x_element"])
+@pytest.fixture(params=["i_element", "x_element", "y_element"])
 def target_sector(request):
     """Test fixture: used to test scenario generation for each sector fixture in params"""
     return request.getfixturevalue(request.param)
 
 
-@pytest.fixture(params=["poisson_scenario"])
-def target_scenario(request):
-    """Test fixture: used to test scenario generation for each scenario fixture in params"""
-    return request.getfixturevalue(request.param)
-
-
-def test_generate_scenario(target_sector, target_scenario):
+def test_generate_scenario(target_sector):
     seed = 83
     duration = 1000
 
-    scen_gen = sg.ScenarioGenerator(target_sector, target_scenario)
+    arrival_rate = 2 / 60 # Two arrivals per minute on average
+    target_scenario = ps.PoissonScenario(sector_element = target_sector,
+                              arrival_rate = arrival_rate,
+                              aircraft_types = ['B747', 'B777'],
+                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+                              flight_levels = [200, 240, 280, 320, 360, 400],
+                              seed = 22)
+
+    scen_gen = sg.ScenarioGenerator(target_scenario)
     scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
 
     assert sg.START_TIME_KEY in scenario.keys()
@@ -61,12 +64,20 @@ def test_generate_scenario(target_sector, target_scenario):
         assert scenario == scenario2
 
 
-def test_generate_scenario_with_start_time(target_sector, target_scenario):
+def test_generate_scenario_with_start_time(target_sector):
     seed = 83
     duration = 1000
     scenario_start_time = datetime.strptime("12:05:42", "%H:%M:%S")
 
-    scen_gen = sg.ScenarioGenerator(target_sector, target_scenario, scenario_start_time)
+    arrival_rate = 2 / 60 # Two arrivals per minute on average
+    target_scenario = ps.PoissonScenario(sector_element = target_sector,
+                              arrival_rate = arrival_rate,
+                              aircraft_types = ['B747', 'B777'],
+                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+                              flight_levels = [200, 240, 280, 320, 360, 400],
+                              seed = 22)
+
+    scen_gen = sg.ScenarioGenerator(target_scenario, scenario_start_time)
     scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
 
     total_time = 0
@@ -86,11 +97,19 @@ def test_generate_scenario_with_start_time(target_sector, target_scenario):
     assert total_time <= duration
 
 
-def test_write_json_scenario(target_sector, target_scenario):
+def test_write_json_scenario(target_sector):
     seed = 76
     duration = 1000
 
-    scen_gen = sg.ScenarioGenerator(target_sector, target_scenario)
+    arrival_rate = 2 / 60 # Two arrivals per minute on average
+    target_scenario = ps.PoissonScenario(sector_element = target_sector,
+                              arrival_rate = arrival_rate,
+                              aircraft_types = ['B747', 'B777'],
+                              callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
+                              flight_levels = [200, 240, 280, 320, 360, 400],
+                              seed = 22)
+
+    scen_gen = sg.ScenarioGenerator(target_scenario)
     scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
 
     filename = "test_scenario"
