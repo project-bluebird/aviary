@@ -5,8 +5,9 @@ from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
 from aviary.sector.route import Route
 
 class ConcreteAlgorithm(ScenarioAlgorithm):
-    def __init__(self, aircraft_types, flight_levels, callsign_prefixes, seed):
+    def __init__(self, sector_element, aircraft_types, flight_levels, callsign_prefixes, seed):
         super().__init__(
+            sector_element=sector_element,
             aircraft_types=aircraft_types,
             flight_levels=flight_levels,
             callsign_prefixes=callsign_prefixes,
@@ -18,10 +19,11 @@ class ConcreteAlgorithm(ScenarioAlgorithm):
 
 
 @pytest.fixture(scope="function")
-def target():
+def target(i_element):
     """Test fixture: a scenario algorithm object."""
 
     return ConcreteAlgorithm(
+        sector_element=i_element,
         aircraft_types=["B747", "B777"],
         flight_levels=[200, 240, 280, 320, 360, 400],
         callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
@@ -32,9 +34,10 @@ def target():
 @pytest.mark.parametrize(
     "aircraft_types", [[], "B747", [777], ["B747", 747, "B777"], [["B747"]]]
 )
-def test_aircraft_types_setter(aircraft_types):
+def test_aircraft_types_setter(aircraft_types, i_element):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
+            sector_element=i_element,
             aircraft_types=aircraft_types,
             flight_levels=[200, 240, 280, 320, 360, 400],
             callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
@@ -45,9 +48,10 @@ def test_aircraft_types_setter(aircraft_types):
 @pytest.mark.parametrize(
     "flight_levels", [[], 200, [0], ["200"], [200.0], [205], [200, 215, 230], [[200]]]
 )
-def test_flight_levels_setter(flight_levels):
+def test_flight_levels_setter(flight_levels, i_element):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
+            sector_element=i_element,
             aircraft_types=["B747", "B777"],
             flight_levels=flight_levels,
             callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
@@ -58,9 +62,10 @@ def test_flight_levels_setter(flight_levels):
 @pytest.mark.parametrize(
     "callsign_prefixes", [[], "TEST", [123], ["TEST", 123, "OTHER"], [["TEST"]]]
 )
-def test_callsign_prefixes_setter(callsign_prefixes):
+def test_callsign_prefixes_setter(callsign_prefixes, i_element):
     with pytest.raises(AssertionError):
         ConcreteAlgorithm(
+            sector_element=i_element,
             aircraft_types=["B747", "B777"],
             flight_levels=[200, 240, 280, 320, 360, 400],
             callsign_prefixes=callsign_prefixes,
@@ -108,9 +113,9 @@ def test_flight_level(target):
     assert result == 200
 
 
-def test_route(target, i_element):
+def test_route(target):
 
-    result = target.route(sector=i_element)
+    result = target.route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -119,7 +124,7 @@ def test_route(target, i_element):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route(sector=i_element)
+    result = target.route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -128,7 +133,7 @@ def test_route(target, i_element):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route(sector=i_element)
+    result = target.route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -137,7 +142,7 @@ def test_route(target, i_element):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route(sector=i_element)
+    result = target.route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "A"

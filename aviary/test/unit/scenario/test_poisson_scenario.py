@@ -8,11 +8,12 @@ import aviary.scenario.scenario_generator as sg
 
 
 @pytest.fixture(scope="function")
-def target():
+def target(i_element):
     """Test fixture: a Poisson scenario object."""
 
     arrival_rate = 2 / 60  # Two arrivals per minute on average
     return ps.PoissonScenario(
+        sector_element=i_element,
         arrival_rate=arrival_rate,
         aircraft_types=["B747", "B777"],
         callsign_prefixes=["SPEEDBIRD", "VJ", "DELTA", "EZY"],
@@ -36,12 +37,12 @@ def test_callsign_generator(target):
         ctr = ctr + 1
 
 
-def test_aircraft_generator(target, i_element):
+def test_aircraft_generator(target):
 
     ctr = 0
     N = 200
     interarrival_times = []
-    for x in target.aircraft_generator(i_element):
+    for x in target.aircraft_generator():
 
         assert isinstance(x, dict)
         assert sorted(x.keys()) == sorted(

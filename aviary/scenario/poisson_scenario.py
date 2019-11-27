@@ -21,12 +21,12 @@ class PoissonScenario(ScenarioAlgorithm):
         self.arrival_rate = arrival_rate
 
     # Overriding abstract method
-    def aircraft_generator(self, sector) -> dict:
+    def aircraft_generator(self) -> dict:
         """Generates a sequence of aircraft constituting a scenario."""
 
         while True:
             current_flight_level = int(self.flight_level())
-            route = self.route(sector)
+            route = self.route()
             start_position = route.fix_points()[0].coords[0]
             departure = self.departure_airport(route)
             destination = self.destination_airport(route)

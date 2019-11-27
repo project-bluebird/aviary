@@ -58,6 +58,7 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
 
         # Instantiate an OverflierClimber algorithm with only the low & mid flight levels.
         self.overflier_climber = OverflierClimberScenario(trajectory_predictor = trajectory_predictor,
+                                                          sector_element = self.sector_element,
                                                           aircraft_types=self.aircraft_types,
                                                           flight_levels=[self.low, self.mid],
                                                           callsign_prefixes=self.callsign_prefixes,
@@ -65,18 +66,18 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
 
 
     # Overriding abstract method
-    def aircraft_generator(self, sector) -> dict:
+    def aircraft_generator(self) -> dict:
         """Generates a sequence of two aircraft whose default trajectories intersect at the centre of the sector."""
 
         # Generate the overflier, followed by the climber.
         is_overflier = True
-        for aircraft in self.overflier_climber.aircraft_generator(sector):
+        for aircraft in self.overflier_climber.aircraft_generator():
 
-            yield self.extend_aircraft(aircraft, is_overflier = is_overflier, sector = sector)
+            yield self.extend_aircraft(aircraft, is_overflier = is_overflier)
             is_overflier = False
 
 
-    def extend_aircraft(self, aircraft, is_overflier, sector):
+    def extend_aircraft(self, aircraft, is_overflier):
 
         # Check that the flight level is as expected.
         if is_overflier:
@@ -97,7 +98,7 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
         windback_distance = true_airspeed * self.thinking_time
 
         lon1, lat1 = aircraft[sg.START_POSITION_KEY]
-        lon2, lat2 = sector.centre_point()
+        lon2, lat2 = self.sector_element.centre_point()
 
         # Note: here it is assumed that the aircraft travels on a straight line
         # to the sector centre (as is the case in an I, X or Y sector element).
@@ -111,4 +112,3 @@ class OverflierClimberExtendedScenario(ScenarioAlgorithm):
             aircraft[sg.REQUESTED_FLIGHT_LEVEL_KEY] = self.high
 
         return aircraft
-

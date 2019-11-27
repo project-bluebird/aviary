@@ -31,11 +31,11 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
 
     # Overriding abstract method
-    def aircraft_generator(self, sector) -> dict:
+    def aircraft_generator(self) -> dict:
         """Generates a sequence of two aircraft whose default trajectories intersect at the centre of the sector."""
 
         # Construct the overflier's route.
-        overflier_route = self.route(sector)
+        overflier_route = self.route()
         overflier_departure = self.departure_airport(overflier_route)
         overflier_destination = self.destination_airport(overflier_route)
 
@@ -65,7 +65,7 @@ class OverflierClimberScenario(ScenarioAlgorithm):
                                                                                       aircraft_type=climber_aircraft_type)
 
         # Location of the central fix of the sector (which is the conflict point).
-        lon1, lat1 = sector.centre_point()
+        lon1, lat1 = self.sector_element.centre_point()
 
         # Get the position of the first fix on the overflier's route. Note lon/lat order!
         o_lon2, o_lat2 = overflier_route.fix_points()[0].coords[0]
@@ -137,4 +137,3 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         """Returns a random flight level, equal to or exceeding the overflier flight level"""
 
         return random.choice([x for x in self.flight_levels if x >= overflier_flight_level])
-
