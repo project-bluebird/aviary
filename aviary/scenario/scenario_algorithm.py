@@ -28,6 +28,7 @@ class ScenarioAlgorithm(ABC):
         ScenarioAlgorithm.set_seed(seed)
 
         self.sector_element = sector_element
+        self.seen_callsigns = set()
 
         if aircraft_types is None:
             aircraft_types = ScenarioAlgorithm.default_aircraft_types
@@ -110,19 +111,17 @@ class ScenarioAlgorithm(ABC):
     def callsign_generator(self):
         """Generates a random sequence of unique callsigns"""
 
-        seen = set()
-
         k = 3
         while True:
             suffix = "".join([str(x) for x in random.sample(range(0, 10), k=k)])
             prefix = random.choice(self.callsign_prefixes)
             ret = prefix + suffix
 
-            if ret in seen:
+            if ret in self.seen_callsigns:
                 k = k + 1
             else:
+                self.seen_callsigns.add(ret)
                 yield ret
-                seen.add(ret)
 
     def departure_airport(self, route):
         """Returns a suitable departure airport for the given route"""
