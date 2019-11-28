@@ -42,18 +42,23 @@ class ScenarioParser:
     # Default parameters:
     default_speed = 200  # TODO: temporary!
 
-    # TODO. sector_geojson and scenario_json should be connections (or Python equivalent), not strings.
     def __init__(self, sector_geojson, scenario_json):
+        """
+        Scenario parser constructor.
+
+        :param sector_geojson: Text stream from which a sector GeoJSON may be read.
+        :param scenario_json: Text stream from which a scenario JSON may be read.
+        """
 
         # Deserialise the sector geoJSON and scenario JSON strings.
-        sector = geojson.loads(sector_geojson)
+        sector = geojson.load(sector_geojson)
 
         if se.FEATURES_KEY not in sector:
             raise ValueError(f"Sector geojson must contain {se.FEATURES_KEY} element")
 
         self.sector = sector
 
-        scenario = json.loads(scenario_json)
+        scenario = json.load(scenario_json)
 
         if sg.AIRCRAFT_KEY not in scenario:
             raise ValueError(f"Scenario json must contain {sg.AIRCRAFT_KEY} element")
@@ -317,11 +322,14 @@ class ScenarioParser:
         :param callsign: an aircraft callsign
         """
 
-        ret = [
-            aircraft[property_key]
-            for aircraft in jp.match("$..{}".format(sg.AIRCRAFT_KEY), self.scenario)[0]
-            if aircraft[sg.CALLSIGN_KEY] == callsign
-        ]
+        try:
+            ret = [
+                aircraft[property_key]
+                for aircraft in jp.match("$..{}".format(sg.AIRCRAFT_KEY), self.scenario)[0]
+                if aircraft[sg.CALLSIGN_KEY] == callsign
+            ]
+        except Exception:
+            raise ValueError(f'Failed to find property {property_key} for aircraft {callsign}.')
 
         if len(ret) != 1:
             raise Exception(
