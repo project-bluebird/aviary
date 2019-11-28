@@ -92,6 +92,12 @@ class ScenarioAlgorithm(ABC):
     def set_seed(seed):
         random.seed(seed)
 
+    def reset_seen_callsigns(self):
+        """
+        Resets the set of seen callsigns (used to prevent duplicates).
+        After resetting, duplicate callsigns (with the set generated before the reset) may occur."""
+        self.seen_callsigns = set()
+
     def route(self):
         """Returns a random route"""
 
