@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/alan-turing-institute/aviary.svg?branch=develop)](https://travis-ci.com/alan-turing-institute/aviary)
+
 # aviary
 Air traffic scenario generation for the [Simurgh](https://github.com/alan-turing-institute/simurgh) project.
 
