@@ -111,13 +111,12 @@ kwargs = {
     "seed": args.seed
 }
 
-scenario_algorithm = CartesianScenario(**kwargs)
+scenario_algorithm = CartesianScenario(sector_element = sector_element, **kwargs)
 
 #
 # Construct the scenario generator.
 #
-scenario_generator = ScenarioGenerator(sector_element = sector_element,
-                                       scenario_algorithm = scenario_algorithm)
+scenario_generator = ScenarioGenerator(scenario_algorithm = scenario_algorithm)
 
 try:
     scenario = scenario_generator.generate_scenario(duration = 1, seed = args.seed)
