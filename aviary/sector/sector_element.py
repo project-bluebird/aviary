@@ -10,6 +10,8 @@ from geojson import dump
 
 import os.path
 
+import shapely.geometry as geom
+
 import aviary.geo.geo_helper as gh
 from aviary.geo.geo_helper import GeoHelper
 
@@ -180,6 +182,18 @@ class SectorElement():
 
         geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
         return geojson
+
+
+    def contains(self, lon, lat, flight_level) -> bool:
+        """
+        Return a boolean indicating whether a point (lon, lat, flight_level) is inside the sector boundary.
+        """
+
+        point = geom.Point(self.projection(lon, lat))
+        return (
+            self.shape.polygon.contains(point) and
+            (self.lower_limit <= flight_level <= self.upper_limit)
+            )
 
 
     def waypoint_geojson(self, name) -> dict:
