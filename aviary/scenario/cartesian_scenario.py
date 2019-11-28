@@ -26,6 +26,7 @@ class CartesianScenario(ScenarioAlgorithm):
                 route = self.route()
                 yield {
                     sg.AIRCRAFT_TIMEDELTA_KEY: 0,
+                    sg.START_POSITION_KEY: route.fix_points()[0].coords[0],
                     sg.CALLSIGN_KEY: next(self.callsign_generator()),
                     sg.AIRCRAFT_TYPE_KEY: aircraft_type,
                     sg.DEPARTURE_KEY: self.departure_airport(route),
