@@ -105,8 +105,8 @@ class Route():
                     }
                 }
             },
-            se.GEOMETRY_KEY: GeoHelper.__inv_project__(self.projection,
-                geom = LineString(self.fix_points(unprojected = True))).__geo_interface__
+            se.GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection,
+                geom = LineString(self.fix_points(unprojected = True))))
         }
 
         # Fix issue with __geo_interface__ unexpectedly returning a tuple of coordinates rather than a list.
@@ -120,7 +120,7 @@ class Route():
         return [
             {
                 FIX_NAME_KEY: self.fix_names()[i],
-                se.GEOMETRY_KEY: self.fix_points()[i].__geo_interface__
+                se.GEOMETRY_KEY: mapping(self.fix_points()[i])
             }
             for i in range(self.length())
         ]
@@ -137,4 +137,3 @@ class Route():
         self.fix_list = [self.fix_list[i] for i in range(self.length()) if
                          GeoHelper.distance(lat1 = final_lat, lon1 = final_lon, lat2 = self.fix_points()[i].coords[0][1], lon2 = self.fix_points()[i].coords[0][0]) <
                          GeoHelper.distance(lat1 = final_lat, lon1 = final_lon, lat2 = initial_lat, lon2 = initial_lon)]
-

@@ -10,6 +10,8 @@ from geojson import dump
 
 import os.path
 
+from shapely.geometry import mapping, Point
+
 import aviary.geo.geo_helper as gh
 from aviary.geo.geo_helper import GeoHelper
 
@@ -113,7 +115,7 @@ class SectorElement():
     def hash_sector_coordinates(self) -> str:
         """Returns hash of the sector boundary coordinates as string"""
 
-        coords = GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon).__geo_interface__[gh.COORDINATES_KEY][0]
+        coords = mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon))[gh.COORDINATES_KEY][0]
         return str(hash(coords))
 
 
@@ -168,7 +170,7 @@ class SectorElement():
 
         geojson = {
             TYPE_KEY : FEATURE_VALUE,
-            GEOMETRY_KEY: GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon).__geo_interface__,
+            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon)),
             PROPERTIES_KEY : {
                 NAME_KEY: self.hash_sector_coordinates(),
                 TYPE_KEY: SECTOR_VOLUME_VALUE,
@@ -180,6 +182,18 @@ class SectorElement():
 
         geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
         return geojson
+
+
+    def contains(self, lon, lat, flight_level) -> bool:
+        """
+        Return a boolean indicating whether a point (lon, lat, flight_level) is inside the sector boundary.
+        """
+
+        point = Point(self.projection(lon, lat))
+        return (
+            self.shape.polygon.contains(point) and
+            (self.lower_limit <= flight_level <= self.upper_limit)
+            )
 
 
     def waypoint_geojson(self, name) -> dict:
@@ -200,7 +214,7 @@ class SectorElement():
                 NAME_KEY: name.upper(),
                 TYPE_KEY: FIX_VALUE
             },
-            GEOMETRY_KEY: GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]).__geo_interface__
+            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]))
         }
 
         geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)

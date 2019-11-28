@@ -59,6 +59,7 @@ class ScenarioGenerator():
         """Generates a list of aircraft creation data constituting a scenario."""
 
         self.scenario_algorithm.set_seed(seed)
+        self.scenario_algorithm.reset_seen_callsigns()
 
         # Format the scenario start time.
         start_time = time.strftime("%H:%M:%S", self.start_time.timetuple())

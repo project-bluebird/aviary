@@ -2,13 +2,14 @@
 import pytest
 
 import os
+import math
 import geojson
 
 import aviary.sector.sector_element as se
 import aviary.geo.geo_helper as gh
 
 def test_centre_point(i_element):
-    
+
     result = i_element.centre_point()
     assert result == pytest.approx((-0.1275, 51.5), 0.0001)
 
@@ -119,6 +120,26 @@ def test_geo_interface(y_element):
 
     # The result contains one feature per route and per waypoint, plus one for the sector and one for the sector boundary/volume.
     assert len(result[se.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 2
+
+
+def test_contains(i_element):
+
+    boundaries = gh.GeoHelper().__inv_project__(i_element.projection, i_element.shape.polygon)
+    exterior = list(boundaries.exterior.coords)
+
+    centre = i_element.centre_point()
+    interior = [centre, (-0.259, 51.0838), (0.004, 51.0838), (-0.262, 51.916), (0.007, 51.916)]
+
+    FLs = [i_element.lower_limit, i_element.lower_limit + 50, i_element.upper_limit - 50, i_element.upper_limit]
+
+    for fl in FLs:
+        for lon, lat in interior:
+            assert i_element.contains(lon=lon, lat=lat, flight_level=fl)
+        for lon, lat in exterior:
+            assert not i_element.contains(lon=lon, lat=lat, flight_level=fl)
+
+    assert not i_element.contains(centre[0], centre[1], flight_level=i_element.lower_limit-10)
+    assert not i_element.contains(centre[0], centre[1], flight_level=i_element.upper_limit+10)
 
 
 def test_serialisation(x_element):
