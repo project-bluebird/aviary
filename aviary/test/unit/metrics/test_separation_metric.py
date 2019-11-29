@@ -14,11 +14,19 @@ def test_separation_score():
 
     assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == -1
 
-    lon2, lat2, alt2 = (5, 0, 0)
+    lon2, lat2, alt2 = (-.05, 0, 0)
 
-    assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == 0
+    assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == -1
 
-    lon2, lat2, alt2 = (0, 5, 0)
+    lon2, lat2, alt2 = (0, -.1, 0)
+
+    assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == -0.8
+
+    lon2, lat2, alt2 = (0.15, 0, 0)
+
+    assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == -0.2
+
+    lon2, lat2, alt2 = (0, 0.2, 0)
 
     assert metric.score(lon1, lat1, alt1, lon2, lat2, alt2) == 0
 
