@@ -45,10 +45,10 @@ pip install -e .
 ## Usage
 
 Aviary supports:
-  - Generation of I, X, Y sector definitions in GeoJSON format
-  - Generation of aircraft definitions in JSON format
-  - Translation between aviary and [BlueSky](https://github.com/alan-turing-institute/bluesky) scenario formats
-  - Calculation of ATC performance metrics.
+  - [Generation of I, X, Y sector definitions](#sector-generation) in GeoJSON format
+  - [Generation of aircraft definitions](#scenario-generation) in JSON format
+  - [Translation](#scenario-translation) between aviary and [BlueSky](https://github.com/alan-turing-institute/bluesky) scenario formats
+<!--  - Calculation of ATC performance metrics. -->
 
 ### Sector generation
 
@@ -88,7 +88,7 @@ Example:
 overflier_climber.py --cruise_speed=cruise_speed.csv --cruise_speed_index=FL --climb_time=climb_time.csv --climb_time_index=FL --downtrack_distance=downtrack_distances.csv --downtrack_distance_index=FL --sector_type=I --aircraft_types=B77W,A320,A346 --flight_levels=300,360,400 --thinking_time=60 --seed=22
 ```
 
-### Scenario translation for BlueSky (NYI)
+### Scenario translation
 
 [BlueSky](https://github.com/alan-turing-institute/bluesky) is an open source air traffic simulator. To convert an aviary scenario into the format expected by BlueSky, run the `parse_scenario.py` script passing the following command line arguments:
  - sector_geojson Full path to an aviary GeoJSON sector definition file
