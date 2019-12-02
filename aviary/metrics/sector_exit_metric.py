@@ -75,10 +75,10 @@ def sector_exit_score(
     :param actual_alt: actual altitude in feet
     :param target_alt: target altitude in feet
     """
-    horizontal_sep_m = utils.horizontal_distance_nm(
+    horizontal_sep_nm = utils.horizontal_distance_nm(
         target_lon, target_lat, actual_lon, actual_lat
     )
-    m_h = score(horizontal_sep_m, hor_warn_dist, hor_max_dist)
+    m_h = score(horizontal_sep_nm, hor_warn_dist, hor_max_dist)
 
     vertical_sep_ft = abs(actual_alt - target_alt)
     m_v = score(vertical_sep_ft, vert_warn_dist, vert_max_dist)
@@ -98,7 +98,7 @@ def sector_exit_metric(
     route,
 ):
     """
-	Return score based on estimated location of aircraft exit from the sector. 
+	Return score based on estimated location of aircraft exit from the sector.
     Returns None if aircraft has not exited sector between current and previous position (lon/lat/alt).
 
     :param current_alt: Current altitude in metres
