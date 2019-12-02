@@ -1,6 +1,7 @@
 import pytest
 
 import os
+from io import StringIO
 
 import aviary.parser.bluesky_parser as sp
 
@@ -23,7 +24,7 @@ overflier_climber_scenario_json = """
 
 @pytest.fixture(scope="function")
 def target():
-    return sp.ScenarioParser(i_sector_geojson, overflier_climber_scenario_json)
+    return sp.ScenarioParser(StringIO(i_sector_geojson), StringIO(overflier_climber_scenario_json))
 
 
 def test_features_of_type(target):
