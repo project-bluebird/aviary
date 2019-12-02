@@ -1,6 +1,3 @@
-"""
-Abstract base class representing a distance based metric between two (lon, lat, alt) positions.
-"""
 
 from pyproj import Geod
 

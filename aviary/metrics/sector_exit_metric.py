@@ -17,7 +17,7 @@ For the simplest metric, define v(d, c, C), a function of distance d and paramet
 - v(d) = -1, if d > C
 - v(d) = -(d - c)/(C - c), otherwise.
 
-Define the sector exit metric m by:
+Define the simplest sector exit metric m as:
 - m(d_h, d_v) = min{ v(d_h, c_h, C_h), v(d_v, c_v, C_v) }
 
 The thresholds c_h, C_h, c_v, C_v are arbitrary parameters passed as arguments.
@@ -28,7 +28,7 @@ import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
 
 
-# TODO: set thresholds (+ units) and decide if these should be passed as arguments
+# TODO: set thresholds and decide if these should be passed as arguments
 vert_warn_dist = 1000  # Vertical separation (ft)
 hor_warn_dist = 5  # Horizontal separation (nm)
 vert_max_dist = 2 * vert_warn_dist
@@ -44,7 +44,7 @@ def target(route):
 def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
     """
     Return midpoint between previous and current positions (lon/lat).
-    see https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
+    see: https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
     """
     lonlats = utils._WGS84.npts(
         current_lon, current_lat, previous_lon, previous_lat, npts=1
@@ -54,7 +54,8 @@ def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
 
 def score(d, c, C):
     """
-    Function for scoring separation
+    Function for scoring distance d.
+    Gives penalty for d > c and max penalty for d > C.
     """
     assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
@@ -97,7 +98,8 @@ def sector_exit_metric(
     route,
 ):
     """
-	Return metric score based on the aircraft's estimated exit point from the sector. Returns None if aircraft has not exited sector between current and previous position (lon/lat/alt).
+	Return score based on estimated location of aircraft exit from the sector. 
+    Returns None if aircraft has not exited sector between current and previous position (lon/lat/alt).
 
     :param current_alt: Current altitude in metres
     :param previous_alt: Previous altitude in metres

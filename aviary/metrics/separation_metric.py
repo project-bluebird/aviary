@@ -22,8 +22,7 @@ where:
 - The c_h (horizontal) and c_v (vertical) thresholds are part of the definition
 of "loss of separation", i.e. they're given constants: c_h = 5 nm, c_v = 1000 ft.
 - the C_h and C_v thresholds are arbitrary parameters (except for the requirement
-that C_h > c_h and C_v > c_v), so the function takes them as arguments.
-Default values are double the corresponding lower thresholds.
+that C_h > c_h and C_v > c_v). Default values are double the corresponding lower thresholds.
 
 An alternative metric (in the same class) would define m_h and m_v as smooth
 functions, each with a negative asymptote at zero, so the reward tends
@@ -40,7 +39,8 @@ hor_warn_dist = 2 * hor_min_dist
 
 def score(d, c, C):
     """
-    Function for scoring separation
+    Function for scoring distance d.
+    Gives penalty for d < C and max penalty for d < c.
     """
     assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
@@ -54,7 +54,7 @@ def score(d, c, C):
 def vertical_separation_score(alt1, alt2):
     """
     Basic vertical separation metric.
-    
+
     :param alt1: altitude in metres
     :param alt2: altitude in metres
     :return:
