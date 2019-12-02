@@ -1,3 +1,4 @@
+#! python
 """
 Script for generating an airspace sector GeoJSON file.
 

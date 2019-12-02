@@ -1,3 +1,4 @@
+#! python
 """
 Script for generating a Cartesian scenario.
 

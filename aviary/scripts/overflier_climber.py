@@ -1,3 +1,4 @@
+#! python
 """
 Script for generating an overflier-climber scenario.
 
