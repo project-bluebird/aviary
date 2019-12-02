@@ -62,5 +62,6 @@ setup(
     install_requires=REQUIRED,
     extras_require=EXTRAS,
     include_package_data=True, # include items specified in MANIFEST.in
+    scripts=['aviary/scripts/sector_geojson.py', 'aviary/scripts/overflier_climber.py', 'aviary/scripts/cartesian.py'],
     license=LICENSE
 )
