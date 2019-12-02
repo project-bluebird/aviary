@@ -10,8 +10,6 @@ import argparse, sys
 
 from aviary.parser.bluesky_parser import ScenarioParser
 
-BLUESKY_FILE_EXTENSION = ".scn"
-
 #
 # Help and usage instructions.
 #
@@ -46,9 +44,10 @@ scenario_parser = ScenarioParser(
 #
 # Generate the scenario.
 #
-filename = args.scenario_json + "." + BLUESKY_FILE_EXTENSION
+filename = args.scenario_json
+path = args.output_path
 try:
-    file = scenario_parser.write_bluesky_scenario(filename = filename, path = args.output_path)
+    file = scenario_parser.write_bluesky_scenario(filename = filename, path = path)
 except Exception as ex:
     print('ERROR: Scenario parsing attempt aborted due to error:')
     print(ex)
