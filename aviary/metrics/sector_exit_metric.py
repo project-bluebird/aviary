@@ -23,34 +23,35 @@ Define the sector exit metric m by:
 The thresholds c_h, C_h, c_v, C_v are arbitrary parameters passed as arguments.
 """
 
-# import aviary.sector.route as rt
 import aviary.geo.geo_helper as gh
 import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
 
-# TODO: set thresholds
-vert_min_dist = 1000  # Vertical separation (ft)
-hor_min_dist = 5  # Horizontal separation (nm)
-vert_warn_dist = 2 * vert_min_dist
-hor_warn_dist = 2 * hor_min_dist
+# TODO: set thresholds (+ units) and decide if these should be passed as arguments
+vert_warn_dist = 1000  # Vertical separation (ft)
+hor_warn_dist = 5  # Horizontal separation (nm)
+vert_max_dist = 2 * vert_warn_dist
+hor_max_dist = 2 * hor_warn_dist
 
 
 def target(route):
-    """Return second to last waypoint on route as the target exit location"""
+    """Return second to last waypoint on route - this is the target exit location."""
     route_coordinates = [
         wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route
     ]
     return route_coordinates[-2]
 
 
-def exit_position(
-    current_lat, current_lon, current_alt, previous_lat, previous_lon, previous_alt
+def get_midpoint(
+    current_lon, current_lat, current_alt, previous_lon, previous_lat, previous_alt
 ):
+    """Return midpoint between previous and current lon/lat/alt positions."""
     # TODO - return better estimate of the exit position as midpoint between the two locations
-    return (current_lat+previous_lat)/2, (current_lon+previous_lon)/2, (current_alt + previous_alt)/2
+    return (current_lon+previous_lon)/2, (current_lat+previous_lat)/2, (current_alt + previous_alt)/2
 
 
 def score(d, c, C):
+    assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
     if d <= c:
         return 0
@@ -59,51 +60,65 @@ def score(d, c, C):
     return -(d - c) / (C - c)
 
 
-def sector_exit(actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt):
-    """Implements setor exit score"""
-    horizontal_sep_m = utils.horizontal_separation_m(
+def sector_exit_score(actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt):
+    """
+    Implements setor exit score.
+
+    :param actual_alt: actual altitude in feet
+    :param target_alt: target altitude in feet
+    """
+    horizontal_sep_m = utils.horizontal_distance_nm(
         target_lon, target_lat, actual_lon, actual_lat
     )
-    m_h = score(horizontal_sep_m, hor_min_dist, hor_warn_dist)
+    m_h = score(horizontal_sep_m, hor_warn_dist, hor_max_dist)
 
-    vertical_sep_m = utils.vertical_separation_m(actual_alt, target_alt)
-    m_v = score(vertical_sep_m, vert_min_dist, vert_warn_dist)
+    vertical_sep_ft = abs(actual_alt - target_alt)
+    m_v = score(vertical_sep_ft, vert_warn_dist, vert_max_dist)
 
     return min(m_h, m_v)
 
 
 def sector_exit_metric(
-    current_lat,
     current_lon,
+    current_lat,
     current_alt,
-    previous_lat,
     previous_lon,
+    previous_lat,
     previous_alt,
     requested_flight_level,
     sector,
     route,
 ):
     """
-	Metric score based on the aircraft's exit point from the sector
-	"""
-    # check if aircraft just exited sector
-    if not sector.contains(current_lat, current_lon, current_alt) and sector.contains(
-        previous_lat, previous_lon, previous_alt
-    ):
+	Return metric score based on the aircraft's estimated exit point from the sector. Returns None if aircraft has not just exited sector.
 
-        actual_lon, actual_lat, actual_alt = exit_position(
-            current_lat,
+    :param current_alt: Current altitude in metres
+    :param previous_alt: Previous altitude in metres
+	"""
+    current_alt_ft = current_alt * utils._SCALE_METRES_TO_FEET
+    previous_alt_ft = previous_alt * utils._SCALE_METRES_TO_FEET
+
+    # check if aircraft just exited sector
+    # sector expresses altitude in flight levels
+    if not sector.contains(current_lon, current_lat, current_alt_ft/100) and sector.contains(
+        previous_lon, previous_lat, previous_alt_ft/100
+    ):
+        # estimate actual exit location as midpoint between previous and current position
+        actual_lon, actual_lat, actual_alt_ft = get_midpoint(
             current_lon,
-            current_alt,
-            previous_lat,
+            current_lat,
+            current_alt_ft,
             previous_lon,
-            previous_alt,
+            previous_lat,
+            previous_alt_ft,
         )
 
         target_lon, target_lat = target(route)
-        target_alt = requested_flight_level
-
-        return sector_exit(
-            actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt
+        target_alt_ft = requested_flight_level * 100 # convert FL to feet
+        print(actual_lon, actual_lat)
+        print(target_lon, target_lat)
+        return sector_exit_score(
+            actual_lon, actual_lat, actual_alt_ft,
+            target_lon, target_lat, target_alt_ft
         )
-    return 0
+    return None

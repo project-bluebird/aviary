@@ -14,24 +14,12 @@ _ONE_NM = 1852  # Meters
 def horizontal_distance_m(lon1, lat1, lon2, lat2):
     """Horizontal distance (metres) between two (lon/lat) points"""
 
-    _, _, horizontal_m = _WGS84.inv(lon1, lat1, lon2, lat2)
-    return horizontal_m
+    _, _, hor_dist_m = _WGS84.inv(lon1, lat1, lon2, lat2)
+    return hor_dist_m
 
 
 def horizontal_distance_nm(lon1, lat1, lon2, lat2):
     """Horizontal distance (nautical miles) between two (lon/lat) points"""
 
-    horizontal_m =horizontal_distance_m(lon1, lat1, lon2, lat2)
-    return round(horizontal_m / _ONE_NM)
-
-
-def vertical_distance_m(alt1, alt2):
-    """Vertical distance (metres) between two altitudes (in metres)"""
-
-    return abs(alt1 - alt2)
-
-
-def vertical_distance_ft(alt1, alt2):
-    """Vertical distance (feet) between two altitudes (in metres)"""
-
-    return vertical_distance_m(alt1, alt2) * _SCALE_METRES_TO_FEET
+    hor_dist_m = horizontal_distance_m(lon1, lat1, lon2, lat2)
+    return round(hor_dist_m / _ONE_NM)

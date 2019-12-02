@@ -39,6 +39,10 @@ hor_warn_dist = 2 * hor_min_dist
 
 
 def score(d, c, C):
+    """
+    Function for scoring separation
+    """
+    assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
     if d < c:
         return -1
@@ -47,39 +51,43 @@ def score(d, c, C):
     return (d - c) / (C - c) - 1
 
 
-def vertical_separation(alt1, alt2):
+def vertical_separation_score(alt1, alt2):
     """
-    Basic vertical separation metric
-    :param alt1:
-    :param alt2:
+    Basic vertical separation metric.
+    
+    :param alt1: altitude in metres
+    :param alt2: altitude in metres
     :return:
     """
 
-    vertical_distance_ft = utils.vertical_distance_ft(alt1, alt2)
-    return score(vertical_distance_ft, vert_min_dist, vert_warn_dist)
+    vert_dist_ft = abs(alt1 - alt2) * utils._SCALE_METRES_TO_FEET
+    return score(vert_dist_ft, vert_min_dist, vert_warn_dist)
 
 
-def horizontal_separation(lon1, lat1, lon2, lat2):
+def horizontal_separation_score(lon1, lat1, lon2, lat2):
     """
-    Basic horizontal separation metric
-    :param acid1:
-    :param acid2:
+    Basic horizontal separation metric.
     :return:
     """
 
-    horizontal_distance_nm = utils.horizontal_distance_nm(lon1, lat1, lon2, lat2)
-    return score(horizontal_distance_nm, hor_min_dist, hor_warn_dist)
+    hor_dist_nm = utils.horizontal_distance_nm(lon1, lat1, lon2, lat2)
+    return score(hor_dist_nm, hor_min_dist, hor_warn_dist)
 
 
 def pairwise_separation_metric(lon1, lat1, alt1, lon2, lat2, alt2):
     """
     Combined score based on horizontal and vertical separation.
-    :param acid1:
-    :param acid2:
+
+    :param lon1: aircraft 1 longitude
+    :param lat1: aircraft 1 latitude
+    :param alt1: aircraft 1 altitude in metres
+    :param lon2: aircraft 2 longitude
+    :param lat2: aircraft 2 latitude
+    :param alt2: aircraft 2 altitude in metres
     :return:
     """
 
-    horizontal_sep = horizontal_separation(lon1, lat1, lon2, lat2)
-    vertical_sep = vertical_separation(alt1, alt2)
+    hor_sep = horizontal_separation_score(lon1, lat1, lon2, lat2)
+    vert_sep = vertical_separation_score(alt1, alt2)
 
-    return round(max(horizontal_sep, vertical_sep), 2)
+    return max(hor_sep, vert_sep)
