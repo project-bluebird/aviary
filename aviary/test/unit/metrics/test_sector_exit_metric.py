@@ -20,11 +20,11 @@ def test_target():
 
 def test_get_midpoint():
 
-    result = get_midpoint(20, 20, 100, 40, 40, 200)
-    assert result == (30, 30, 150)
+    result = get_midpoint(0, 0, 0, 0)
+    assert result == (0, 0)
 
-    result = get_midpoint(-0.12, 51.9, 350, -0.135, 51.932, 450)
-    assert result == (-0.1275, 51.916, 400)
+    result = get_midpoint(0, 0, 0.2, 0.2)
+    assert result == pytest.approx((0.1, 0.1), 0.01)
 
 
 def test_score():

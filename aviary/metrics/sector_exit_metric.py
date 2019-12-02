@@ -27,6 +27,7 @@ import aviary.geo.geo_helper as gh
 import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
 
+
 # TODO: set thresholds (+ units) and decide if these should be passed as arguments
 vert_warn_dist = 1000  # Vertical separation (ft)
 hor_warn_dist = 5  # Horizontal separation (nm)
@@ -36,21 +37,25 @@ hor_max_dist = 2 * hor_warn_dist
 
 def target(route):
     """Return second to last waypoint on route - this is the target exit location."""
-    route_coordinates = [
-        wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route
-    ]
+    route_coordinates = [wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route]
     return route_coordinates[-2]
 
 
-def get_midpoint(
-    current_lon, current_lat, current_alt, previous_lon, previous_lat, previous_alt
-):
-    """Return midpoint between previous and current lon/lat/alt positions."""
-    # TODO - return better estimate of the exit position as midpoint between the two locations
-    return (current_lon+previous_lon)/2, (current_lat+previous_lat)/2, (current_alt + previous_alt)/2
+def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
+    """
+    Return midpoint between previous and current positions (lon/lat).
+    see https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
+    """
+    lonlats = utils._WGS84.npts(
+        current_lon, current_lat, previous_lon, previous_lat, npts=1
+    )
+    return lonlats[0]
 
 
 def score(d, c, C):
+    """
+    Function for scoring separation
+    """
     assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
     if d <= c:
@@ -60,7 +65,9 @@ def score(d, c, C):
     return -(d - c) / (C - c)
 
 
-def sector_exit_score(actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt):
+def sector_exit_score(
+    actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt
+):
     """
     Implements setor exit score.
 
@@ -90,7 +97,7 @@ def sector_exit_metric(
     route,
 ):
     """
-	Return metric score based on the aircraft's estimated exit point from the sector. Returns None if aircraft has not just exited sector.
+	Return metric score based on the aircraft's estimated exit point from the sector. Returns None if aircraft has not exited sector between current and previous position (lon/lat/alt).
 
     :param current_alt: Current altitude in metres
     :param previous_alt: Previous altitude in metres
@@ -99,26 +106,21 @@ def sector_exit_metric(
     previous_alt_ft = previous_alt * utils._SCALE_METRES_TO_FEET
 
     # check if aircraft just exited sector
-    # sector expresses altitude in flight levels
-    if not sector.contains(current_lon, current_lat, current_alt_ft/100) and sector.contains(
-        previous_lon, previous_lat, previous_alt_ft/100
-    ):
+    # NOTE: sector stores altitude in flight levels
+    if not sector.contains(
+        current_lon, current_lat, current_alt_ft / 100
+    ) and sector.contains(previous_lon, previous_lat, previous_alt_ft / 100):
+
         # estimate actual exit location as midpoint between previous and current position
-        actual_lon, actual_lat, actual_alt_ft = get_midpoint(
-            current_lon,
-            current_lat,
-            current_alt_ft,
-            previous_lon,
-            previous_lat,
-            previous_alt_ft,
+        actual_lon, actual_lat = get_midpoint(
+            current_lon, current_lat, previous_lon, previous_lat
         )
+        actual_alt_ft = (current_alt_ft + previous_alt_ft) / 2
 
         target_lon, target_lat = target(route)
-        target_alt_ft = requested_flight_level * 100 # convert FL to feet
-        print(actual_lon, actual_lat)
-        print(target_lon, target_lat)
+        target_alt_ft = requested_flight_level * 100  # convert FL to feet
+
         return sector_exit_score(
-            actual_lon, actual_lat, actual_alt_ft,
-            target_lon, target_lat, target_alt_ft
+            actual_lon, actual_lat, actual_alt_ft, target_lon, target_lat, target_alt_ft
         )
     return None
