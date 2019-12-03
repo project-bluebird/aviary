@@ -11,18 +11,23 @@ A general class of metrics takes the form:
 - m(d_h, d_v) = min{ m_h(d_h), m_v(d_v) }
 
 Where m_h and m_v are functions depending on horizontal & vertical distance, respectively.
+
+For the simplest metric, m_h and m_v take the form of v(d, c, C), a function of distance d and parameters c < C, where:
+
+ - v(d) = 0, if d <= c
+ - v(d) = -1, if d > C
+ - v(d) = -(d - c)/(C - c), otherwise.
 """
 
 import aviary.geo.geo_helper as gh
 import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
 
-
-# TODO: set thresholds and decide if these should be passed as arguments
-vert_warn_dist = 1000  # Vertical separation (ft)
-hor_warn_dist = 5  # Horizontal separation (nm)
-vert_max_dist = 2 * vert_warn_dist
-hor_max_dist = 2 * hor_warn_dist
+# DEFAULT THRESHOLD VALUES
+VERT_WARN_DIST = 1000  # Vertical separation (ft)
+HOR_WARN_DIST = 5  # Horizontal separation (nm)
+VERT_MAX_DIST = 2 * VERT_WARN_DIST
+HOR_MAX_DIST = 2 * HOR_WARN_DIST
 
 
 def target(route):
@@ -50,9 +55,13 @@ def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
 
 def score(d, c, C):
     """
-    - score(d) = 0, if d <= c
-    - score(d) = -1, if d > C
-    - score(d) = -(d - c)/(C - c), otherwise.
+    Give a score as a function of distance d and parameters c < C.
+    Optimal distance is d <= c.
+
+    :return:
+        - 0, if d <= c
+        - -1, if d > C
+        - -(d - c)/(C - c), otherwise
     """
 
     assert d >= 0, f"Incorrent value {d} for distance"
@@ -65,7 +74,16 @@ def score(d, c, C):
 
 
 def sector_exit_score(
-    actual_lon, actual_lat, actual_alt, target_lon, target_lat, target_alt
+    actual_lon,
+    actual_lat,
+    actual_alt,
+    target_lon,
+    target_lat,
+    target_alt,
+    hor_warn_dist=HOR_WARN_DIST,
+    hor_max_dist=HOR_MAX_DIST,
+    vert_warn_dist=VERT_WARN_DIST,
+    vert_max_dist=VERT_MAX_DIST
 ):
     """
     Implements setor exit score.
@@ -76,7 +94,11 @@ def sector_exit_score(
     :param target_lon: Longitude of target position.
     :param target_lat: Latitude of target position.
     :param target_alt: Altitude (in feet) of target position.
-    :return: Combined score based on horizontal and vertical distance between actual and target position.
+    :param hor_warn_dist: Horizontal distance threshold in nautical miles (nm).
+    :param hor_max_dist: Horizontal distance threshold in nautical miles (nm).
+    :param vert_warn_dist: Vertical distance threshold in feet (ft).
+    :param vert_max_dist: Vertical distance threshold in feet (ft).
+    :return: Combined score based on horizontal and vertical distance between actual and target position given the hor/vert_warn_dist and hor/vert_max_dist thresholds.
     """
 
     horizontal_sep_nm = utils.horizontal_distance_nm(
@@ -100,6 +122,10 @@ def sector_exit_metric(
     requested_flight_level,
     sector,
     route,
+    hor_warn_dist=HOR_WARN_DIST,
+    hor_max_dist=HOR_MAX_DIST,
+    vert_warn_dist=VERT_WARN_DIST,
+    vert_max_dist=VERT_MAX_DIST
 ):
     """
 	Sector exit metric.
@@ -113,7 +139,11 @@ def sector_exit_metric(
     :param requested_flight_level: Requested flight level at sector exit.
     :param sector: Shapely Polygon object defining the sector.
     :param route: Aircraft route (as returned by aviary.sector.Route).
-    :return: Score based on distance between target and estimated actual position of aircraft at exit from the sector. None if aircraft has not exited sector between current and previous position.
+    :param hor_warn_dist: Horizontal distance threshold in nautical miles (nm).
+    :param hor_max_dist: Horizontal distance threshold in nautical miles (nm).
+    :param vert_warn_dist: Vertical distance threshold in feet (ft).
+    :param vert_max_dist: Vertical distance threshold in feet (ft).
+    :return: Score based on distance between target and estimated actual position of aircraft at exit from sector given the hor/vert_warn_dist and hor/vert_max_dist thresholds. None if aircraft has not exited sector between current and previous position.
 	"""
 
     current_alt_ft = current_alt * utils._SCALE_METRES_TO_FEET
@@ -135,6 +165,15 @@ def sector_exit_metric(
         target_alt_ft = requested_flight_level * 100  # convert FL to feet
 
         return sector_exit_score(
-            actual_lon, actual_lat, actual_alt_ft, target_lon, target_lat, target_alt_ft
+            actual_lon,
+            actual_lat,
+            actual_alt_ft,
+            target_lon,
+            target_lat,
+            target_alt_ft,
+            hor_warn_dist,
+            hor_max_dist,
+            vert_warn_dist,
+            vert_max_dist
         )
     return None

@@ -9,21 +9,32 @@ A general class of metrics takes the form:
 - m(d_h, d_v) = max{ m_h(d_h), m_v(d_v) }
 
 Where m_h and m_v are functions depending on horizontal & vertical distance, respectively.
+
+For the simplest metric, m_h and m_v take the form of v(d, c, C), a function of distance d and parameters c < C, where:
+
+ - v(d) = 0, if d >= C
+ - v(d) = -1, if d < c
+ - v(d) = (d - c)/(C - c) -1, otherwise.
 """
 
 import aviary.metrics.utils as utils
 
-vert_min_dist = 1000  # Vertical separation (ft)
-hor_min_dist = 5  # Horizontal separation (nm)
-vert_warn_dist = 2 * vert_min_dist
-hor_warn_dist = 2 * hor_min_dist
+# DEFAULT THRESHOLD VALUES
+VERT_MIN_DIST = 1000  # Vertical separation (ft)
+HOR_MIN_DIST = 5  # Horizontal separation (nm)
+VERT_WARN_DIST = 2 * VERT_MIN_DIST
+HOR_WARN_DIST = 2 * HOR_MIN_DIST
 
 
 def score(d, c, C):
     """
-    - score(d) = 0, if d >= C
-    - score(d) = -1, if d < c
-    - score(d) = (d - c)/(C - c) -1, otherwise.
+    Give a score as a function of distance d and parameters c < C.
+    Optimal distance is d >= C.
+
+    :return:
+        - 0, if d >= C
+        - -1, if d < c
+        - (d - c)/(C - c) -1, otherwise.
     """
 
     assert d >= 0, f"Incorrent value {d} for distance"
@@ -35,7 +46,9 @@ def score(d, c, C):
     return (d - c) / (C - c) - 1
 
 
-def vertical_separation_score(alt1, alt2):
+def vertical_separation_score(
+    alt1, alt2, vert_min_dist=VERT_MIN_DIST, vert_warn_dist=VERT_WARN_DIST
+):
     """
     Basic vertical separation metric.
 
@@ -48,7 +61,9 @@ def vertical_separation_score(alt1, alt2):
     return score(vert_dist_ft, vert_min_dist, vert_warn_dist)
 
 
-def horizontal_separation_score(lon1, lat1, lon2, lat2):
+def horizontal_separation_score(
+    lon1, lat1, lon2, lat2, hor_min_dist=HOR_MIN_DIST, hor_warn_dist=HOR_WARN_DIST
+):
     """
     Basic horizontal separation metric.
 
@@ -63,7 +78,18 @@ def horizontal_separation_score(lon1, lat1, lon2, lat2):
     return score(hor_dist_nm, hor_min_dist, hor_warn_dist)
 
 
-def pairwise_separation_metric(lon1, lat1, alt1, lon2, lat2, alt2):
+def pairwise_separation_metric(
+    lon1,
+    lat1,
+    alt1,
+    lon2,
+    lat2,
+    alt2,
+    hor_min_dist=HOR_MIN_DIST,
+    hor_warn_dist=HOR_WARN_DIST,
+    vert_min_dist=VERT_MIN_DIST,
+    vert_warn_dist=VERT_WARN_DIST
+):
     """
     Aircraft separation metric.
 
@@ -73,10 +99,14 @@ def pairwise_separation_metric(lon1, lat1, alt1, lon2, lat2, alt2):
     :param lon2: Aircraft 2 longitude.
     :param lat2: Aircraft 2 latitude.
     :param alt2: Aircraft 2 altitude (in metres).
-    :return: Combined score based on horizontal and vertical separation between aircraft.
+    :param hor_min_dist: Horizontal distance threshold in nautical miles (nm).
+    :param hor_warn_dist: Horizontal distance threshold in nautical miles (nm).
+    :param vert_min_dist: Vertical distance threshold in feet (ft).
+    :param vert_warn_dist: Vertical distance threshold in feet (ft).
+    :return: Combined score based on horizontal and vertical separation between aircraft given the hor/vert_min_dist and hor/vert_warn_dist thresholds.
     """
 
-    hor_sep = horizontal_separation_score(lon1, lat1, lon2, lat2)
-    vert_sep = vertical_separation_score(alt1, alt2)
+    hor_sep = horizontal_separation_score(lon1, lat1, lon2, lat2, hor_min_dist, hor_warn_dist)
+    vert_sep = vertical_separation_score(alt1, alt2, vert_min_dist, vert_warn_dist)
 
     return max(hor_sep, vert_sep)
