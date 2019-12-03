@@ -1,26 +1,16 @@
 """
 Basic sector exit metric. Specification is:
 
-Denote:
 - x = (x_lat, x_lon, x_alt) := the target sector exit location.
 - y = (y_lat, y_lon, y_alt) := the terminal location of the aircraft within the sector.
-- d_h = Geodesic distance between (x_lat, x_lon) and (y_lat, y_lon)
-- d_v = | x_alt - y_alt |, the absolute vertical distance between x & y
+- d_h = Geodesic distance between (x_lat, x_lon) and (y_lat, y_lon) in nautical miles (nm)
+- d_v = | x_alt - y_alt |, the absolute vertical distance between x & y in feet (ft)
 
 A general class of metrics takes the form:
+
 - m(d_h, d_v) = min{ m_h(d_h), m_v(d_v) }
 
 Where m_h and m_v are functions depending on horizontal & vertical distance, respectively.
-
-For the simplest metric, define v(d, c, C), a function of distance d and parameters c < C, by:
-- v(d) = 0, if d <= c
-- v(d) = -1, if d > C
-- v(d) = -(d - c)/(C - c), otherwise.
-
-Define the simplest sector exit metric m as:
-- m(d_h, d_v) = min{ v(d_h, c_h, C_h), v(d_v, c_v, C_v) }
-
-The thresholds c_h, C_h, c_v, C_v are arbitrary parameters passed as arguments.
 """
 
 import aviary.geo.geo_helper as gh
@@ -36,16 +26,22 @@ hor_max_dist = 2 * hor_warn_dist
 
 
 def target(route):
-    """Return second to last waypoint on route - this is the target exit location."""
+    """
+    Return second to last waypoint on route as the target exit location.
+
+    :param route: aircraft route (as defined by aviary.sector.Route)
+    """
+
     route_coordinates = [wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route]
     return route_coordinates[-2]
 
 
 def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
     """
-    Return midpoint between previous and current positions (lon/lat).
-    see: https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
+    Return midpoint between previous and current lon/lat positions.
     """
+
+    # see: https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
     lonlats = utils._WGS84.npts(
         current_lon, current_lat, previous_lon, previous_lat, npts=1
     )
@@ -54,9 +50,11 @@ def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
 
 def score(d, c, C):
     """
-    Function for scoring distance d.
-    Gives penalty for d > c and max penalty for d > C.
+    - score(d) = 0, if d <= c
+    - score(d) = -1, if d > C
+    - score(d) = -(d - c)/(C - c), otherwise.
     """
+
     assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
     if d <= c:
@@ -72,9 +70,15 @@ def sector_exit_score(
     """
     Implements setor exit score.
 
-    :param actual_alt: actual altitude in feet
-    :param target_alt: target altitude in feet
+    :param actual_lon: Longitude of actual position.
+    :param actual_lat: Latitude of actual position.
+    :param actual_alt: Altitude (in feet) of actual position.
+    :param target_lon: Longitude of target position.
+    :param target_lat: Latitude of target position.
+    :param target_alt: Altitude (in feet) of target position.
+    :return: Combined score based on horizontal and vertical distance between actual and target position.
     """
+
     horizontal_sep_nm = utils.horizontal_distance_nm(
         target_lon, target_lat, actual_lon, actual_lat
     )
@@ -98,12 +102,20 @@ def sector_exit_metric(
     route,
 ):
     """
-	Return score based on estimated location of aircraft exit from the sector.
-    Returns None if aircraft has not exited sector between current and previous position (lon/lat/alt).
+	Sector exit metric.
 
-    :param current_alt: Current altitude in metres
-    :param previous_alt: Previous altitude in metres
+    :param current_lon: Longitude of current position.
+    :param current_lat: Latitude of current position.
+    :param current_alt: Altitude (in metres) of current position.
+    :param previous_lon: Longitude of previous position.
+    :param previous_lat: Latitude of previous position.
+    :param previous_alt: Altitude (in metres) of previous position.
+    :param requested_flight_level: Requested flight level at sector exit.
+    :param sector: Shapely Polygon object defining the sector.
+    :param route: Aircraft route (as returned by aviary.sector.Route).
+    :return: Score based on distance between target and estimated actual position of aircraft at exit from the sector. None if aircraft has not exited sector between current and previous position.
 	"""
+
     current_alt_ft = current_alt * utils._SCALE_METRES_TO_FEET
     previous_alt_ft = previous_alt * utils._SCALE_METRES_TO_FEET
 
@@ -113,7 +125,7 @@ def sector_exit_metric(
         current_lon, current_lat, current_alt_ft / 100
     ) and sector.contains(previous_lon, previous_lat, previous_alt_ft / 100):
 
-        # estimate actual exit location as midpoint between previous and current position
+        # estimate actual sector exit position as midpoint between previous and current position
         actual_lon, actual_lat = get_midpoint(
             current_lon, current_lat, previous_lon, previous_lat
         )

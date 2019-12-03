@@ -1,32 +1,14 @@
 """
 Basic aircraft separation metric. Specification is:
 
-Denote:
-- d_h := absolute horizontal distance between two aircraft measured in nautical miles (nm)
+- d_h := Geodesic distance between two aircraft measured in nautical miles (nm)
 - d_v := absolute vertical separation between two aircraft measured in feet (ft)
 
 A general class of metrics takes the form:
+
 - m(d_h, d_v) = max{ m_h(d_h), m_v(d_v) }
 
 Where m_h and m_v are functions depending on horizontal & vertical distance, respectively.
-
-For the simplest metric, define v(d, c, C), a function of distance d and parameters c < C, by:
-- v(d) = 0, if d >= C
-- v(d) = -1, if d < c
-- v(d) = (d - c)/(C - c) -1, otherwise.
-
-The simplest aircraft separation metric is then defined by:
-- m(d_h, d_v) = max{ v(d_h, c_h, C_h), v(d_v, c_v, C_V) }
-
-where:
-- The c_h (horizontal) and c_v (vertical) thresholds are part of the definition
-of "loss of separation", i.e. they're given constants: c_h = 5 nm, c_v = 1000 ft.
-- the C_h and C_v thresholds are arbitrary parameters (except for the requirement
-that C_h > c_h and C_v > c_v). Default values are double the corresponding lower thresholds.
-
-An alternative metric (in the same class) would define m_h and m_v as smooth
-functions, each with a negative asymptote at zero, so the reward tends
-to minus infinity as the separation decreases to zero.
 """
 
 import aviary.metrics.utils as utils
@@ -39,9 +21,11 @@ hor_warn_dist = 2 * hor_min_dist
 
 def score(d, c, C):
     """
-    Function for scoring distance d.
-    Gives penalty for d < C and max penalty for d < c.
+    - score(d) = 0, if d >= C
+    - score(d) = -1, if d < c
+    - score(d) = (d - c)/(C - c) -1, otherwise.
     """
+
     assert d >= 0, f"Incorrent value {d} for distance"
     assert c < C, f"Expected {c} < {C}"
     if d < c:
@@ -55,9 +39,9 @@ def vertical_separation_score(alt1, alt2):
     """
     Basic vertical separation metric.
 
-    :param alt1: altitude in metres
-    :param alt2: altitude in metres
-    :return:
+    :param alt1: Aircraft 1 altitude in metres.
+    :param alt2: Aircraft 2 altitude in metres.
+    :return: Score based on vertical distance between aircraft.
     """
 
     vert_dist_ft = abs(alt1 - alt2) * utils._SCALE_METRES_TO_FEET
@@ -67,7 +51,12 @@ def vertical_separation_score(alt1, alt2):
 def horizontal_separation_score(lon1, lat1, lon2, lat2):
     """
     Basic horizontal separation metric.
-    :return:
+
+    :param lon1: Aircraft 1 longitude.
+    :param lat1: Aircraft 1 latitude.
+    :param lon2: Aircraft 2 longitude.
+    :param lat2: Aircraft 2 latitude.
+    :return: Score based on horizontal distance between aircraft.
     """
 
     hor_dist_nm = utils.horizontal_distance_nm(lon1, lat1, lon2, lat2)
@@ -76,15 +65,15 @@ def horizontal_separation_score(lon1, lat1, lon2, lat2):
 
 def pairwise_separation_metric(lon1, lat1, alt1, lon2, lat2, alt2):
     """
-    Combined score based on horizontal and vertical separation.
+    Aircraft separation metric.
 
-    :param lon1: aircraft 1 longitude
-    :param lat1: aircraft 1 latitude
-    :param alt1: aircraft 1 altitude in metres
-    :param lon2: aircraft 2 longitude
-    :param lat2: aircraft 2 latitude
-    :param alt2: aircraft 2 altitude in metres
-    :return:
+    :param lon1: Aircraft 1 longitude.
+    :param lat1: Aircraft 1 latitude.
+    :param alt1: Aircraft 1 altitude (in metres).
+    :param lon2: Aircraft 2 longitude.
+    :param lat2: Aircraft 2 latitude.
+    :param alt2: Aircraft 2 altitude (in metres).
+    :return: Combined score based on horizontal and vertical separation between aircraft.
     """
 
     hor_sep = horizontal_separation_score(lon1, lat1, lon2, lat2)
