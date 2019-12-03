@@ -48,7 +48,11 @@ def get_midpoint(current_lon, current_lat, previous_lon, previous_lat):
 
     # see: https://pyproj4.github.io/pyproj/dev/_modules/pyproj/geod.html#Geod.npts
     lonlats = utils._WGS84.npts(
-        current_lon, current_lat, previous_lon, previous_lat, npts=1
+        lon1=current_lon,
+        lat1=current_lat,
+        lon2=previous_lon,
+        lat2=previous_lat,
+        npts=1
     )
     return lonlats[0]
 

@@ -11,7 +11,7 @@ _ONE_NM = 1852  # Meters
 def horizontal_distance_m(lon1, lat1, lon2, lat2):
     """Horizontal distance (metres) between two (lon/lat) points"""
 
-    _, _, hor_dist_m = _WGS84.inv(lon1, lat1, lon2, lat2)
+    _, _, hor_dist_m = _WGS84.inv(lons1=lon1, lats1=lat1, lons2=lon2, lats2=lat2)
     return hor_dist_m
 
 
