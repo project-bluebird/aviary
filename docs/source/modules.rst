@@ -10,4 +10,6 @@ Subpackages
 
   aviary.parser
 
+  aviary.metrics
+
   utils
