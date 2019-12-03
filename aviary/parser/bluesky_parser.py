@@ -306,9 +306,9 @@ class ScenarioParser:
 
     def write_bluesky_scenario(self, filename, path="."):
 
-        extension = os.path.splitext(filename)[1]
+        name, extension = os.path.splitext(filename)
         if extension.lower() != BS_SCENARIO_EXTENSION.lower():
-            filename = filename + "." + BS_SCENARIO_EXTENSION
+            filename = name + "." + BS_SCENARIO_EXTENSION
 
         file = os.path.join(path, filename)
         with open(file, "w") as f:
