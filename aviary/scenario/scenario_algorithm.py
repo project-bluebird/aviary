@@ -16,7 +16,7 @@ class ScenarioAlgorithm(ABC):
     # Default parameters:
     default_aircraft_types = ["B77W", "A320", "A346"] # Types of aircraft available (by default).
     default_flight_levels = [200, 240, 280, 320, 360, 400]
-    callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"]
+    default_callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"]
 
     def __init__(
         self, sector_element, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
@@ -39,7 +39,7 @@ class ScenarioAlgorithm(ABC):
         self.flight_levels = flight_levels
 
         if callsign_prefixes is None:
-            callsign_prefixes = ScenarioAlgorithm.callsign_prefixes
+            callsign_prefixes = ScenarioAlgorithm.default_callsign_prefixes
         self.callsign_prefixes = callsign_prefixes
 
     @property
