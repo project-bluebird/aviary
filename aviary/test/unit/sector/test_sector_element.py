@@ -8,6 +8,11 @@ import geojson
 import aviary.sector.sector_element as se
 import aviary.geo.geo_helper as gh
 
+def test_sector_element():
+
+    target = se.SectorElement(shape = "I", name = "I-Sector", origin = (0, 40), lower_limit=50, upper_limit=100)
+    assert isinstance(target, se.SectorElement)
+
 def test_centre_point(i_element):
 
     result = i_element.centre_point()

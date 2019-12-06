@@ -13,7 +13,15 @@ import os.path
 from shapely.geometry import mapping, Point
 
 import aviary.geo.geo_helper as gh
+import aviary.sector.sector_shape as ss
 from aviary.geo.geo_helper import GeoHelper
+
+# DEFAULTS
+DEFAULT_SECTOR_NAME = "SECTOR"
+DEFAULT_ORIGIN = (51.5, -0.1275)
+DEFAULT_LOWER_LIMIT = 60
+DEFAULT_UPPER_LIMIT = 400
+
 
 # CONSTANTS
 ELLIPSOID = "WGS84"
@@ -48,7 +56,12 @@ POINT_VALUE = "Point"
 class SectorElement():
     """An elemental sector of airspace"""
 
-    def __init__(self, name, origin, shape, lower_limit, upper_limit):
+    def __init__(self,
+                 shape,
+                 name = DEFAULT_SECTOR_NAME,
+                 origin = DEFAULT_ORIGIN,
+                 lower_limit = DEFAULT_LOWER_LIMIT,
+                 upper_limit = DEFAULT_UPPER_LIMIT):
 
         self.name = name
 
@@ -57,9 +70,26 @@ class SectorElement():
         proj_string = f'+proj=stere +lat_0={origin[0]} +lon_0={origin[1]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
 
         self.projection = Proj(proj_string, preserve_units=True)
+
+        # Handle string shape argument.
+        if isinstance(shape, str):
+            shape = SectorElement.parse_shape(shape)
+
         self.shape = shape
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
+
+
+    @staticmethod
+    def parse_shape(shape):
+        """Parse a string shape into a SectorShape object."""
+        if shape == 'I':
+            return ss.IShape()
+        if shape == 'X':
+            return ss.XShape()
+        if shape == 'Y':
+            return ss.YShape()
+        raise ValueError(f'Failed to parse shape. Invalid shape type: {shape}.')
 
 
     def centre_point(self):
