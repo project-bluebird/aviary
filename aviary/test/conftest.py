@@ -18,7 +18,7 @@ def x_element():
     shape = ss.XShape()
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
@@ -31,7 +31,7 @@ def i_element():
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
@@ -44,7 +44,7 @@ def y_element():
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(name, origin, shape, lower_limit, upper_limit)
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
