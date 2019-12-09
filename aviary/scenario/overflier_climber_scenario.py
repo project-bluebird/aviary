@@ -5,9 +5,12 @@ Scenario generation algorithm with a single overflier and a single climber.
 # email: thobson@turing.ac.uk
 
 import random
+import warnings
+
+import aviary.scenario.scenario_generator as sg
+import aviary.trajectory.trajectory_predictor as tp
 
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
-import aviary.scenario.scenario_generator as sg
 from aviary.geo.geo_helper import GeoHelper
 
 class OverflierClimberScenario(ScenarioAlgorithm):
@@ -15,17 +18,23 @@ class OverflierClimberScenario(ScenarioAlgorithm):
     An overflier-climber scenario generator for I, X, Y airspace sectors
 
     Args:
-        trajectory_predictor: Simple trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
+        trajectory_predictor: Trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
 
     Attributes:
-        trajectory_predictor: Simple trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
+        trajectory_predictor: Trajectory predictor offering cruise speed, climb time and downtrack distance estimates.
     """
 
 
-    def __init__(self, trajectory_predictor, **kwargs):
+    def __init__(self, trajectory_predictor = tp.global_trajectory_predictor, **kwargs):
 
         # Pass the keyword args (including the random seed) to the superclass constructor.
         super().__init__(**kwargs)
+
+        # Issue a warning if the trajectory_predictor is the default (global)
+        # variable and it has not yet been initialised (i.e. is None), issue a warning.
+        if trajectory_predictor is tp.global_trajectory_predictor:
+            if trajectory_predictor is None:
+                warnings.warn("Uninitialised global trajectory predictor in use.")
 
         self.trajectory_predictor = trajectory_predictor
 

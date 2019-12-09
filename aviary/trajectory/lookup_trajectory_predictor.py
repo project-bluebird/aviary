@@ -1,10 +1,13 @@
 """
-Provides simple trajectory prediction estimates.
+Provides simple trajectory prediction estimates via lookup tables.
 """
 # author: Tim Hobson
 # email: thobson@turing.ac.uk
 
-class LookupTrajectoryPredictor():
+
+import aviary.trajectory.trajectory_predictor as tp
+
+class LookupTrajectoryPredictor(tp.TrajectoryPredictor):
     """A class providing simple trajectory prediction via lookup tables for cruise speed, climb time & downtrack distance.
 
     Args:
@@ -49,15 +52,17 @@ class LookupTrajectoryPredictor():
         return self.downtrack_distance_lookup.at[flight_level, aircraft_type]
 
 
-    def climb_time_between_levels(self, lower_level, upper_level, aircraft_type):
-        """Computes the time taken to climb between two levels"""
+    @staticmethod
+    def load_trajectory_lookups(cruise_speed_lookup, climb_time_lookup, downtrack_distance_lookup):
+        """
+        Static method to load trajectory lookup data. Assigns to the global_trajectory_predictor variable.
 
-        return self.climb_time_to_level(upper_level, aircraft_type) - self.climb_time_to_level(lower_level, aircraft_type)
+        :param cruise_speed_lookup (pandas data frame): Lookup table for cruise speeds by flight level & aircraft type. 
+        :param climb_time_lookup (pandas data frame): Lookup table for climb time by flight level & aircraft type. 
+        :param downtrack_distance_lookup (pandas data frame): Lookup table for downtrack distance in the climb by flight level & aircraft type.
+        """
 
-
-    def downtrack_distance_between_levels(self, lower_level, upper_level, aircraft_type):
-        """Computes the downtrack distance in metres between two levels in the climb"""
-
-        return self.downtrack_distance_to_level(upper_level, aircraft_type) - self.downtrack_distance_to_level(lower_level, aircraft_type)
-
-
+        # Assign to the global trajectory predictor variable.
+        tp.global_trajectory_predictor = LookupTrajectoryPredictor(cruise_speed_lookup=cruise_speed_lookup,
+                                                                   climb_time_lookup=climb_time_lookup,
+                                                                   downtrack_distance_lookup=downtrack_distance_lookup)
