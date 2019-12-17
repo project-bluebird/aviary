@@ -158,13 +158,12 @@ else:
     args.filename_prefix = args.filename_prefix + "-extended-" + str(int(args.thinking_time))
     algorithm = OverflierClimberExtendedScenario
 
-scenario_algorithm = algorithm(**kwargs)
+scenario_algorithm = algorithm(**kwargs, sector_element = sector_element)
 
 #
 # Construct the scenario generator.
 #
-scenario_generator = ScenarioGenerator(sector_element = sector_element,
-                                       scenario_algorithm = scenario_algorithm)
+scenario_generator = ScenarioGenerator(scenario_algorithm = scenario_algorithm)
 
 try:
     scenario = scenario_generator.generate_scenario(duration = 1, seed = args.seed)
