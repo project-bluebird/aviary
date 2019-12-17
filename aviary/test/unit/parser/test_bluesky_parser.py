@@ -3,7 +3,7 @@ import pytest
 import os
 from io import StringIO
 
-import aviary.parser.bluesky_parser as sp
+import aviary.parser.bluesky_parser as bp
 
 import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_element as se
@@ -24,91 +24,7 @@ overflier_climber_scenario_json = """
 
 @pytest.fixture(scope="function")
 def target():
-    return sp.ScenarioParser(StringIO(i_sector_geojson), StringIO(overflier_climber_scenario_json))
-
-
-def test_features_of_type(target):
-
-    # Get the (singleton) list of sector features.
-    result = target.features_of_type(se.SECTOR_VALUE)
-
-    assert isinstance(result, list)
-    assert len(result) == 1
-
-    assert isinstance(result[0], dict)
-    assert sorted(result[0].keys()) == sorted([se.TYPE_KEY, se.PROPERTIES_KEY, se.GEOMETRY_KEY])
-
-
-def test_fix_features(target):
-
-    result = target.fix_features()
-
-    assert isinstance(result, list)
-    assert len(result) == 5
-    for fix in result:
-        assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, se.PROPERTIES_KEY, se.GEOMETRY_KEY])
-
-
-def test_properties_of_type(target):
-
-    result = target.properties_of_type(se.SECTOR_VALUE)
-
-    assert isinstance(result, list)
-    assert len(result) == 1
-    assert isinstance(result[0], dict)
-    assert sorted(result[0].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY, se.CHILDREN_KEY])
-
-
-def test_sector_volume_properties(target):
-
-    result = target.sector_volume_properties()
-
-    assert isinstance(result, list)
-    assert len(result) == 1
-    assert isinstance(result[0], dict)
-    assert sorted(result[0].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY, se.CHILDREN_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY])
-
-
-def test_geometris_of_type(target):
-
-    result = target.geometries_of_type(se.POINT_VALUE)
-
-    assert isinstance(result, list)
-    assert len(result) == 5
-    for fix in result:
-        assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
-
-
-def test_polygon_geometries(target):
-
-    result = target.polygon_geometries()
-
-    assert isinstance(result, list)
-    assert len(result) == 1
-    assert isinstance(result[0], dict)
-
-
-def test_sector_polygon(target):
-
-    result = target.sector_polygon()
-
-    assert isinstance(result, dict)
-    assert sorted(result.keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
-
-    # coordinates are nested list - at lowest level should have 5 coordinates
-    # the first and last coordinate is the same
-    coords = result[gh.COORDINATES_KEY]
-    while len(coords) == 1:
-        coords = coords[0]
-    assert len(coords) == 5
-    assert coords[0] == coords[-1]
-
-
-def test_sector_name(target):
-    result = target.sector_name()
-    assert result == "test_sector"
+    return bp.BlueskyParser(StringIO(i_sector_geojson), StringIO(overflier_climber_scenario_json))
 
 
 def test_pan_lines(target):
@@ -135,8 +51,8 @@ def test_define_waypoint_lines(target):
 
     # All waypoint definitions begin with "00:00:00.00>DEFWPT"
     for x in result:
-        assert x[0:len(sp.BS_DEFWPT_PREFIX)] == sp.BS_DEFWPT_PREFIX
-        assert x[len(sp.BS_DEFWPT_PREFIX):(len(sp.BS_DEFWPT_PREFIX) + len(sp.BS_DEFINE_WAYPOINT))] == sp.BS_DEFINE_WAYPOINT
+        assert x[0:len(bp.BS_DEFWPT_PREFIX)] == bp.BS_DEFWPT_PREFIX
+        assert x[len(bp.BS_DEFWPT_PREFIX):(len(bp.BS_DEFWPT_PREFIX) + len(bp.BS_DEFINE_WAYPOINT))] == bp.BS_DEFINE_WAYPOINT
 
 
 def test_all_lines(target):
@@ -200,7 +116,7 @@ def test_create_aircraft_lines(target):
 
     # All create aircraft commands begin with "HH:MM:SS.00>CRE"
     for x in result:
-        assert x[len(sp.BS_DEFWPT_PREFIX):(len(sp.BS_DEFWPT_PREFIX) + len(sp.BS_CREATE_AIRCRAFT))] == sp.BS_CREATE_AIRCRAFT
+        assert x[len(bp.BS_DEFWPT_PREFIX):(len(bp.BS_DEFWPT_PREFIX) + len(bp.BS_CREATE_AIRCRAFT))] == bp.BS_CREATE_AIRCRAFT
 
 
 def test_add_aircraft_waypoint_lines(target):
