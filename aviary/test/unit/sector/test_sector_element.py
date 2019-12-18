@@ -121,7 +121,7 @@ def test_geo_interface(y_element):
 
     result = y_element.__geo_interface__
 
-    assert sorted(result.keys()) == [se.FEATURES_KEY]
+    assert sorted(result.keys()) == [se.FEATURES_KEY, se.TYPE_KEY]
 
     # The result contains one feature per route and per waypoint, plus one for the sector and one for the sector boundary/volume.
     assert len(result[se.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 2
@@ -155,7 +155,7 @@ def test_serialisation(x_element):
     deserialised = geojson.loads(serialised)
 
     assert isinstance(deserialised, dict)
-    assert list(deserialised.keys()) == [se.FEATURES_KEY]
+    assert list(deserialised.keys()) == [se.TYPE_KEY, se.FEATURES_KEY]
 
 
 def test_write_geojson(x_element):
