@@ -45,6 +45,7 @@ CHILDREN_KEY = "children"
 CHILDREN_NAMES_KEY = "names"
 
 # JSON values
+FEATURE_COLLECTION = "FeatureCollection"
 FEATURE_VALUE = "Feature"
 SECTOR_VALUE = "SECTOR"
 FIX_VALUE = "FIX"
@@ -133,7 +134,7 @@ class SectorElement():
         """
 
         # Build the list of features: one for the boundary, one for each fix and one for each route.
-        geojson = {FEATURES_KEY: []}
+        geojson = {TYPE_KEY: FEATURE_COLLECTION, FEATURES_KEY: []}
         geojson[FEATURES_KEY].append(self.sector_geojson())
         geojson[FEATURES_KEY].append(self.boundary_geojson())
         geojson[FEATURES_KEY].extend([route.geojson() for route in self.routes()])

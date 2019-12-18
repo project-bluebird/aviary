@@ -59,7 +59,7 @@ def main():
     origin = tuple([float(x) for x in args.origin.split(",")])
 
     try:
-        sector = SectorElement(args.sector_name, origin, shape, args.lower_limit, args.upper_limit)
+        sector = SectorElement(name=args.sector_name, origin=origin, shape=shape, lower_limit=args.lower_limit, upper_limit=args.upper_limit)
     except Exception as ex:
         print('ERROR: Sector construction attempt aborted due to error:')
         print(ex)
