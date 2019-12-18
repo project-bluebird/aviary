@@ -118,3 +118,13 @@ class SectorParser:
 
         polygon = geom.Polygon(coords)
         return polygon.centroid
+
+    def sector_shape(self):
+        """
+        Returns the sector shape.
+        """
+
+        # TODO: this is required (or desirable) for SectorElement deserialise method
+        # but it may be better to instead have a "secto_type" method that just returns a string I, X or Y.
+        pass
+

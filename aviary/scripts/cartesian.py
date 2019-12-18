@@ -12,8 +12,8 @@ import argparse, sys
 from aviary.scenario.cartesian_scenario import CartesianScenario
 from aviary.scenario.scenario_generator import ScenarioGenerator
 
-import aviary.sector.sector_shape as ss
-from aviary.sector.sector_element import SectorElement
+import aviary.sector.sector_element as se
+from aviary.sector.sector_shape import SectorType
 
 FILENAME_PREFIX = "cartesian-scenario"
 
@@ -45,9 +45,8 @@ args=parser.parse_args()
 print(">>>>> Generating Cartesian scenario >>>>>")
 
 # Default parameters:
-origin = (51.5, -0.1275)
-lower_limit = 60
-upper_limit = 460
+lower_limit = se.DEFAULT_LOWER_LIMIT
+upper_limit = se.DEFAULT_UPPER_LIMIT
 
 default_flight_levels = list(range(lower_limit, upper_limit, 10))
 
@@ -79,25 +78,16 @@ else:
 # Construct the sector.
 #
 
-# Construct the sector shape.
-if args.sector_type == 'I':
-    shape = ss.IShape()
-    name = "TERRAFIRMA"
-elif args.sector_type == 'X':
-    shape = ss.XShape()
-    name = "HELL"
-elif args.sector_type == 'Y':
-    shape = ss.YShape()
-    name = "HEAVEN"
-else:
-    raise ValueError(f'Invalid sector_type argument: {args.sector_type}.')
-
 if any([fl < lower_limit for fl in flight_levels]):
     raise ValueError(f'Flight levels must not be less than the sector lower limit of {lower_limit}')
 if any([fl > upper_limit for fl in flight_levels]):
     raise ValueError(f'Flight levels must not exceed the sector lower limit of {upper_limit}')
 
-sector_element = SectorElement(name, origin, shape, lower_limit, upper_limit)
+sector_element = se.SectorElement(type = SectorType[args.sector_type],
+                               name = se.DEFAULT_SECTOR_NAME,
+                               origin = se.DEFAULT_ORIGIN,
+                               lower_limit = lower_limit,
+                               upper_limit = lower_limit)
 
 #
 # Construct the Cartesian scenario algorithm.

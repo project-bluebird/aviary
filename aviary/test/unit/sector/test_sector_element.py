@@ -6,12 +6,40 @@ import math
 import geojson
 
 import aviary.sector.sector_element as se
+import aviary.sector.sector_shape as ss
 import aviary.geo.geo_helper as gh
 
 def test_sector_element():
 
-    target = se.SectorElement(shape = "I", name = "I-Sector", origin = (0, 40), lower_limit=50, upper_limit=100)
+    target = se.SectorElement(type = ss.SectorType.I,
+                              name = "I-Sector",
+                              origin = (0, 40),
+                              lower_limit=50,
+                              upper_limit=100)
     assert isinstance(target, se.SectorElement)
+
+def test_sector_element_with_names():
+
+    route_names = ['up', 'down']
+    fix_names = ['a', 'b', 'c', 'd', 'e']
+
+    target = se.SectorElement(type = ss.SectorType.I,
+                              name = "I-Sector-with-names",
+                              origin = (0, 40),
+                              fix_names = fix_names,
+                              route_names = route_names)
+
+    assert isinstance(target, se.SectorElement)
+    assert target.shape.sector_type == ss.SectorType.I
+    assert target.routes()[0].name == 'UP'
+    assert target.routes()[1].name == 'DOWN'
+
+    assert 'A' in target.shape.fixes
+    assert 'B' in target.shape.fixes
+    assert 'C' in target.shape.fixes
+    assert 'D' in target.shape.fixes
+    assert 'E' in target.shape.fixes
+
 
 def test_centre_point(i_element):
 
@@ -171,3 +199,12 @@ def test_write_geojson(x_element):
 
     # Clean up.
     os.remove(file)
+
+
+def test_deserialise(i_sector_geojson):
+
+    # TODO.
+    # result = se.SectorElement.deserialise(i_sector_geojson)
+    #
+    # assert isinstance(result, se.SectorElement)
+    pass

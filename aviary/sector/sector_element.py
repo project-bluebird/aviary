@@ -14,11 +14,13 @@ from shapely.geometry import mapping, Point
 
 import aviary.geo.geo_helper as gh
 import aviary.sector.sector_shape as ss
+import aviary.parser.sector_parser as sp
 from aviary.geo.geo_helper import GeoHelper
+#from aviary.sector.sector_element import SectorElement
 
 # DEFAULTS
 DEFAULT_SECTOR_NAME = "SECTOR"
-DEFAULT_ORIGIN = (51.5, -0.1275)
+DEFAULT_ORIGIN = (-0.1275, 51.5)
 DEFAULT_LOWER_LIMIT = 60
 DEFAULT_UPPER_LIMIT = 400
 
@@ -58,39 +60,37 @@ class SectorElement():
     """An elemental sector of airspace"""
 
     def __init__(self,
-                 shape,
+                 type,
                  name = DEFAULT_SECTOR_NAME,
                  origin = DEFAULT_ORIGIN,
                  lower_limit = DEFAULT_LOWER_LIMIT,
-                 upper_limit = DEFAULT_UPPER_LIMIT):
+                 upper_limit = DEFAULT_UPPER_LIMIT,
+                 **kwargs):
+        """
+        SectorElement constructor.
+
+        :param type: a SectorType (enum)
+        :param name: the name of the sector element
+        :param origin: the origin coordinates as a (longitude, latitude) tuple
+        :param lower_limit: the lower flight level limit
+        :param upper_limit: the upper flight level limit
+        """
 
         self.name = name
 
         # Construct the proj-string (see https://proj.org/usage/quickstart.html)
         # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
-        proj_string = f'+proj=stere +lat_0={origin[0]} +lon_0={origin[1]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
+        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
 
         self.projection = Proj(proj_string, preserve_units=True)
 
-        # Handle string shape argument.
-        if isinstance(shape, str):
-            shape = SectorElement.parse_shape(shape)
+        # Construct the shape.
+        f = ss.SectorShape.shape_constructor(type)
+        shape = f(**kwargs)
 
         self.shape = shape
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
-
-
-    @staticmethod
-    def parse_shape(shape):
-        """Parse a string shape into a SectorShape object."""
-        if shape == 'I':
-            return ss.IShape()
-        if shape == 'X':
-            return ss.XShape()
-        if shape == 'Y':
-            return ss.YShape()
-        raise ValueError(f'Failed to parse shape. Invalid shape type: {shape}.')
 
 
     def centre_point(self):
@@ -112,10 +112,12 @@ class SectorElement():
     def routes(self):
         """Returns the valid routes through the sector
 
-        Each route is a list of fixes, and each fix is a (string, Point) pair
+        Each route contains a list of fixes, and each fix is a (string, Point) pair
         where the string is the name of the fix and the Point is its geographical longitude-latitude coordinate.
 
         Note: the order of coordinates in a Point is longitude then latitude.
+
+        :return: A list of Route instances.
         """
 
         # Return route objects.
@@ -265,3 +267,42 @@ class SectorElement():
             dump(self, f, indent = 4)
 
         return file
+
+
+    @staticmethod
+    def deserialise(sector_geojson):
+        """
+        Deserialises a SectorElement instance from a GeoJSON.
+
+        :param sector_geojson: Text stream from which a sector GeoJSON may be read.
+        :return: a SectorElement instance
+        """
+
+        parser = sp.SectorParser(sector_geojson)
+
+        # TODO NOT YET IMPLEMENTED.
+        # TODO:
+        # PROBLEM:
+        # We need to construct the shape so it matches the one given in the geojson,
+        # but we have geographic information (as opposed to 2D geometric) so we
+        # don't have the info in the form need for the SectorShape constructor
+        # (or IShape/XShape/YShape constructors).
+        # SOLUTION:
+        # include those parameters in the geojson as additional elements, for the purpose of deserialisation.
+
+
+        name = parser.sector_name()
+        shape = parser.sector_shape() # TODO: NYI
+        origin = parser.sector_centroid()
+        lower_limit = DEFAULT_LOWER_LIMIT # TODO
+        upper_limit = DEFAULT_UPPER_LIMIT # TODO
+
+        return SectorElement(shape = shape,
+                             name = name,
+                             origin = origin,
+                             lower_limit = lower_limit,
+                             upper_limit = upper_limit)
+
+
+
+

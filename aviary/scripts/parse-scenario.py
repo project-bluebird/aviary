@@ -8,7 +8,7 @@ Author: Tim Hobson, thobson@turing.ac.uk
 import traceback
 import argparse, sys
 
-from aviary.parser.bluesky_parser import ScenarioParser
+from aviary.parser.bluesky_parser import BlueskyParser
 
 #
 # Help and usage instructions.
@@ -36,7 +36,7 @@ print(">>>>> Parsing scenario >>>>>")
 #
 # Construct the scenario parser.
 #
-scenario_parser = ScenarioParser(
+scenario_parser = BlueskyParser(
     sector_geojson = open(args.sector_geojson, "r"),
     scenario_json = open(args.scenario_json, "r")
 )

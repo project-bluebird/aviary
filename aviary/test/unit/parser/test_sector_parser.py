@@ -102,5 +102,5 @@ def test_sector_name(target):
 
 def test_sector_centroid(target):
     result = target.sector_centroid()
-    assert result.coords[0] == pytest.approx(se.DEFAULT_ORIGIN[::-1], 0.0001)
+    assert result.coords[0] == pytest.approx(se.DEFAULT_ORIGIN, 0.0001)
 

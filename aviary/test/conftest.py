@@ -10,41 +10,44 @@ import aviary.scenario.poisson_scenario as ps
 import aviary.scenario.overflier_climber_scenario as ocs
 
 @pytest.fixture(scope="function")
-def x_element():
-    """Test fixture: an X-shaped sector element object."""
-
-    name = "HELL"
-    origin = (51.5, -0.1275)
-    shape = ss.XShape()
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
-
-
-@pytest.fixture(scope="function")
 def i_element():
     """Test fixture: an I-shaped sector element object."""
 
+    type = ss.SectorType.I
     name = "EARTH"
-    origin = (51.5, -0.1275)
-    shape = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = ['up', 'down'])
+    origin = (-0.1275, 51.5)
+    fix_names = ['a', 'b', 'c', 'd', 'e']
+    route_names = ['up', 'down']
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit,
+                            fix_names = fix_names, route_names = route_names)
+
+
+@pytest.fixture(scope="function")
+def x_element():
+    """Test fixture: an X-shaped sector element object."""
+
+    type = ss.SectorType.X
+    name = "HELL"
+    origin = (-0.1275, 51.5)
+    lower_limit = 140
+    upper_limit = 400
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
 def y_element():
     """Test fixture: a Y-shaped sector element object."""
 
+    type = ss.SectorType.Y
     name = "HEAVEN"
-    origin = (51.5, -0.1275)
-    shape = ss.YShape()
+    origin = (-0.1275, 51.5)
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")

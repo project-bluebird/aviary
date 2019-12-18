@@ -43,23 +43,16 @@ def main():
 
     print(">>>>> Generating sector GeoJSON >>>>>")
 
-    # Construct the sector shape.
-    if args.sector_type == 'I':
-        shape = ss.IShape()
-    elif args.sector_type == 'X':
-        shape = ss.XShape()
-    elif args.sector_type == 'Y':
-        shape = ss.YShape()
-    else:
-        raise ValueError(f'Invalid sector_type argument: {args.sector_type}.')
-
-    # Construct the sector.
-
     # Default parameters:
     origin = tuple([float(x) for x in args.origin.split(",")])
 
+    # Construct the sector.
     try:
-        sector = SectorElement(name=args.sector_name, origin=origin, shape=shape, lower_limit=args.lower_limit, upper_limit=args.upper_limit)
+        sector = SectorElement(type = ss.SectorType[args.sector_type],
+                               name = args.sector_name,
+                               origin = origin,
+                               lower_limit = args.lower_limit,
+                               upper_limit = args.upper_limit)
     except Exception as ex:
         print('ERROR: Sector construction attempt aborted due to error:')
         print(ex)
