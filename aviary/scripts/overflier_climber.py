@@ -135,7 +135,7 @@ if any([fl < lower_limit for fl in flight_levels]):
 if any([fl > upper_limit for fl in flight_levels]):
     raise ValueError(f'Flight levels must not exceed the sector lower limit of {upper_limit}')
 
-sector_element = SectorElement(name, origin, shape, lower_limit, upper_limit)
+sector_element = SectorElement(name=name, origin=origin, shape=shape, lower_limit=lower_limit, upper_limit=upper_limit)
 
 #
 # Construct the overflier-climber scenario algorithm.
@@ -158,13 +158,12 @@ else:
     args.filename_prefix = args.filename_prefix + "-extended-" + str(int(args.thinking_time))
     algorithm = OverflierClimberExtendedScenario
 
-scenario_algorithm = algorithm(**kwargs)
+scenario_algorithm = algorithm(**kwargs, sector_element = sector_element)
 
 #
 # Construct the scenario generator.
 #
-scenario_generator = ScenarioGenerator(sector_element = sector_element,
-                                       scenario_algorithm = scenario_algorithm)
+scenario_generator = ScenarioGenerator(scenario_algorithm = scenario_algorithm)
 
 try:
     scenario = scenario_generator.generate_scenario(duration = 1, seed = args.seed)
