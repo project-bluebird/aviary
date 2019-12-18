@@ -9,6 +9,7 @@ from pyproj import Proj
 from geojson import dump
 
 import os.path
+from io import StringIO
 
 from shapely.geometry import mapping, Point
 
@@ -22,7 +23,7 @@ from aviary.geo.geo_helper import GeoHelper
 DEFAULT_SECTOR_NAME = "SECTOR"
 DEFAULT_ORIGIN = (-0.1275, 51.5)
 DEFAULT_LOWER_LIMIT = 60
-DEFAULT_UPPER_LIMIT = 400
+DEFAULT_UPPER_LIMIT = 460
 
 
 # CONSTANTS
@@ -32,6 +33,8 @@ GEOJSON_EXTENSION = "geojson"
 # JSON keys
 FEATURES_KEY = "features"
 NAME_KEY = "name"
+SHAPE_KEY = "shape"
+ORIGIN_KEY = "origin"
 TYPE_KEY = "type"
 PROPERTIES_KEY = "properties"
 LOWER_LIMIT_KEY = "lower_limit"
@@ -77,6 +80,7 @@ class SectorElement():
         """
 
         self.name = name
+        self.origin = origin
 
         # Construct the proj-string (see https://proj.org/usage/quickstart.html)
         # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
@@ -175,6 +179,8 @@ class SectorElement():
             PROPERTIES_KEY: {
                 NAME_KEY: self.name,
                 TYPE_KEY: SECTOR_VALUE,
+                SHAPE_KEY: self.shape.sector_type.name,
+                ORIGIN_KEY: self.origin,
                 CHILDREN_KEY: {
                     SECTOR_VOLUME_VALUE : {CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
                     ROUTE_VALUE: {CHILDREN_NAMES_KEY: self.shape.route_names}
@@ -278,30 +284,14 @@ class SectorElement():
         :return: a SectorElement instance
         """
 
-        parser = sp.SectorParser(sector_geojson)
-
-        # TODO NOT YET IMPLEMENTED.
-        # TODO:
-        # PROBLEM:
-        # We need to construct the shape so it matches the one given in the geojson,
-        # but we have geographic information (as opposed to 2D geometric) so we
-        # don't have the info in the form need for the SectorShape constructor
-        # (or IShape/XShape/YShape constructors).
-        # SOLUTION:
-        # include those parameters in the geojson as additional elements, for the purpose of deserialisation.
-
-
-        name = parser.sector_name()
-        shape = parser.sector_shape() # TODO: NYI
-        origin = parser.sector_centroid()
-        lower_limit = DEFAULT_LOWER_LIMIT # TODO
-        upper_limit = DEFAULT_UPPER_LIMIT # TODO
-
-        return SectorElement(shape = shape,
-                             name = name,
-                             origin = origin,
-                             lower_limit = lower_limit,
-                             upper_limit = upper_limit)
+        parser = sp.SectorParser(StringIO(sector_geojson))
+        return SectorElement(type = parser.sector_type(),
+                             name = parser.sector_name(),
+                             origin = parser.sector_origin().coords[0],
+                             lower_limit = parser.sector_lower_limit(),
+                             upper_limit = parser.sector_upper_limit(),
+                             fix_names = parser.fix_names(),
+                             route_names = parser.route_names())
 
 
 

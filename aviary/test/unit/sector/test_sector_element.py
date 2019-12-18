@@ -83,9 +83,10 @@ def test_sector_geojson(i_element):
 
     assert isinstance(result[se.PROPERTIES_KEY], dict)
     assert sorted(result[se.PROPERTIES_KEY].keys()) == \
-           sorted([se.CHILDREN_KEY, se.NAME_KEY, se.TYPE_KEY])
+           sorted([se.CHILDREN_KEY, se.NAME_KEY, se.SHAPE_KEY, se.ORIGIN_KEY, se.TYPE_KEY])
 
     assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.SECTOR_VALUE
+    assert result[se.PROPERTIES_KEY][se.SHAPE_KEY] == "I"
 
     assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY], dict)
     assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY].keys()) == \
@@ -203,8 +204,11 @@ def test_write_geojson(x_element):
 
 def test_deserialise(i_sector_geojson):
 
-    # TODO.
-    # result = se.SectorElement.deserialise(i_sector_geojson)
-    #
-    # assert isinstance(result, se.SectorElement)
-    pass
+    result = se.SectorElement.deserialise(i_sector_geojson)
+
+    assert isinstance(result, se.SectorElement)
+    assert result.origin == se.DEFAULT_ORIGIN
+    assert result.shape.sector_type == ss.SectorType.I
+
+    # Check that re-serialisation produces the original GeoJSON string.
+    assert str(geojson.dumps(result)) == i_sector_geojson.strip()

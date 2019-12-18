@@ -2,6 +2,7 @@
 Sector (GeoJSON) parser.
 """
 
+import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
 import aviary.geo.geo_helper as gh
 
@@ -39,14 +40,6 @@ class SectorParser:
             self.sector,
         )
 
-    def fix_features(self):
-        """
-        Filters the features to retain those with 'type': 'FIX'.
-        Returns a list of dictionaries.
-        """
-
-        return self.features_of_type(type_value=se.FIX_VALUE)
-
     def properties_of_type(self, type_value):
         """
         Filters the features to retain those whose 'type', inside a 'properties' element, matches the given type_value.
@@ -57,6 +50,28 @@ class SectorParser:
             f"$..{se.FEATURES_KEY}[?@.{se.PROPERTIES_KEY}.{se.TYPE_KEY}=={type_value}].{se.PROPERTIES_KEY}",
             self.sector,
         )
+
+    def fix_features(self):
+        """
+        Filters the features to retain those with 'type': 'FIX'.
+        Returns a list of dictionaries.
+        """
+
+        return self.features_of_type(type_value=se.FIX_VALUE)
+
+    def fix_names(self):
+        """
+        Returns the names of the fixes in the sector as a list of strings.
+        """
+
+        return [p[se.NAME_KEY] for p in self.properties_of_type(type_value=se.FIX_VALUE)]
+
+    def route_names(self):
+        """
+        Returns the names of the routes in the sector as a list of strings.
+        """
+
+        return [p[se.NAME_KEY] for p in self.properties_of_type(type_value=se.ROUTE_VALUE)]
 
     def sector_volume_properties(self):
         """
@@ -104,6 +119,38 @@ class SectorParser:
 
         return self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.NAME_KEY]
 
+    def sector_type(self):
+        """
+        Returns the sector type (SectorType enum).
+        """
+
+        return ss.SectorType[self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.SHAPE_KEY]]
+
+    def sector_origin(self):
+        """
+        Returns the sector origin.
+        :return: a shapely.geometry.point.Point object representing the origin of the sector.
+        """
+
+        origin = self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.ORIGIN_KEY]
+        return geom.Point(origin[0], origin[1])
+
+    def sector_lower_limit(self):
+        """
+        Returns the sector lower flight level limit.
+        :return: an integer.
+        """
+
+        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.LOWER_LIMIT_KEY])
+
+    def sector_upper_limit(self):
+        """
+        Returns the sector upper flight level limit.
+        :return: an integer.
+        """
+
+        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.UPPER_LIMIT_KEY])
+
     def sector_centroid(self):
         """
         Returns the centroid of the sector polygon.
@@ -118,13 +165,4 @@ class SectorParser:
 
         polygon = geom.Polygon(coords)
         return polygon.centroid
-
-    def sector_shape(self):
-        """
-        Returns the sector shape.
-        """
-
-        # TODO: this is required (or desirable) for SectorElement deserialise method
-        # but it may be better to instead have a "secto_type" method that just returns a string I, X or Y.
-        pass
 

@@ -10,6 +10,7 @@ from aviary.parser.sector_parser import SectorParser
 
 from datetime import datetime, timedelta
 import os.path
+from io import StringIO
 
 import json
 import jsonpath_rw_ext as jp
