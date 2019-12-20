@@ -202,6 +202,15 @@ def test_write_geojson(x_element):
     os.remove(file)
 
 
+def test_hash_sector_coordinates(x_element):
+
+    result = x_element.hash_sector_coordinates()
+    same_result = x_element.hash_sector_coordinates()
+    assert result == same_result
+    different_result = x_element.hash_sector_coordinates(se.FLOAT_PRECISION + 1)
+    assert not result == different_result
+
+
 def test_deserialise(i_sector_geojson):
 
     result = se.SectorElement.deserialise(i_sector_geojson)

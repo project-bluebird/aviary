@@ -24,7 +24,7 @@ DEFAULT_SECTOR_NAME = "SECTOR"
 DEFAULT_ORIGIN = (-0.1275, 51.5)
 DEFAULT_LOWER_LIMIT = 60
 DEFAULT_UPPER_LIMIT = 460
-
+FLOAT_PRECISION = 4
 
 # CONSTANTS
 ELLIPSOID = "WGS84"
@@ -149,11 +149,12 @@ class SectorElement():
         return geojson
 
 
-    def hash_sector_coordinates(self) -> str:
+    def hash_sector_coordinates(self, float_precision = FLOAT_PRECISION) -> str:
         """Returns hash of the sector boundary coordinates as string"""
 
         coords = mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon))[gh.COORDINATES_KEY][0]
-        return str(hash(coords))
+        rounded_coords = tuple([(round(lon, float_precision), round(lat, float_precision)) for lon, lat in coords])
+        return str(hash(rounded_coords))
 
 
     def sector_geojson(self) -> dict:
