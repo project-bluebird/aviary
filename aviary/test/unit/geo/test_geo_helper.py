@@ -1,7 +1,10 @@
 
 import pytest
+from io import StringIO
+import geojson
 
 from aviary.geo.geo_helper import GeoHelper
+import aviary.sector.sector_element as se
 
 
 def test_distance():
@@ -30,4 +33,16 @@ def test_waypoint_location():
     result = GeoHelper.waypoint_location(lat1, lon1, lat2, lon2, distance_m = 250e3)
     assert result == pytest.approx((-2.9125, 50.1154), 0.01)
 
+
+def test_format_coordinates(i_sector_geojson):
+
+    json = geojson.load(StringIO(i_sector_geojson))
+    key = se.GEOMETRY_KEY
+    float_precision = 4
+    result = GeoHelper.format_coordinates(json[se.FEATURES_KEY][3], key = key, float_precision = float_precision,
+                                          as_geojson = False)
+
+    assert isinstance(result, list)
+    expected = [tuple(round(num, float_precision) for num in longlat) for longlat in result]
+    assert result == expected
 

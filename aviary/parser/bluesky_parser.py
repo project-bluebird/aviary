@@ -91,6 +91,10 @@ class BlueskyParser(SectorParser):
             while len(coords) == 1:
                 coords = coords[0]
 
+            # Individual coordinate pairs are not part of the polyalt definition.
+            if isinstance(coords[0], float):
+                continue
+
             # Note: longitudes appear first!
             latlongs = list(
                 chain.from_iterable(

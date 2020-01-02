@@ -22,16 +22,33 @@ class GeoHelper():
 
 
     @staticmethod
-    def fix_geometry_coordinates_tuple(geojson, key):
+    def format_coordinates(geojson, key, float_precision, as_geojson = True):
         """
-        Works around an issue with __geo_interface__ unexpectedly returning a
-        tuple of coordinates rather than a list.
+        Formats coordinates to apply a given float precision and work around
+        an issue with __geo_interface__ unexpectedly returning a tuple of
+        coordinates rather than a list.
         """
 
         if not key in geojson:
             raise ValueError(f'Key {key} not found in geojson: {geojson}')
 
-        geojson[key][COORDINATES_KEY] = list(geojson[key][COORDINATES_KEY])
+        # Ensure the coordinates are in a list, not a tuple.
+        coords = list(geojson[key][COORDINATES_KEY])
+
+        # Coordinates list may be nested.
+        while (isinstance(coords, list) and len(coords) == 1):
+            coords = coords[0]
+
+        # Round to the given float precision.
+        if isinstance(coords[0], float):
+            rounded = [round(num, float_precision) for num in coords]
+        else:
+            rounded = [tuple(round(num, float_precision) for num in longlat) for longlat in coords]
+
+        if not as_geojson:
+            return rounded
+
+        geojson[key][COORDINATES_KEY] = rounded
         return geojson
 
 
