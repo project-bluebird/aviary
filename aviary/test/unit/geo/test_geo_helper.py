@@ -3,7 +3,7 @@ import pytest
 from io import StringIO
 import geojson
 
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 import aviary.sector.sector_element as se
 
 

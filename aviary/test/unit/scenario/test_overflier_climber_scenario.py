@@ -6,7 +6,7 @@ import aviary.scenario.scenario_generator as sg
 import aviary.trajectory.lookup_trajectory_predictor as tp
 import aviary.sector.route as sr
 
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 
 @pytest.fixture(scope="function")
 def target(i_element, cruise_speed_dataframe, climb_time_dataframe, downtrack_distance_dataframe):

@@ -5,7 +5,7 @@ import json
 
 import aviary.sector.route as sr
 import aviary.sector.sector_element as se
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 
 def test_reverse(i_element):
 

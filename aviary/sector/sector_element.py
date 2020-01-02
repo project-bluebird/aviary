@@ -14,7 +14,8 @@ from shapely.geometry import mapping, Point
 
 import aviary.sector.sector_shape as ss
 import aviary.parser.sector_parser as sp
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
+from aviary.utils.filename_helper import FilenameHelper
 
 # DEFAULTS
 DEFAULT_SECTOR_NAME = "SECTOR"
@@ -144,7 +145,7 @@ class SectorElement():
     @property
     def __geo_interface__(self) -> dict:
         """
-        Implements the geo interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
+        Implements the utils interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
         Returns a GeoJSON dictionary. For serialisation and deserialisation, use geojson.dumps and geojson.loads.
         """
 
@@ -277,11 +278,7 @@ class SectorElement():
     def write_geojson(self, filename, path = "."):
         """Write the geojson object to a file"""
 
-        extension = os.path.splitext(filename)[1]
-        if extension.upper() != GEOJSON_EXTENSION:
-            filename = filename + "." + GEOJSON_EXTENSION
-
-        file = os.path.join(path, filename)
+        file = FilenameHelper.construct_filename(filename=filename, desired_extension=GEOJSON_EXTENSION, path=path)
 
         with open(file, 'w') as f:
             dump(self, f, indent = 4)

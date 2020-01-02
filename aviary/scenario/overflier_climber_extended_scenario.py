@@ -9,7 +9,7 @@ import random
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
 from aviary.scenario.overflier_climber_scenario import OverflierClimberScenario
 import aviary.scenario.scenario_generator as sg
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 
 class OverflierClimberExtendedScenario(ScenarioAlgorithm):
     """

@@ -11,7 +11,7 @@ import aviary.scenario.scenario_generator as sg
 import aviary.trajectory.trajectory_predictor as tp
 
 from aviary.scenario.scenario_algorithm import ScenarioAlgorithm
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 
 class OverflierClimberScenario(ScenarioAlgorithm):
     """

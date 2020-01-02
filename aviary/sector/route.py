@@ -7,7 +7,7 @@ Represents a route through a sector shape or element.
 from shapely.geometry import LineString, mapping
 
 import aviary.sector.sector_element as se
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 
 FIX_NAME_KEY = "fixName"
 
@@ -75,7 +75,7 @@ class Route():
     @property
     def __geo_interface__(self) -> dict:
         """
-        Implements the geo interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
+        Implements the utils interface (see https://gist.github.com/sgillies/2217756#__geo_interface__)
         Returns a GeoJSON dictionary. For serialisation and deserialisation, use geojson.dumps and geojson.loads.
         """
         return self.geojson()

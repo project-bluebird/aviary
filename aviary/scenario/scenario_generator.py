@@ -13,6 +13,8 @@ from datetime import datetime, timedelta
 
 from json import dump
 
+from aviary.utils.filename_helper import FilenameHelper
+
 # CONSTANTS
 JSON_EXTENSION = "json"
 
@@ -82,12 +84,7 @@ class ScenarioGenerator():
     def write_json_scenario(scenario, filename, path="."):
         """Write the JSON scenario object to a file"""
 
-        extension = os.path.splitext(filename)[1]
-        if extension.upper() != JSON_EXTENSION:
-            filename = filename + "." + JSON_EXTENSION
-
-        file = os.path.join(path, filename)
-
+        file = FilenameHelper.construct_filename(filename=filename, desired_extension=JSON_EXTENSION, path=path)
 
         with open(file, 'w') as f:
             dump(scenario, f, indent = 4)
