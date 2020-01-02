@@ -83,6 +83,18 @@ class SectorShape:
         pass
 
 
+    @staticmethod
+    def shape_constructor(type):
+        """Parse a shape type into a SectorShape constructor."""
+        if type == SectorType.I:
+            return IShape
+        if type == SectorType.X:
+            return XShape
+        if type == SectorType.Y:
+            return YShape
+        raise ValueError(f'Invalid shape type: {type}.')
+
+
     def __init__(self, sector_type: SectorType, polygon: geom.base.BaseGeometry, fix_names, route_names):
 
         if not isinstance(sector_type, SectorType):

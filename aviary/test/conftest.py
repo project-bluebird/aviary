@@ -10,41 +10,44 @@ import aviary.scenario.poisson_scenario as ps
 import aviary.scenario.overflier_climber_scenario as ocs
 
 @pytest.fixture(scope="function")
-def x_element():
-    """Test fixture: an X-shaped sector element object."""
-
-    name = "HELL"
-    origin = (51.5, -0.1275)
-    shape = ss.XShape()
-    lower_limit = 140
-    upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
-
-
-@pytest.fixture(scope="function")
 def i_element():
     """Test fixture: an I-shaped sector element object."""
 
+    type = ss.SectorType.I
     name = "EARTH"
-    origin = (51.5, -0.1275)
-    shape = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = ['up', 'down'])
+    origin = (-0.1275, 51.5)
+    fix_names = ['a', 'b', 'c', 'd', 'e']
+    route_names = ['up', 'down']
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit,
+                            fix_names = fix_names, route_names = route_names)
+
+
+@pytest.fixture(scope="function")
+def x_element():
+    """Test fixture: an X-shaped sector element object."""
+
+    type = ss.SectorType.X
+    name = "HELL"
+    origin = (-0.1275, 51.5)
+    lower_limit = 140
+    upper_limit = 400
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
 def y_element():
     """Test fixture: a Y-shaped sector element object."""
 
+    type = ss.SectorType.Y
     name = "HEAVEN"
-    origin = (51.5, -0.1275)
-    shape = ss.YShape()
+    origin = (-0.1275, 51.5)
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
@@ -102,3 +105,29 @@ def downtrack_distance_dataframe():
     index_col = "fl_bins"
 
     return pandas.read_csv(downtrack_distance_data, index_col = index_col)
+
+
+@pytest.fixture(scope="function")
+def i_sector_geojson():
+    """Test fixture: a serialised geoJSON sector,
+     obtained by calling geojson.dumps() on an I-shaped SectorElement."""
+
+    return """
+    {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "test_sector", "type": "SECTOR", "shape": "I", "origin": [-0.1275, 51.5], "children": {"SECTOR_VOLUME": {"names": ["-14746818374995097"]}, "ROUTE": {"names": ["ASCENSION", "FALLEN"]}}}, "geometry": {}}, {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[-0.2597, 51.0838], [-0.2621, 51.9161], [0.0071, 51.9161], [0.0047, 51.0838], [-0.2597, 51.0838]]}, "properties": {"name": "-14746818374995097", "type": "SECTOR_VOLUME", "lower_limit": 60, "upper_limit": 460, "children": {}}}, {"type": "Feature", "properties": {"name": "ASCENSION", "type": "ROUTE", "children": {"FIX": {"names": ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 50.9174], [-0.1275, 51.0838], [-0.1275, 51.5], [-0.1275, 51.9161], [-0.1275, 52.0826]]}}, {"type": "Feature", "properties": {"name": "FALLEN", "type": "ROUTE", "children": {"FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 52.0826], [-0.1275, 51.9161], [-0.1275, 51.5], [-0.1275, 51.0838], [-0.1275, 50.9174]]}}, {"type": "Feature", "properties": {"name": "SPIRT", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.0826]}}, {"type": "Feature", "properties": {"name": "AIR", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.9161]}}, {"type": "Feature", "properties": {"name": "WATER", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.5]}}, {"type": "Feature", "properties": {"name": "EARTH", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.0838]}}, {"type": "Feature", "properties": {"name": "FIYRE", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.9174]}}]}
+    """
+    # return """
+    # {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"name": "test_sector", "type": "SECTOR", "shape": "I", "origin": [-0.1275, 51.5], "children": {"SECTOR_VOLUME": {"names": ["-14746818374995097"]}, "ROUTE": {"names": ["ASCENSION", "FALLEN"]}}}, "geometry": {}}, {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[-0.2596527086555938, 51.08375683891335], [-0.26207557205922527, 51.916052359621695], [0.007075572059225247, 51.916052359621695], [0.004652708655593784, 51.08375683891335], [-0.2596527086555938, 51.08375683891335]]]}, "properties": {"name": "-14746818374995097", "type": "SECTOR_VOLUME", "lower_limit": 60, "upper_limit": 460, "children": {}}}, {"type": "Feature", "properties": {"name": "ASCENSION", "type": "ROUTE", "children": {"FIX": {"names": ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 50.91735552314281], [-0.1275, 51.08383154960228], [-0.1275, 51.49999999999135], [-0.1275, 51.916128869951486], [-0.1275, 52.08256690115545]]}}, {"type": "Feature", "properties": {"name": "FALLEN", "type": "ROUTE", "children": {"FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 52.08256690115545], [-0.1275, 51.916128869951486], [-0.1275, 51.49999999999135], [-0.1275, 51.08383154960228], [-0.1275, 50.91735552314281]]}}, {"type": "Feature", "properties": {"name": "SPIRT", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}}, {"type": "Feature", "properties": {"name": "AIR", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}}, {"type": "Feature", "properties": {"name": "WATER", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}}, {"type": "Feature", "properties": {"name": "EARTH", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}}, {"type": "Feature", "properties": {"name": "FIYRE", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}}]}
+    # """
+
+
+@pytest.fixture(scope="function")
+def overflier_climber_scenario_json():
+    """Test fixture: a serialised JSON scenario,
+    obtained by calling json.dumps() on an overflier_climber scenario in an I-shaped sector generated using ScenarioGenerator.
+    """
+
+    return """
+    {"startTime": "00:00:00", "aircraft": [{"timedelta": 0, "startPosition": [-0.1275, 49.39138473926763], "callsign": "VJ159", "type": "A346", "departure": "DEP", "destination": "DEST", "currentFlightLevel": 400, "clearedFlightLevel": 400, "requestedFlightLevel": 400, "route": [{"fixName": "FIYRE", "geometry": {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}}, {"fixName": "EARTH", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}}, {"fixName": "WATER", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}}, {"fixName": "AIR", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}}, {"fixName": "SPIRT", "geometry": {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}}], "startTime": "00:00:00"}, {"timedelta": 0, "startPosition": [-0.1275, 53.57478111513239], "callsign": "VJ405", "type": "B77W", "departure": "DEST", "destination": "DEP", "currentFlightLevel": 200, "clearedFlightLevel": 200, "requestedFlightLevel": 400, "route": [{"fixName": "SPIRT", "geometry": {"type": "Point", "coordinates": [-0.1275, 52.08256690115545]}}, {"fixName": "AIR", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.916128869951486]}}, {"fixName": "WATER", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.49999999999135]}}, {"fixName": "EARTH", "geometry": {"type": "Point", "coordinates": [-0.1275, 51.08383154960228]}}, {"fixName": "FIYRE", "geometry": {"type": "Point", "coordinates": [-0.1275, 50.91735552314281]}}], "startTime": "00:00:00"}]}
+    """
+
+

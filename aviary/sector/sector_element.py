@@ -5,23 +5,23 @@ Construction of I, X, Y airspace sector elements with upper & lower vertical lim
 # email: thobson@turing.ac.uk
 
 from pyproj import Proj
-
 from geojson import dump
 
 import os.path
+from io import StringIO
 
 from shapely.geometry import mapping, Point
 
-import aviary.geo.geo_helper as gh
 import aviary.sector.sector_shape as ss
+import aviary.parser.sector_parser as sp
 from aviary.geo.geo_helper import GeoHelper
 
 # DEFAULTS
 DEFAULT_SECTOR_NAME = "SECTOR"
-DEFAULT_ORIGIN = (51.5, -0.1275)
+DEFAULT_ORIGIN = (-0.1275, 51.5)
 DEFAULT_LOWER_LIMIT = 60
-DEFAULT_UPPER_LIMIT = 400
-
+DEFAULT_UPPER_LIMIT = 460
+FLOAT_PRECISION = 4
 
 # CONSTANTS
 ELLIPSOID = "WGS84"
@@ -30,6 +30,8 @@ GEOJSON_EXTENSION = "geojson"
 # JSON keys
 FEATURES_KEY = "features"
 NAME_KEY = "name"
+SHAPE_KEY = "shape"
+ORIGIN_KEY = "origin"
 TYPE_KEY = "type"
 PROPERTIES_KEY = "properties"
 LOWER_LIMIT_KEY = "lower_limit"
@@ -58,64 +60,77 @@ class SectorElement():
     """An elemental sector of airspace"""
 
     def __init__(self,
-                 shape,
+                 type,
                  name = DEFAULT_SECTOR_NAME,
                  origin = DEFAULT_ORIGIN,
                  lower_limit = DEFAULT_LOWER_LIMIT,
-                 upper_limit = DEFAULT_UPPER_LIMIT):
+                 upper_limit = DEFAULT_UPPER_LIMIT,
+                 **kwargs):
+        """
+        SectorElement constructor.
+
+        :param type: a SectorType (enum)
+        :param name: the name of the sector element
+        :param origin: the origin coordinates as a (longitude, latitude) tuple
+        :param lower_limit: the lower flight level limit
+        :param upper_limit: the upper flight level limit
+        """
 
         self.name = name
+        self.origin = origin
 
         # Construct the proj-string (see https://proj.org/usage/quickstart.html)
         # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
-        proj_string = f'+proj=stere +lat_0={origin[0]} +lon_0={origin[1]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
+        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
 
         self.projection = Proj(proj_string, preserve_units=True)
 
-        # Handle string shape argument.
-        if isinstance(shape, str):
-            shape = SectorElement.parse_shape(shape)
+        # Construct the shape.
+        f = ss.SectorShape.shape_constructor(type)
+        shape = f(**kwargs)
 
         self.shape = shape
         self.lower_limit = lower_limit
         self.upper_limit = upper_limit
 
 
-    @staticmethod
-    def parse_shape(shape):
-        """Parse a string shape into a SectorShape object."""
-        if shape == 'I':
-            return ss.IShape()
-        if shape == 'X':
-            return ss.XShape()
-        if shape == 'Y':
-            return ss.YShape()
-        raise ValueError(f'Failed to parse shape. Invalid shape type: {shape}.')
+    def polygon(self):
+        """
+        The sector polygon
+        :return: a Shapely Polygon
+        """
 
+        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon)
 
-    def centre_point(self):
-        """The long/lat coordinates of the centre point of the sector"""
-
-        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
-
-
-    def fix_location(self, fix_name):
-        """The long/lat coordinates of a named fix"""
+    def fix(self, fix_name):
+        """The Point associated with a particular fix"""
 
         fixes = self.shape.fixes
         if not fix_name in list(fixes.keys()):
             raise ValueError(f'No fix exists named {fix_name}')
 
-        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]
+        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name])
 
+
+    def fix_location(self, fix_name):
+        """The long/lat coordinates of a named fix"""
+
+        return self.fix(fix_name).coords[0]
+
+    def centre_point(self):
+        """The long/lat coordinates of the centre point of the sector"""
+
+        return self.polygon().centroid.coords[0]
 
     def routes(self):
         """Returns the valid routes through the sector
 
-        Each route is a list of fixes, and each fix is a (string, Point) pair
+        Each route contains a list of fixes, and each fix is a (string, Point) pair
         where the string is the name of the fix and the Point is its geographical longitude-latitude coordinate.
 
         Note: the order of coordinates in a Point is longitude then latitude.
+
+        :return: A list of Route instances.
         """
 
         # Return route objects.
@@ -143,11 +158,16 @@ class SectorElement():
         return geojson
 
 
-    def hash_sector_coordinates(self) -> str:
+    def hash_sector_coordinates(self, float_precision = FLOAT_PRECISION) -> str:
         """Returns hash of the sector boundary coordinates as string"""
 
-        coords = mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon))[gh.COORDINATES_KEY][0]
-        return str(hash(coords))
+        # Construct properly formatted coordinates before hashing.
+        geojson = {
+            GEOMETRY_KEY: mapping(self.polygon())
+        }
+        coords = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = float_precision,
+                                              as_geojson= False)
+        return str(hash(tuple(coords)))
 
 
     def sector_geojson(self) -> dict:
@@ -173,6 +193,8 @@ class SectorElement():
             PROPERTIES_KEY: {
                 NAME_KEY: self.name,
                 TYPE_KEY: SECTOR_VALUE,
+                SHAPE_KEY: self.shape.sector_type.name,
+                ORIGIN_KEY: self.origin,
                 CHILDREN_KEY: {
                     SECTOR_VOLUME_VALUE : {CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
                     ROUTE_VALUE: {CHILDREN_NAMES_KEY: self.shape.route_names}
@@ -201,7 +223,7 @@ class SectorElement():
 
         geojson = {
             TYPE_KEY : FEATURE_VALUE,
-            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon)),
+            GEOMETRY_KEY: mapping(self.polygon()),
             PROPERTIES_KEY : {
                 NAME_KEY: self.hash_sector_coordinates(),
                 TYPE_KEY: SECTOR_VOLUME_VALUE,
@@ -211,7 +233,7 @@ class SectorElement():
             }
         }
 
-        geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
+        geojson = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = FLOAT_PRECISION)
         return geojson
 
 
@@ -245,10 +267,10 @@ class SectorElement():
                 NAME_KEY: name.upper(),
                 TYPE_KEY: FIX_VALUE
             },
-            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]))
+            GEOMETRY_KEY: mapping(self.fix(fix_name = name))
         }
 
-        geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
+        geojson = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = FLOAT_PRECISION)
         return geojson
 
 
@@ -265,3 +287,26 @@ class SectorElement():
             dump(self, f, indent = 4)
 
         return file
+
+
+    @staticmethod
+    def deserialise(sector_geojson):
+        """
+        Deserialises a SectorElement instance from a GeoJSON.
+
+        :param sector_geojson: Text stream from which a sector GeoJSON may be read.
+        :return: a SectorElement instance
+        """
+
+        parser = sp.SectorParser(StringIO(sector_geojson))
+        return SectorElement(type = parser.sector_type(),
+                             name = parser.sector_name(),
+                             origin = parser.sector_origin().coords[0],
+                             lower_limit = parser.sector_lower_limit(),
+                             upper_limit = parser.sector_upper_limit(),
+                             fix_names = parser.fix_names(),
+                             route_names = parser.route_names())
+
+
+
+

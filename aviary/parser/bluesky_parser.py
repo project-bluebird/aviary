@@ -6,18 +6,18 @@ import aviary.sector.sector_element as se
 import aviary.sector.route as rt
 import aviary.scenario.scenario_generator as sg
 import aviary.geo.geo_helper as gh
+from aviary.parser.sector_parser import SectorParser
 
 from datetime import datetime, timedelta
 import os.path
-import numpy as np
+from io import StringIO
+
 import json
-import geojson
 import jsonpath_rw_ext as jp
 
 from pyproj import Geod
-import shapely.geometry as geom
 
-from itertools import compress, chain
+from itertools import chain
 
 BS_PROMPT = ">"
 BS_DEFWPT_PREFIX = "00:00:00.00" + BS_PROMPT
@@ -36,7 +36,7 @@ BS_SCENARIO_EXTENSION = "scn"
 LONG_INDEX = 0
 LAT_INDEX = 1
 
-class ScenarioParser:
+class BlueskyParser(SectorParser):
     """A parser of geoJSON sectors and JSON scenarios for translation into BlueSky format"""
 
     # Default parameters:
@@ -44,117 +44,22 @@ class ScenarioParser:
 
     def __init__(self, sector_geojson, scenario_json):
         """
-        Scenario parser constructor.
+        Bluesky scenario parser constructor.
 
         :param sector_geojson: Text stream from which a sector GeoJSON may be read.
         :param scenario_json: Text stream from which a scenario JSON may be read.
         """
 
-        # Deserialise the sector geoJSON and scenario JSON strings.
-        sector = geojson.load(sector_geojson)
+        # Pass the sector GeoJSON to the superclass constructor.
+        super().__init__(sector_geojson)
 
-        if se.FEATURES_KEY not in sector:
-            raise ValueError(f"Sector geojson must contain {se.FEATURES_KEY} element")
-
-        self.sector = sector
-
+        # Decode the scenario JSON string.
         scenario = json.load(scenario_json)
 
         if sg.AIRCRAFT_KEY not in scenario:
             raise ValueError(f"Scenario json must contain {sg.AIRCRAFT_KEY} element")
 
         self.scenario = scenario
-
-    def features_of_type(self, type_value):
-        """
-        Filters the features to retain those whose 'type', inside a 'properties' element, matches the given type_value.
-        Returns a list of features dictionaries.
-        """
-
-        return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.PROPERTIES_KEY}.{se.TYPE_KEY}=={type_value}]",
-            self.sector,
-        )
-
-    def fix_features(self):
-        """
-        Filters the features to retain those with 'type': 'FIX'.
-        Returns a list of dictionaries.
-        """
-
-        return self.features_of_type(type_value=se.FIX_VALUE)
-
-    def properties_of_type(self, type_value):
-        """
-        Filters the features to retain those whose 'type', inside a 'properties' element, matches the given type_value.
-        Returns a list of properties dictionaries.
-        """
-
-        return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.PROPERTIES_KEY}.{se.TYPE_KEY}=={type_value}].{se.PROPERTIES_KEY}",
-            self.sector,
-        )
-
-    def sector_volume_properties(self):
-        """
-        Filters the features to retain properties of those with 'type': 'SECTOR_VOLUME'.
-        Returns a list of dictionaries.
-        """
-
-        return self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)
-
-    def geometries_of_type(self, type_value):
-        """
-        Filters the features to retain those whose 'type', inside a 'geometry' element, matches the given type_value.
-        Returns a list of geometries dictionaries.
-        """
-
-        return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.GEOMETRY_KEY}.{se.TYPE_KEY}=={type_value}].{se.GEOMETRY_KEY}",
-            self.sector,
-        )
-
-    def polygon_geometries(self):
-        """
-        Filters the features to retain geometries of those with 'type': 'Polygon'.
-        Returns a list of dictionaries.
-        """
-
-        return self.geometries_of_type(type_value=se.POLYGON_VALUE)
-
-    def sector_polygon(self):
-        """
-        Returns a dictionary containing the coordinates of the sector polygon.
-        """
-
-        polygons = self.polygon_geometries()
-        if len(polygons) != 1:
-            raise Exception(
-                f"Expected precisely one polygon; found {len(polygons)} polygons."
-            )
-        return polygons[0]
-
-    def sector_name(self):
-        """
-        Returns the sector name.
-        """
-
-        return self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.NAME_KEY]
-
-    def sector_centroid(self):
-        """
-        Returns the centroid of the sector polygon.
-        :return: a shapely.geometry.point.Point object representing the centroid of the sector.
-        """
-
-        # Determine the centroid of the sector polygon.
-        coords = self.sector_polygon()[gh.COORDINATES_KEY]
-
-        while len(coords) == 1:
-            coords = coords[0]
-
-        polygon = geom.Polygon(coords)
-        return polygon.centroid
 
     def polyalt_lines(self):
         """
@@ -186,6 +91,10 @@ class ScenarioParser:
             while len(coords) == 1:
                 coords = coords[0]
 
+            # Individual coordinate pairs are not part of the polyalt definition.
+            if isinstance(coords[0], float):
+                continue
+
             # Note: longitudes appear first!
             latlongs = list(
                 chain.from_iterable(
@@ -208,7 +117,7 @@ class ScenarioParser:
 
         # aircraft_initial_position() returns long/lat --> return to lat/lon order
         return [
-            f'{self.aircraft_start_time(ac[sg.CALLSIGN_KEY]).strftime("%H:%M:%S") + ".00"}{BS_PROMPT}{BS_CREATE_AIRCRAFT} {ac[sg.CALLSIGN_KEY]} {ac[sg.AIRCRAFT_TYPE_KEY]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LAT_INDEX]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LONG_INDEX]} {self.aircraft_heading(ac[sg.CALLSIGN_KEY])} {BS_FLIGHT_LEVEL + str(ac[sg.CURRENT_FLIGHT_LEVEL_KEY])} {ScenarioParser.default_speed}'
+            f'{self.aircraft_start_time(ac[sg.CALLSIGN_KEY]).strftime("%H:%M:%S") + ".00"}{BS_PROMPT}{BS_CREATE_AIRCRAFT} {ac[sg.CALLSIGN_KEY]} {ac[sg.AIRCRAFT_TYPE_KEY]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LAT_INDEX]} {self.aircraft_initial_position(ac[sg.CALLSIGN_KEY])[LONG_INDEX]} {self.aircraft_heading(ac[sg.CALLSIGN_KEY])} {BS_FLIGHT_LEVEL + str(ac[sg.CURRENT_FLIGHT_LEVEL_KEY])} {BlueskyParser.default_speed}'
             for ac in aircraft
         ]
 

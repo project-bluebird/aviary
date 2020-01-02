@@ -109,8 +109,8 @@ class Route():
                 geom = LineString(self.fix_points(unprojected = True))))
         }
 
-        # Fix issue with __geo_interface__ unexpectedly returning a tuple of coordinates rather than a list.
-        geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = se.GEOMETRY_KEY)
+        # Format the coordinates.
+        geojson = GeoHelper.format_coordinates(geojson, key = se.GEOMETRY_KEY, float_precision = se.FLOAT_PRECISION)
         return geojson
 
 
