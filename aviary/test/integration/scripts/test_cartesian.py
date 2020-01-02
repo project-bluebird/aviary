@@ -28,10 +28,10 @@ def test_cartesian_script():
     assert returned_value == 0
 
     filename = ScriptHelper.output_filename(filename_prefix=filename_prefix, seed=seed)
-    file = ScenarioGenerator.json_filename(filename = filename, path = output_path)
+    output_file = ScenarioGenerator.json_filename(filename = filename, path = output_path)
 
-    assert os.path.exists(file)
+    assert os.path.exists(output_file)
 
     # Clean up.
-    os.remove(file)
+    os.remove(output_file)
 
