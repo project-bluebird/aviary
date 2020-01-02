@@ -277,17 +277,22 @@ class SectorElement():
     def write_geojson(self, filename, path = "."):
         """Write the geojson object to a file"""
 
-        extension = os.path.splitext(filename)[1]
-        if extension.upper() != GEOJSON_EXTENSION:
-            filename = filename + "." + GEOJSON_EXTENSION
-
-        file = os.path.join(path, filename)
+        file = SectorElement.geojson_filename(filename=filename, path=path)
 
         with open(file, 'w') as f:
             dump(self, f, indent = 4)
 
         return file
 
+
+    @staticmethod
+    def geojson_filename(filename, path="."):
+
+        extension = os.path.splitext(filename)[1]
+        if extension.upper() != GEOJSON_EXTENSION:
+            filename = filename + "." + GEOJSON_EXTENSION
+
+        return os.path.join(path, filename)
 
     @staticmethod
     def deserialise(sector_geojson):
