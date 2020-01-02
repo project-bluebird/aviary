@@ -4,7 +4,7 @@ import aviary.scenario.overflier_climber_extended_scenario as oces
 import aviary.scenario.scenario_generator as sg
 import aviary.trajectory.lookup_trajectory_predictor as tp
 
-from aviary.geo.geo_helper import GeoHelper
+from aviary.utils.geo_helper import GeoHelper
 
 THINKING_TIME = 60
 

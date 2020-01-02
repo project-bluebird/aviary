@@ -7,7 +7,7 @@ import shapely
 
 import aviary.sector.sector_element as se
 import aviary.sector.sector_shape as ss
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 
 def test_sector_element():
 

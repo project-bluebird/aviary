@@ -5,7 +5,7 @@ Scenario parser for the BlueSky simulator.
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
 import aviary.scenario.scenario_generator as sg
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 from aviary.parser.sector_parser import SectorParser
 
 from datetime import datetime, timedelta

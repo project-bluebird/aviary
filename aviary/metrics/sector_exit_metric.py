@@ -19,7 +19,7 @@ For the simplest metric, m_h and m_v take the form of v(d, c, C), a function of 
  - v(d) = -(d - c)/(C - c), otherwise.
 """
 
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
 

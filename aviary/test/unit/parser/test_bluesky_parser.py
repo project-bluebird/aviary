@@ -8,7 +8,7 @@ import aviary.parser.bluesky_parser as bp
 import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 
 
 @pytest.fixture(scope="function")

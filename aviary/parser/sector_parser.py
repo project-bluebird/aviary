@@ -4,7 +4,7 @@ Sector (GeoJSON) parser.
 
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
-import aviary.geo.geo_helper as gh
+import aviary.utils.geo_helper as gh
 
 import geojson
 import jsonpath_rw_ext as jp
