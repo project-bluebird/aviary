@@ -79,15 +79,19 @@ class ScenarioGenerator():
 
 
     @staticmethod
-    def write_json_scenario(scenario, filename, path="."):
-        """Write the JSON scenario object to a file"""
+    def json_filename(filename, path="."):
 
         extension = os.path.splitext(filename)[1]
         if extension.upper() != JSON_EXTENSION:
             filename = filename + "." + JSON_EXTENSION
 
-        file = os.path.join(path, filename)
+        return os.path.join(path, filename)
 
+    @staticmethod
+    def write_json_scenario(scenario, filename, path="."):
+        """Write the JSON scenario object to a file"""
+
+        file = ScenarioGenerator.json_filename(filename=filename, path=path)
 
         with open(file, 'w') as f:
             dump(scenario, f, indent = 4)

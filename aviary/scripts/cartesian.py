@@ -11,6 +11,7 @@ import argparse, sys
 
 from aviary.scenario.cartesian_scenario import CartesianScenario
 from aviary.scenario.scenario_generator import ScenarioGenerator
+from aviary.scripts.script_helper import ScriptHelper
 
 import aviary.sector.sector_element as se
 from aviary.sector.sector_shape import SectorType
@@ -125,7 +126,7 @@ except Exception as ex:
 #
 # Generate the scenario.
 #
-filename = args.filename_prefix + "-" + str(args.seed)
+filename = ScriptHelper.output_filename(filename_prefix=args.filename_prefix, seed=args.seed)
 file = scenario_generator.write_json_scenario(scenario = scenario, filename = filename, path = args.output_path)
 
 print(f'SUCCESS! Wrote scenario to {file}')
