@@ -1,9 +1,8 @@
 
-import pytest
 import os
 
-from aviary.scripts.script_helper import ScriptHelper
-from aviary.scenario.scenario_generator import ScenarioGenerator
+from aviary.utils.filename_helper import FilenameHelper
+import aviary.scenario.scenario_generator as sg
 
 def test_cartesian_script():
 
@@ -27,8 +26,9 @@ def test_cartesian_script():
     # Expect no error.
     assert returned_value == 0
 
-    filename = ScriptHelper.scenario_output_filename(filename_prefix=filename_prefix, seed=seed)
-    output_file = ScenarioGenerator.json_filename(filename = filename, path = output_path)
+    filename = FilenameHelper.scenario_output_filename(filename_prefix=filename_prefix, seed=seed)
+    output_file = FilenameHelper.construct_filename(filename = filename, desired_extension=sg.JSON_EXTENSION,
+                                                    path = output_path)
 
     assert os.path.exists(output_file)
 

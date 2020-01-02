@@ -1,11 +1,24 @@
 """
-Helper class for scenario generation scripts.
+Helper class implementing file naming conventions.
 """
 # author: Tim Hobson
 # email: thobson@turing.ac.uk
 
-class ScriptHelper():
-    """Helper class implementing scenario generation script output filename conventions"""
+import os
+
+class FilenameHelper():
+    """Helper class implementing file naming conventions"""
+
+    @staticmethod
+    def construct_filename(filename, desired_extension, path="."):
+        """Constructs a full path filename with extension"""
+
+        extension = os.path.splitext(filename)[1]
+        if extension.upper() != desired_extension:
+            filename = filename + "." + desired_extension
+
+        return os.path.join(path, filename)
+
 
     @staticmethod
     def scenario_output_filename(filename_prefix, seed):

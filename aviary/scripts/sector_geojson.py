@@ -11,7 +11,7 @@ import argparse, sys
 
 import aviary.sector.sector_shape as ss
 from aviary.sector.sector_element import SectorElement
-from aviary.scripts.script_helper import ScriptHelper
+from aviary.utils.filename_helper import FilenameHelper
 
 FILENAME_PREFIX = "sector"
 
@@ -66,11 +66,11 @@ def main():
         exit()
 
     #old: filename = "-".join([args.filename_prefix, args.sector_name, args.sector_type, str(args.lower_limit), str(args.upper_limit)])
-    filename = ScriptHelper.sector_output_filename(filename_prefix=args.filename_prefix,
-                                                   sector_name=args.sector_name,
-                                                   sector_type=args.sector_type,
-                                                   lower_limit=args.lower_limit,
-                                                   upper_limit=args.upper_limit)
+    filename = FilenameHelper.sector_output_filename(filename_prefix=args.filename_prefix,
+                                                     sector_name=args.sector_name,
+                                                     sector_type=args.sector_type,
+                                                     lower_limit=args.lower_limit,
+                                                     upper_limit=args.upper_limit)
 
     file = sector.write_geojson(filename = filename, path = args.output_path)
 

@@ -1,9 +1,8 @@
 
-import pytest
 import os
 
-from aviary.scripts.script_helper import ScriptHelper
-from aviary.sector.sector_element import SectorElement
+from aviary.utils.filename_helper import FilenameHelper
+import aviary.sector.sector_element as se
 
 def test_sector_geojson_script():
 
@@ -30,13 +29,14 @@ def test_sector_geojson_script():
     # Expect no error.
     assert returned_value == 0
 
-    filename = ScriptHelper.sector_output_filename(filename_prefix=filename_prefix,
-                                                   sector_name=sector_name,
-                                                   sector_type=sector_type,
-                                                   lower_limit=lower_limit,
-                                                   upper_limit=upper_limit)
+    filename = FilenameHelper.sector_output_filename(filename_prefix=filename_prefix,
+                                                     sector_name=sector_name,
+                                                     sector_type=sector_type,
+                                                     lower_limit=lower_limit,
+                                                     upper_limit=upper_limit)
 
-    output_file = SectorElement.geojson_filename(filename = filename, path = output_path)
+    output_file = FilenameHelper.construct_filename(filename = filename, desired_extension=se.GEOJSON_EXTENSION,
+                                                    path = output_path)
 
     assert os.path.exists(output_file)
 
