@@ -43,7 +43,7 @@ def test_aircraft_generator(target):
                                     sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
         assert isinstance(x[sg.START_POSITION_KEY], tuple)
         assert not isinstance(x[sg.START_POSITION_KEY][0], tuple)
-        assert x[sg.START_POSITION_KEY][0] == -0.1275
+        assert x[sg.START_POSITION_KEY][0] == pytest.approx(-0.1275, 10e-8)
 
         ctr = ctr + 1
         if ctr == 1:

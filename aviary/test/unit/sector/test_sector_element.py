@@ -2,8 +2,8 @@
 import pytest
 
 import os
-import math
 import geojson
+import shapely
 
 import aviary.sector.sector_element as se
 import aviary.sector.sector_shape as ss
@@ -39,6 +39,26 @@ def test_sector_element_with_names():
     assert 'C' in target.shape.fixes
     assert 'D' in target.shape.fixes
     assert 'E' in target.shape.fixes
+
+
+def test_fix(i_element):
+
+    result = i_element.fix(fix_name = "D")
+
+def test_polygon(i_element):
+
+    result = i_element.polygon()
+
+    # The result is a Shapely Polygon.
+    assert isinstance(result, shapely.geometry.polygon.Polygon)
+    assert isinstance(result.exterior.coords, shapely.coords.CoordinateSequence)
+
+    # Check that the I-element polygon contains five points.
+    assert len(result.exterior.coords) == 5
+
+    # Each coordinate is a (lon, lat) tuple.
+    assert isinstance(result.exterior.coords[0], tuple)
+    assert len(result.exterior.coords[0]) == 2
 
 
 def test_centre_point(i_element):
@@ -205,8 +225,7 @@ def test_write_geojson(x_element):
 def test_hash_sector_coordinates(x_element):
 
     result = x_element.hash_sector_coordinates()
-    same_result = x_element.hash_sector_coordinates()
-    assert result == same_result
+    assert result == x_element.hash_sector_coordinates()
     different_result = x_element.hash_sector_coordinates(se.FLOAT_PRECISION + 1)
     assert not result == different_result
 

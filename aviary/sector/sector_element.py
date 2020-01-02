@@ -5,7 +5,6 @@ Construction of I, X, Y airspace sector elements with upper & lower vertical lim
 # email: thobson@turing.ac.uk
 
 from pyproj import Proj
-
 from geojson import dump
 
 import os.path
@@ -97,21 +96,39 @@ class SectorElement():
         self.upper_limit = upper_limit
 
 
-    def centre_point(self):
-        """The long/lat coordinates of the centre point of the sector"""
+    def polygon(self):
+        """
+        The sector polygon
+        :return: a Shapely Polygon
+        """
 
-        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
+        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon)
 
-
-    def fix_location(self, fix_name):
-        """The long/lat coordinates of a named fix"""
+    def fix(self, fix_name):
+        """The Point associated with a particular fix"""
 
         fixes = self.shape.fixes
         if not fix_name in list(fixes.keys()):
             raise ValueError(f'No fix exists named {fix_name}')
 
-        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]
+        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name])
 
+
+    def fix_location(self, fix_name):
+        """The long/lat coordinates of a named fix"""
+
+        # fixes = self.shape.fixes
+        # if not fix_name in list(fixes.keys()):
+        #     raise ValueError(f'No fix exists named {fix_name}')
+        #
+        # return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name]).coords[0]
+        return self.fix(fix_name).coords[0]
+
+    def centre_point(self):
+        """The long/lat coordinates of the centre point of the sector"""
+
+        # return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon.centroid).coords[0]
+        return self.polygon().centroid.coords[0]
 
     def routes(self):
         """Returns the valid routes through the sector
@@ -152,9 +169,13 @@ class SectorElement():
     def hash_sector_coordinates(self, float_precision = FLOAT_PRECISION) -> str:
         """Returns hash of the sector boundary coordinates as string"""
 
-        coords = mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon))[gh.COORDINATES_KEY][0]
-        rounded_coords = tuple([(round(lon, float_precision), round(lat, float_precision)) for lon, lat in coords])
-        return str(hash(rounded_coords))
+        coords = mapping(self.polygon())[gh.COORDINATES_KEY][0]
+        #coords = mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon))[gh.COORDINATES_KEY][0]
+
+        # Round all coordinates to the given precision.
+        rounded = tuple(tuple(round(num, float_precision) for num in longlat) for longlat in coords)
+
+        return str(hash(rounded))
 
 
     def sector_geojson(self) -> dict:
@@ -210,7 +231,8 @@ class SectorElement():
 
         geojson = {
             TYPE_KEY : FEATURE_VALUE,
-            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon)),
+            GEOMETRY_KEY: mapping(self.polygon()),
+            # GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.polygon)),
             PROPERTIES_KEY : {
                 NAME_KEY: self.hash_sector_coordinates(),
                 TYPE_KEY: SECTOR_VOLUME_VALUE,
@@ -254,7 +276,8 @@ class SectorElement():
                 NAME_KEY: name.upper(),
                 TYPE_KEY: FIX_VALUE
             },
-            GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]))
+            GEOMETRY_KEY: mapping(self.fix(fix_name = name))
+            # GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection, geom = self.shape.fixes[name]))
         }
 
         geojson = GeoHelper.fix_geometry_coordinates_tuple(geojson, key = GEOMETRY_KEY)
