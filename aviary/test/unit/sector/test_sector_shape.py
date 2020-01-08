@@ -92,6 +92,8 @@ def test_i_routes():
     i = ss.IShape(length_nm=length_nm)
     result = i.routes()
 
+    assert isinstance(result, list)
+
     # There are two routes: ascending/descending along the y-axis.
     assert len(result) == 2
 
@@ -121,6 +123,8 @@ def test_x_routes():
     length_nm = 10
     x = ss.XShape(length_nm=length_nm)
     result = x.routes()
+
+    assert isinstance(result, list)
 
     # There are four routes: ascending/descending in the y-coordinate and ascending/descending in the x-coordinate.
     assert len(result) == 4
@@ -153,6 +157,8 @@ def test_y_routes():
     length_nm = 10
     y = ss.YShape(length_nm=length_nm)
     result = y.routes()
+
+    assert isinstance(result, list)
 
     # There are four routes: two along each of the Y branches.
     assert len(result) == 4

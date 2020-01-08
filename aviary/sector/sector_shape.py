@@ -17,6 +17,9 @@ from abc import abstractmethod
 
 from aviary.sector.route import Route
 
+
+EPSILON = 1e-10 # Small number used as a tolerance when determining routes.
+
 class SectorType(Enum):
     I = "I",
     X = "X",
@@ -78,14 +81,18 @@ class SectorShape:
     y_route_names = ['almighty', 'ethereal', 'everlasting', 'divine']
 
     @abstractmethod
-    def routes(self, epsilon = 1e-10) -> dict:
-        """Compute the valid routes through the sector """
+    def routes(self) -> list:
+        """
+        Compute the valid routes through the sector.
+
+        :return: A list of Route instances
+        """
         pass
 
 
     @staticmethod
     def shape_constructor(type):
-        """Parse a shape type into a SectorShape constructor."""
+        """Parse a ShapeType (enum value) into a SectorShape constructor."""
         if type == SectorType.I:
             return IShape
         if type == SectorType.X:
@@ -119,6 +126,11 @@ class SectorShape:
 
     @property
     def sector_type(self):
+        """
+        Sector type property
+
+        :return: A SectorType enum value
+        """
         return self._sector_type
 
     # Make the sector_type property immutable.
@@ -128,6 +140,11 @@ class SectorShape:
 
     @property
     def polygon(self):
+        """
+        Polygon property.
+
+        :return: A Shapely BaseGeometry instance
+        """
         return self._polygon
 
     # Make the polygon property immutable.
@@ -136,7 +153,12 @@ class SectorShape:
         raise Exception("polygon is immutable")
 
     @property
-    def fixes(self):
+    def fixes(self) -> dict:
+        """
+        Fixes property.
+
+        :return: A dictionary keyed by fix name with each value a Shapely Point instance
+        """
         return self._fixes
 
     # Make the fixes property immutable.
@@ -152,15 +174,6 @@ class SectorShape:
     @route_names.setter
     def route_names(self, route_names):
         raise Exception("route_names are immutable")
-
-
-    # superfluous:
-    # def named_routes(self) -> dict:
-    #     """Return a dictionary of routes, mapping from route name to a list of waypoints"""
-    #
-    #     routes = self.routes()
-    #     route_names = self.route_names
-    #     return dict((route_names[route_index], [item[0] for item in routes[route_index]]) for route_index in range(0, len(routes)))
 
 
 class IShape(SectorShape):
@@ -198,10 +211,9 @@ class IShape(SectorShape):
 
     def routes(self):
         """
-        Compute the valid routes through the sector shape.
+        Compute the valid routes through the sector.
 
-        Each route is a list of fixes, and each fix is a (string, Point) pair
-        where the string is the name of the fix and the Point is its x-y coordinate.
+        :return: A list of Route instances
         """
 
         # Order by increasing y-coordinate to get the "ascending" route.
@@ -249,12 +261,16 @@ class XShape(SectorShape):
 
         return fix_points
 
-    def routes(self, epsilon = 1e-10):
-        """Compute the valid routes through the sector """
+    def routes(self):
+        """
+        Compute the valid routes through the sector.
+
+        :return: A list of Route instances
+        """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
-        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < epsilon, self.fixes.items()))
-        horizontal_fixes = list(filter(lambda item : abs(item[1].coords[0][1]) < epsilon, self.fixes.items()))
+        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < EPSILON, self.fixes.items()))
+        horizontal_fixes = list(filter(lambda item : abs(item[1].coords[0][1]) < EPSILON, self.fixes.items()))
 
         # Order by increasing y-coordinate to get the "ascending_y" route.
         ascending_y_fix_list = sorted(vertical_fixes, key = lambda item : item[1].coords[0][1])
@@ -303,7 +319,7 @@ class YShape(SectorShape):
         coords = list(self.polygon.exterior.coords)
         xy_min, xy_max = self.minmax_xy(coords)
         xmin, ymin = xy_min
-        bottom = self.get_centre([geom.Point(pt) for pt in self.get_coords(coords, xmin)])
+        bottom = self.__get_centre__([geom.Point(pt) for pt in self.__get_coords__(coords, xmin)])
         bottom = geom.Point(self.polygon.centroid.coords[0][0], bottom.coords[0][1])
         _x, _y = bottom.coords[0]
         bottom_outer = geom.Point(_x, _y - self.offset_nm)
@@ -324,17 +340,21 @@ class YShape(SectorShape):
         max_x, max_y = max([y for x, y in coords]), max([x for x, y in coords])
         return [(min_x, min_y), (max_x, max_y)]
 
-    def get_coords(self, coords, match):
+    def __get_coords__(self, coords, match):
         return [(x, y) for x, y in coords if x == match or y == match]
 
-    def get_centre(self, coords):
+    def __get_centre__(self, coords):
         return geom.Point(geom.GeometryCollection(coords).centroid.coords[0])
 
-    def routes(self, epsilon = 1e-10):
-        """Compute the valid routes through the sector """
+    def routes(self):
+        """
+        Compute the valid routes through the sector.
+
+        :return: A list of Route instances
+        """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
-        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < epsilon, self.fixes.items()))
+        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < EPSILON, self.fixes.items()))
 
         # Get the fixes on the left arm, possibly including the vertical fixes.
         all_left_fixes = list(filter(lambda item : item[1].coords[0][0] < 0, self.fixes.items()))

@@ -183,6 +183,8 @@ class SectorElement():
         - properties:
             - name: e.g. "HELL"
             - type: "SECTOR"
+            - shape: "I", "X" or "Y"
+            - origin: [long, lat]
             - children: {
                 "SECTOR_VOLUME": {"names": [<hash of sector boundary coordinates>]},
                 "ROUTE":{"names": [<shape route names>]}
