@@ -1,5 +1,6 @@
 """
-Construction of 2D polygons (including I, X, Y shapes) for use as cross-sections of airspace sector elements.
+Construction of 2D polygons (including I, X, Y shapes) for use as
+cross-sections of airspace sector elements.
 
 TODO:
     - support gluing together simple I, X, Y elements to construct more complex sector shapes.
@@ -12,7 +13,7 @@ from enum import Enum
 
 import shapely.geometry as geom
 from shapely.ops import cascaded_union
-from shapely.affinity import rotate
+from shapely.affinity import rotate, translate
 from abc import abstractmethod
 
 from aviary.sector.route import Route
@@ -27,9 +28,6 @@ class SectorType(Enum):
 
 class SectorShape:
     """A 2D sector shape with waypoint fixes"""
-
-    airway_width_nm = 10 # Class attribute: constant airway width of 10 nm
-    offset_nm = 10 # Class attribute: constant exterior waypoint offset
 
     ###
     ### Default fix names:
@@ -102,13 +100,22 @@ class SectorShape:
         raise ValueError(f'Invalid shape type: {type}.')
 
 
-    def __init__(self, sector_type: SectorType, polygon: geom.base.BaseGeometry, fix_names, route_names):
+    def __init__(self,
+                 sector_type: SectorType,
+                 polygon: geom.base.BaseGeometry,
+                 fix_names,
+                 route_names,
+                 airway_width_nm=10,
+                 offset_nm=10
+                 ):
 
         if not isinstance(sector_type, SectorType):
             raise KeyError("Type must be a SectorType")
 
         self._sector_type = sector_type
         self._polygon = polygon
+        self._airway_width_nm = airway_width_nm
+        self._offset_nm = offset_nm
 
         fix_points = self.__fix_points__()
 
@@ -175,10 +182,41 @@ class SectorShape:
     def route_names(self, route_names):
         raise Exception("route_names are immutable")
 
+    @property
+    def airway_width_nm(self):
+        """
+        Airway width property
+
+        :return: The airway width in nautical miles
+        """
+        return self._airway_width_nm
+
+    # Make the airway_width_nm property immutable.
+    @airway_width_nm.setter
+    def airway_width_nm(self, airway_width_nm):
+        raise Exception("airway_width_nm is immutable")
+
+    @property
+    def offset_nm(self):
+        """
+        Offset property
+
+        :return: The external fix offset distance in nautical miles
+        """
+        return self._offset_nm
+
+    # Make the offset_nm property immutable.
+    @offset_nm.setter
+    def offset_nm(self, offset_nm):
+        raise Exception("offset_nm is immutable")
+
 
 class IShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None):
+    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
+
+        if airway_width_nm > length_nm:
+            raise ValueError(f'I sector width {airway_width_nm} must not exceed length {length_nm}')
 
         if fix_names is None:
             fix_names = self.i_fix_names
@@ -187,13 +225,18 @@ class IShape(SectorShape):
             route_names = self.i_route_names
 
         # Set the polygon points
-        width_nm = SectorShape.airway_width_nm
+        width_nm = airway_width_nm
         points = [(-0.5 * width_nm, -0.5 * length_nm),
                   (-0.5 * width_nm, 0.5 * length_nm),
                   (0.5 * width_nm, 0.5 * length_nm),
                   (0.5 * width_nm, -0.5 * length_nm)]
 
-        super(IShape, self).__init__(SectorType.I, geom.Polygon(points), fix_names, route_names)
+        super(IShape, self).__init__(sector_type = SectorType.I,
+                                     polygon = geom.Polygon(points),
+                                     fix_names = fix_names,
+                                     route_names = route_names,
+                                     airway_width_nm = airway_width_nm,
+                                     offset_nm = offset_nm)
 
     def __fix_points__(self):
         """Compute the locations of the fixes """
@@ -231,7 +274,7 @@ class IShape(SectorShape):
 
 class XShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None):
+    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
 
         if fix_names is None:
             fix_names = self.x_fix_names
@@ -239,10 +282,15 @@ class XShape(SectorShape):
         if route_names is None:
             route_names = self.x_route_names
 
-        i = IShape(length_nm)
+        i = IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
         polygon = cascaded_union([i.polygon, rotate(i.polygon, 90)])
 
-        super(XShape, self).__init__(SectorType.X, polygon, fix_names, route_names)
+        super(XShape, self).__init__(sector_type = SectorType.X,
+                                     polygon = polygon,
+                                     fix_names = fix_names,
+                                     route_names = route_names,
+                                     airway_width_nm = airway_width_nm,
+                                     offset_nm = offset_nm)
 
     def __fix_points__(self):
 
@@ -298,7 +346,7 @@ class XShape(SectorShape):
 
 class YShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None):
+    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
 
         if fix_names is None:
             fix_names = self.y_fix_names
@@ -307,12 +355,20 @@ class YShape(SectorShape):
             route_names = self.y_route_names
 
         # Use an I shape of half length here, so Y sector scale matches that of I & X.
-        i = IShape(length_nm / 2)
+        i = IShape(length_nm = length_nm / 2, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
         x_mid, y_mid = i.polygon.centroid.coords[0]
         x_min, y_min, x_max, y_max = i.polygon.bounds
-        polygon = cascaded_union([i.polygon, rotate(i.polygon, -120, origin=(x_mid, y_max)), rotate(i.polygon, 120, origin=(x_mid, y_max))])
+        offset_polygon = cascaded_union([i.polygon, rotate(i.polygon, -120, origin=(x_mid, y_max)), rotate(i.polygon, 120, origin=(x_mid, y_max))])
 
-        super(YShape, self).__init__(SectorType.Y, polygon, fix_names, route_names)
+        # Shift the polygon so its centre is at the origin.
+        polygon = translate(offset_polygon, xoff = 0.0, yoff = - length_nm / 4)
+
+        super(YShape, self).__init__(sector_type = SectorType.Y,
+                                     polygon = polygon,
+                                     fix_names = fix_names,
+                                     route_names = route_names,
+                                     airway_width_nm = airway_width_nm,
+                                     offset_nm = offset_nm)
 
     def __fix_points__(self):
 

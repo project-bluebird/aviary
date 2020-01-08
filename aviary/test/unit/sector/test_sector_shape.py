@@ -1,6 +1,9 @@
 
 import pytest
 
+from numpy import sin, pi
+import shapely.geometry as geom
+
 import aviary.sector.sector_shape as ss
 
 def test_sector_type():
@@ -20,6 +23,22 @@ def test_sector_type():
 
     assert i.sector_type == ss.SectorType.I
 
+
+def test_i_polygon():
+
+    length_nm = 100
+    airway_width_nm = 40
+    offset_nm = 60
+    target = ss.IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
+
+    result = target.polygon
+
+    assert isinstance(result, geom.polygon.BaseGeometry)
+
+    assert result.bounds[0] == - airway_width_nm / 2
+    assert result.bounds[1] == - length_nm / 2
+    assert result.bounds[2] == airway_width_nm / 2
+    assert result.bounds[3] == length_nm / 2
 
 def test_i_route_names():
 
@@ -89,7 +108,9 @@ def test_y_fixes():
 def test_i_routes():
 
     length_nm = 10
-    i = ss.IShape(length_nm=length_nm)
+    offset_nm = 25
+
+    i = ss.IShape(length_nm=length_nm, offset_nm =  offset_nm)
     result = i.routes()
 
     assert isinstance(result, list)
@@ -137,7 +158,7 @@ def test_x_routes():
 
     # Each element of 'result' is a list of dictionary items (representing fixes) of the form: (name, Point).
 
-    # result[0] is increasing in the y-coordinate
+    # result[0] is increasing in the x-coordinate
     assert result[0].fix_points()[0].coords[0][1] == -1 * (x.offset_nm + (length_nm / 2))
     assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 2)
     assert result[0].fix_points()[2].coords[0][1] == 0
@@ -154,7 +175,7 @@ def test_x_routes():
 
 def test_y_routes():
 
-    length_nm = 10
+    length_nm = 50
     y = ss.YShape(length_nm=length_nm)
     result = y.routes()
 
@@ -181,9 +202,9 @@ def test_y_routes():
     assert result[0].fix_points()[4].coords[0][0] < result[0].fix_points()[3].coords[0][0]
 
     # y-coordinates:
-    assert result[0].fix_points()[0].coords[0][1] == -1 * (y.offset_nm + (length_nm / 4))
-    assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 4)
-    assert result[0].fix_points()[2].coords[0][1] == pytest.approx(length_nm / 4)
-    assert result[0].fix_points()[3].coords[0][1] == pytest.approx(length_nm / 2)
-    assert result[0].fix_points()[4].coords[0][1] == pytest.approx(y.offset_nm)
+    assert result[0].fix_points()[0].coords[0][1] == -1 * (y.offset_nm + length_nm / 2)
+    assert result[0].fix_points()[1].coords[0][1] == -1 * (length_nm / 2)
+    assert result[0].fix_points()[2].coords[0][1] == pytest.approx(0) # Centre of the shape is at the origin
+    assert result[0].fix_points()[3].coords[0][1] == pytest.approx(length_nm / 2 * sin(pi / 6))
+    assert result[0].fix_points()[4].coords[0][1] == pytest.approx((y.offset_nm + length_nm / 2) * sin(pi / 6))
 
