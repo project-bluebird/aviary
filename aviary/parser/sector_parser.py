@@ -151,6 +151,30 @@ class SectorParser:
 
         return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.UPPER_LIMIT_KEY])
 
+    def sector_length_nm(self):
+        """
+        Returns the parsed sector length.
+        :return: an integer.
+        """
+
+        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.LENGTH_NM_KEY])
+
+    def sector_airway_width_nm(self):
+        """
+        Returns the parsed sector airway width.
+        :return: an integer.
+        """
+
+        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.AIRWAY_WIDTH_NM_KEY])
+
+    def waypoint_offset_nm(self):
+        """
+        Returns the parsed waypoint offset.
+        :return: an integer.
+        """
+
+        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.OFFSET_NM_KEY])
+
     def sector_centroid(self):
         """
         Returns the centroid of the sector polygon.

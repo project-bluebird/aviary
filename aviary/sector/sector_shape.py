@@ -109,6 +109,7 @@ class SectorShape:
                  polygon: geom.base.BaseGeometry,
                  fix_names,
                  route_names,
+                 length_nm,
                  airway_width_nm,
                  offset_nm
                  ):
@@ -118,6 +119,7 @@ class SectorShape:
 
         self._sector_type = sector_type
         self._polygon = polygon
+        self._length_nm = length_nm
         self._airway_width_nm = airway_width_nm
         self._offset_nm = offset_nm
 
@@ -187,6 +189,20 @@ class SectorShape:
         raise Exception("route_names are immutable")
 
     @property
+    def length_nm(self):
+        """
+        Sector length property
+
+        :return: The sector length in nautical miles
+        """
+        return self._length_nm
+
+    # Make the length_nm property immutable.
+    @length_nm.setter
+    def length_nm(self, length_nm):
+        raise Exception("length_nm is immutable")
+
+    @property
     def airway_width_nm(self):
         """
         Airway width property
@@ -239,6 +255,7 @@ class IShape(SectorShape):
                                      polygon = geom.Polygon(points),
                                      fix_names = fix_names,
                                      route_names = route_names,
+                                     length_nm = length_nm,
                                      airway_width_nm = airway_width_nm,
                                      offset_nm = offset_nm)
 
@@ -294,6 +311,7 @@ class XShape(SectorShape):
                                      polygon = polygon,
                                      fix_names = fix_names,
                                      route_names = route_names,
+                                     length_nm = length_nm,
                                      airway_width_nm = airway_width_nm,
                                      offset_nm = offset_nm)
 
@@ -374,6 +392,7 @@ class YShape(SectorShape):
                                      polygon = polygon,
                                      fix_names = fix_names,
                                      route_names = route_names,
+                                     length_nm = length_nm,
                                      airway_width_nm = airway_width_nm,
                                      offset_nm = offset_nm)
 

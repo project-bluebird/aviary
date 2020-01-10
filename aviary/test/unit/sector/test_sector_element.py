@@ -188,7 +188,8 @@ def test_boundary_geojson(i_element):
     assert result[se.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.2597, 51.0838)
 
     assert sorted(result[se.PROPERTIES_KEY].keys()) == \
-           sorted([se.NAME_KEY, se.TYPE_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY, se.CHILDREN_KEY])
+           sorted([se.NAME_KEY, se.TYPE_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY,
+                   se.LENGTH_NM_KEY, se.AIRWAY_WIDTH_NM_KEY, se.OFFSET_NM_KEY, se.CHILDREN_KEY])
 
     assert isinstance(result[se.PROPERTIES_KEY][se.NAME_KEY], str)
     assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.SECTOR_VOLUME_VALUE
@@ -290,6 +291,13 @@ def test_deserialise(i_sector_geojson):
     assert isinstance(result, se.SectorElement)
     assert result.origin == se.DEFAULT_ORIGIN
     assert result.shape.sector_type == ss.SectorType.I
+
+    assert result.lower_limit == 50
+    assert result.upper_limit == 450
+
+    assert result.shape.length_nm == 100
+    assert result.shape.airway_width_nm == 20
+    assert result.shape.offset_nm == 40
 
     # Check that re-serialisation produces the original GeoJSON string.
     assert str(geojson.dumps(result)) == i_sector_geojson.strip()

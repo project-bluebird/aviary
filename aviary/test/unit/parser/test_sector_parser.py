@@ -69,7 +69,9 @@ def test_sector_volume_properties(target):
     assert isinstance(result, list)
     assert len(result) == 1
     assert isinstance(result[0], dict)
-    assert sorted(result[0].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY, se.CHILDREN_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY])
+    assert sorted(result[0].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY,
+                                               se.CHILDREN_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY,
+                                               se.LENGTH_NM_KEY, se.AIRWAY_WIDTH_NM_KEY, se.OFFSET_NM_KEY])
 
 
 def test_geometries_of_type(target):
@@ -139,13 +141,45 @@ def test_sector_lower_limit(target):
     result = target.sector_lower_limit()
 
     assert isinstance(result, int)
-    assert result == se.DEFAULT_LOWER_LIMIT
+
+    # Note that the lower limit in the test fixture is not the default value.
+    assert result == 50
 
 
 def test_sector_upper_limit(target):
     result = target.sector_upper_limit()
 
     assert isinstance(result, int)
-    assert result == se.DEFAULT_UPPER_LIMIT
+
+    # Note that the upper limit in the test fixture is not the default value.
+    assert result == 450
+
+
+def test_sector_length_nm(target):
+    result = target.sector_length_nm()
+
+    assert isinstance(result, int)
+
+    # Note that the length in the test fixture is not the default value.
+    assert result == 100
+
+
+def test_sector_airway_width_nm(target):
+    result = target.sector_airway_width_nm()
+
+    assert isinstance(result, int)
+
+    # Note that the airway width in the test fixture is not the default value.
+    assert result == 20
+
+
+def test_waypoint_offset_nm(target):
+    result = target.waypoint_offset_nm()
+
+    assert isinstance(result, int)
+
+    # Note that the waypoint offset in the test fixture is not the default value.
+    assert result == 40
+
 
 

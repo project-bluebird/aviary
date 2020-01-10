@@ -36,6 +36,9 @@ TYPE_KEY = "type"
 PROPERTIES_KEY = "properties"
 LOWER_LIMIT_KEY = "lower_limit"
 UPPER_LIMIT_KEY = "upper_limit"
+LENGTH_NM_KEY = "length_nm"
+AIRWAY_WIDTH_NM_KEY = "airway_width_nm"
+OFFSET_NM_KEY = "offset_nm"
 ROUTES_KEY = "routes"
 GEOMETRY_KEY = "geometry"
 LATITUDE_KEY = "latitude"
@@ -220,6 +223,9 @@ class SectorElement():
             - type: "SECTOR_VOLUME"
             - lower_limit: e.g. 150
             - upper_limit: e.g. 400
+            - length_nm: e.g. 50
+            - airway_width_nm: e.g. 10
+            - offset_nm: e.g. 10
             - children: {}
         """
 
@@ -231,6 +237,9 @@ class SectorElement():
                 TYPE_KEY: SECTOR_VOLUME_VALUE,
                 LOWER_LIMIT_KEY: self.lower_limit,
                 UPPER_LIMIT_KEY: self.upper_limit,
+                LENGTH_NM_KEY: self.shape.length_nm,
+                AIRWAY_WIDTH_NM_KEY: self.shape.airway_width_nm,
+                OFFSET_NM_KEY: self.shape.offset_nm,
                 CHILDREN_KEY: {}
             }
         }
@@ -302,6 +311,9 @@ class SectorElement():
                              origin = parser.sector_origin().coords[0],
                              lower_limit = parser.sector_lower_limit(),
                              upper_limit = parser.sector_upper_limit(),
+                             length_nm = parser.sector_length_nm(),
+                             airway_width_nm = parser.sector_airway_width_nm(),
+                             offset_nm = parser.waypoint_offset_nm(),
                              fix_names = parser.fix_names(),
                              route_names = parser.route_names())
 

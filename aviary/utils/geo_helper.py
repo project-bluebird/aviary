@@ -24,18 +24,16 @@ class GeoHelper():
     @staticmethod
     def format_coordinates(geojson, key, float_precision, as_geojson = True):
         """
-        Formats coordinates to apply a given float precision and work around
-        an issue with __geo_interface__ unexpectedly returning a tuple of
-        coordinate pairs rather than a list.
+        Formats coordinates to apply a given float precision and work around an
+        issue with __geo_interface__ unexpectedly returning a tuple of coordinate
+        pairs rather than a list, which breaks deserialisation via geojson.load.
         """
 
         if not key in geojson:
             raise ValueError(f'Key {key} not found in geojson: {geojson}')
 
-        # Ensure the coordinates are in a list, not a tuple, *if* there is more than one pair of coordinates.
-        coords = geojson[key][COORDINATES_KEY]
-        if not isinstance(coords[0], float):
-            coords = list(geojson[key][COORDINATES_KEY])
+        # Ensure the coordinates are in a list, not a tuple.
+        coords = list(geojson[key][COORDINATES_KEY])
 
         # Coordinates list may be nested.
         while (isinstance(coords, list) and len(coords) == 1):
