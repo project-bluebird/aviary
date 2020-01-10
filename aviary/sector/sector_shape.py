@@ -18,6 +18,10 @@ from abc import abstractmethod
 
 from aviary.sector.route import Route
 
+# Default sector dimensions:
+LENGTH_NM = 50
+AIRWAY_WIDTH_NM = 10
+OFFSET_NM = 10
 
 EPSILON = 1e-10 # Small number used as a tolerance when determining routes.
 
@@ -105,8 +109,8 @@ class SectorShape:
                  polygon: geom.base.BaseGeometry,
                  fix_names,
                  route_names,
-                 airway_width_nm=10,
-                 offset_nm=10
+                 airway_width_nm,
+                 offset_nm
                  ):
 
         if not isinstance(sector_type, SectorType):
@@ -213,7 +217,8 @@ class SectorShape:
 
 class IShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
+    def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
 
         if airway_width_nm > length_nm:
             raise ValueError(f'I sector width {airway_width_nm} must not exceed length {length_nm}')
@@ -225,11 +230,10 @@ class IShape(SectorShape):
             route_names = self.i_route_names
 
         # Set the polygon points
-        width_nm = airway_width_nm
-        points = [(-0.5 * width_nm, -0.5 * length_nm),
-                  (-0.5 * width_nm, 0.5 * length_nm),
-                  (0.5 * width_nm, 0.5 * length_nm),
-                  (0.5 * width_nm, -0.5 * length_nm)]
+        points = [(-0.5 * airway_width_nm, -0.5 * length_nm),
+                  (-0.5 * airway_width_nm, 0.5 * length_nm),
+                  (0.5 * airway_width_nm, 0.5 * length_nm),
+                  (0.5 * airway_width_nm, -0.5 * length_nm)]
 
         super(IShape, self).__init__(sector_type = SectorType.I,
                                      polygon = geom.Polygon(points),
@@ -274,7 +278,8 @@ class IShape(SectorShape):
 
 class XShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
+    def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
 
         if fix_names is None:
             fix_names = self.x_fix_names
@@ -318,6 +323,7 @@ class XShape(SectorShape):
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
         vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < EPSILON, self.fixes.items()))
+        # Get the fixes on the horizontal line (i.e. with zero y coordinate).
         horizontal_fixes = list(filter(lambda item : abs(item[1].coords[0][1]) < EPSILON, self.fixes.items()))
 
         # Order by increasing y-coordinate to get the "ascending_y" route.
@@ -346,7 +352,8 @@ class XShape(SectorShape):
 
 class YShape(SectorShape):
 
-    def __init__(self, length_nm = 50, fix_names = None, route_names = None, airway_width_nm = 10, offset_nm = 10):
+    def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
 
         if fix_names is None:
             fix_names = self.y_fix_names

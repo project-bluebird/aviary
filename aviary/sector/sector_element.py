@@ -7,7 +7,6 @@ Construction of I, X, Y airspace sector elements with upper & lower vertical lim
 from pyproj import Proj
 from geojson import dump
 
-import os.path
 from io import StringIO
 
 from shapely.geometry import mapping, Point
