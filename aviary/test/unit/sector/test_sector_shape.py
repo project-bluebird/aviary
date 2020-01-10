@@ -27,8 +27,14 @@ def test_i_polygon():
 
     length_nm = 100
     airway_width_nm = 40
+    offset_nm = 20
     target = ss.IShape(length_nm = length_nm,
-                       airway_width_nm = airway_width_nm)
+                       airway_width_nm = airway_width_nm,
+                       offset_nm = offset_nm)
+
+    assert target.length_nm == length_nm
+    assert target.airway_width_nm == airway_width_nm
+    assert target.offset_nm == offset_nm
 
     result = target.polygon
 
