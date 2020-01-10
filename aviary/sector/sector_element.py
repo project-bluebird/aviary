@@ -7,7 +7,6 @@ Construction of I, X, Y airspace sector elements with upper & lower vertical lim
 from pyproj import Proj
 from geojson import dump
 
-import os.path
 from io import StringIO
 
 from shapely.geometry import mapping, Point
@@ -183,6 +182,8 @@ class SectorElement():
         - properties:
             - name: e.g. "HELL"
             - type: "SECTOR"
+            - shape: "I", "X" or "Y"
+            - origin: [long, lat]
             - children: {
                 "SECTOR_VOLUME": {"names": [<hash of sector boundary coordinates>]},
                 "ROUTE":{"names": [<shape route names>]}

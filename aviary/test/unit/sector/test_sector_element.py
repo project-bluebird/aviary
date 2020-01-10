@@ -11,12 +11,52 @@ import aviary.utils.geo_helper as gh
 
 def test_sector_element():
 
-    target = se.SectorElement(type = ss.SectorType.I,
+    origin = (-0.1275, 51.5) # longitude/latitude
+
+    length_nm = 50
+    airway_width_nm = 10
+    sector = se.SectorElement(type = ss.SectorType.I,
                               name = "I-Sector",
-                              origin = (0, 40),
-                              lower_limit=50,
-                              upper_limit=100)
-    assert isinstance(target, se.SectorElement)
+                              origin = origin,
+                              length_nm = length_nm,
+                              airway_width_nm = airway_width_nm)
+
+    longSector = se.SectorElement(type = ss.SectorType.I,
+                              name = "Long-I-Sector",
+                              origin = origin,
+                              length_nm = 2 * length_nm,
+                              airway_width_nm = airway_width_nm)
+
+    wideSector = se.SectorElement(type = ss.SectorType.I,
+                              name = "Wide-I-Sector",
+                              origin = origin,
+                              length_nm = length_nm,
+                              airway_width_nm = 2 * airway_width_nm)
+
+    assert isinstance(sector, se.SectorElement)
+    assert isinstance(longSector, se.SectorElement)
+    assert isinstance(wideSector, se.SectorElement)
+
+    lon, lat = sector.polygon().exterior.coords.xy
+    longSector_lon, longSector_lat = longSector.polygon().exterior.coords.xy
+    wideSector_lon, wideSector_lat = wideSector.polygon().exterior.coords.xy
+
+    # Check that the "length" of the I shape runs north to south, and the "width" runs east to west.
+
+    # In the longSector the latitudes should be different.
+    # (Note: longitudes should be similar to the original sector but not identical due to the non-linear projection).
+    assert longSector_lat[0] < lat[0]
+    assert longSector_lat[1] > lat[1]
+    assert longSector_lat[2] > lat[2]
+    assert longSector_lat[3] < lat[3]
+
+    # In the wideSector the longitudes should be different.
+    # (Note: latitudes should be similar to the original sector but not identical due to the non-linear projection).
+    assert wideSector_lon[0] < lon[0]
+    assert wideSector_lon[1] < lon[1]
+    assert wideSector_lon[2] > lon[2]
+    assert wideSector_lon[3] > lon[3]
+
 
 def test_sector_element_with_names():
 
@@ -136,8 +176,16 @@ def test_boundary_geojson(i_element):
     assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
 
     assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POLYGON_VALUE
+
+    # Multiple coordinate pairs are stored as a list of tuples.
     assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    # TODO: check length of coordinates
+    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
+
+    # The I geometry contains 5 "bounding box" points (since the first and last are duplicates).
+    assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 5
+
+    # # Check the order of coordinates is correct, i.e. (longitude, latitude):
+    assert result[se.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.2597, 51.0838)
 
     assert sorted(result[se.PROPERTIES_KEY].keys()) == \
            sorted([se.NAME_KEY, se.TYPE_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY, se.CHILDREN_KEY])
@@ -159,12 +207,17 @@ def test_waypoint_geojson(i_element):
 
     assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
     assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POINT_VALUE
-    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+
+    # A single coordinate pair is stored as a tuple.
+    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], tuple)
     assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
 
     assert sorted(result[se.PROPERTIES_KEY].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY])
     assert result[se.PROPERTIES_KEY][se.NAME_KEY] == name.upper()
     assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.FIX_VALUE
+
+    # Check the order of coordinates is correct, i.e. (longitude, latitude):
+    assert result[se.GEOMETRY_KEY][gh.COORDINATES_KEY] == (-0.1275, 51.9161)
 
 def test_geo_interface(y_element):
 

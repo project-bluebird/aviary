@@ -26,22 +26,25 @@ class GeoHelper():
         """
         Formats coordinates to apply a given float precision and work around
         an issue with __geo_interface__ unexpectedly returning a tuple of
-        coordinates rather than a list.
+        coordinate pairs rather than a list.
         """
 
         if not key in geojson:
             raise ValueError(f'Key {key} not found in geojson: {geojson}')
 
-        # Ensure the coordinates are in a list, not a tuple.
-        coords = list(geojson[key][COORDINATES_KEY])
+        # Ensure the coordinates are in a list, not a tuple, *if* there is more than one pair of coordinates.
+        coords = geojson[key][COORDINATES_KEY]
+        if not isinstance(coords[0], float):
+            coords = list(geojson[key][COORDINATES_KEY])
 
         # Coordinates list may be nested.
         while (isinstance(coords, list) and len(coords) == 1):
             coords = coords[0]
 
-        # Round to the given float precision.
+        # Round to the given float precision, handling separately the cases of
+        # a single coordinate pair versus a list of coordinate pairs.
         if isinstance(coords[0], float):
-            rounded = [round(num, float_precision) for num in coords]
+            rounded = tuple(round(num, float_precision) for num in coords)
         else:
             rounded = [tuple(round(num, float_precision) for num in longlat) for longlat in coords]
 
