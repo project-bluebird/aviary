@@ -10,7 +10,7 @@ def test_sector_geojson_script():
 
     sector_type = "I"
     sector_name = "MORTAL"
-    origin = "51.5,-0.1275"
+    origin = "-0.1275,51.5"
     lower_limit = 140
     upper_limit = 400
 
