@@ -4,6 +4,7 @@ import pytest
 import os
 import geojson
 import shapely
+from io import StringIO
 
 import aviary.sector.sector_element as se
 import aviary.sector.sector_shape as ss
@@ -286,7 +287,7 @@ def test_hash_sector_coordinates(x_element):
 
 def test_deserialise(i_sector_geojson):
 
-    result = se.SectorElement.deserialise(i_sector_geojson)
+    result = se.SectorElement.deserialise(StringIO(i_sector_geojson))
 
     assert isinstance(result, se.SectorElement)
     assert result.origin == se.DEFAULT_ORIGIN

@@ -305,7 +305,7 @@ class SectorElement():
         :return: a SectorElement instance
         """
 
-        parser = sp.SectorParser(StringIO(sector_geojson))
+        parser = sp.SectorParser(sector_geojson)
         return SectorElement(type = parser.sector_type(),
                              name = parser.sector_name(),
                              origin = parser.sector_origin().coords[0],
