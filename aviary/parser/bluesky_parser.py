@@ -81,9 +81,11 @@ class BlueskyParser(SectorParser):
         lower_limit = BS_FLIGHT_LEVEL + str(sector[se.LOWER_LIMIT_KEY])
 
         line = f"{start_time}{BS_PROMPT}{BS_POLY} {self.sector_name()} {upper_limit} {lower_limit}"
+        orig_len = len(line)
 
         # Parse lat/long info.
         polygon = self.sector_polygon()
+
         for coords_list in polygon[gh.COORDINATES_KEY]:
 
             # Coordinates list may be nested.
@@ -103,6 +105,8 @@ class BlueskyParser(SectorParser):
             )
 
             line = f'{line} {" ".join(str(latlong) for latlong in latlongs)}'
+        
+        assert len(line) > orig_len, "No latlon pairs added to line"
 
         # Return a list containing the single line.
         return [line]
