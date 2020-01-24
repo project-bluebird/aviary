@@ -143,5 +143,5 @@ def test_write_bluesky_scenario(target):
 def test_valid_polyalt_command(target):
     lines = target.all_lines()
     for polyalt_command in [l for l in lines if "POLYALT" in l]:
-       assert len(polyalt_command.split(">")[1].split()) >= 6
+        assert len(polyalt_command.split(">")[1].split()) >= 6
 
