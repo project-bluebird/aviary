@@ -83,6 +83,41 @@ def test_serialize(i_element):
     for i in range(target.length()):
         assert deserialized[i][sr.FIX_NAME_KEY] == target.fix_names()[i]
 
+def test_next_waypoint(i_element):
+
+    # Get the A to E route for the I sector.
+    target = i_element.routes()[1]
+
+    lonA, latA = target.fix_points()[0].coords[0]
+    lonB, latB = target.fix_points()[1].coords[0]
+    lonC, latC = target.fix_points()[2].coords[0]
+    lonD, latD = target.fix_points()[3].coords[0]
+    lonE, latE = target.fix_points()[4].coords[0]
+
+    assert latB < latA # Sanity check: the route is due south.
+    assert latC < latB # Sanity check: the route is due south.
+    assert latD < latC # Sanity check: the route is due south.
+    assert latE < latD # Sanity check: the route is due south.
+
+    # If we're north of fix A, the next waypoint is A.
+    assert target.next_waypoint(lat = latA + 1, lon = lonA) == 'A'
+
+    # If we're halfway between fixes A and B, the next waypoint is B.
+    assert target.next_waypoint(lat = (latA + latB)/2, lon = lonA) == 'B'
+
+    # If we're halfway between fixes B and C, the next waypoint is C.
+    assert target.next_waypoint(lat = (latB + latC)/2, lon = lonA) == 'C'
+
+    # If we're halfway between fixes C and D, the next waypoint is D.
+    assert target.next_waypoint(lat = (latC + latD)/2, lon = lonA) == 'D'
+
+    # If we're halfway between fixes D and E, the next waypoint is E.
+    assert target.next_waypoint(lat = (latD + latE)/2, lon = lonA) == 'E'
+
+    # If we're south of fix E, the next waypoint is None.
+    assert target.next_waypoint(lat = latE - 1, lon = lonA) is None
+
+
 def test_truncate(i_element):
 
     # Get the A to E route for the I sector.
@@ -92,9 +127,20 @@ def test_truncate(i_element):
     lonA, latA = target.fix_points()[0].coords[0]
     lonB, latB = target.fix_points()[1].coords[0]
     lonC, latC = target.fix_points()[2].coords[0]
+    lonD, latD = target.fix_points()[3].coords[0]
+    lonE, latE = target.fix_points()[4].coords[0]
 
     assert latB < latA # Sanity check: the route is due south.
     assert latC < latB # Sanity check: the route is due south.
+    assert latD < latC # Sanity check: the route is due south.
+    assert latE < latD # Sanity check: the route is due south.
+
+    # If we start from north of fix A, the truncated route is identical to the original route
+    target.truncate(initial_lat = latA + 1, initial_lon = lonA)
+    assert target.fix_list == full_route.fix_list
+
+    # If we start from halfway between fixes B and C, the truncated route omits both fixes A and B.
+    target = i_element.routes()[1]
 
     # If we start from halfway between fixes A and B, the truncated route omits only fix A.
     target.truncate(initial_lat = (latA + latB)/2, initial_lon = lonA)
@@ -105,4 +151,22 @@ def test_truncate(i_element):
 
     target.truncate(initial_lat = (latB + latC)/2, initial_lon = lonA)
     assert target.fix_list == full_route.fix_list[2:]
+
+    # If we start from halfway between fixes C and D, the truncated route omits fixes A, B and C.
+    target = i_element.routes()[1]
+
+    target.truncate(initial_lat = (latC + latD)/2, initial_lon = lonA)
+    assert target.fix_list == full_route.fix_list[3:]
+
+    # If we start from halfway between fixes D and E, the truncated route omits both fixes A, B, C and D.
+    target = i_element.routes()[1]
+
+    target.truncate(initial_lat = (latD + latE)/2, initial_lon = lonA)
+    assert target.fix_list == full_route.fix_list[4:]
+
+    # If we start from south of fix E, the truncated route has an empty fix list.
+    target = i_element.routes()[1]
+
+    target.truncate(initial_lat = latE - 1, initial_lon = lonA)
+    assert not target.fix_list
 

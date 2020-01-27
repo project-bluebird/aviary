@@ -125,6 +125,23 @@ class Route():
             for i in range(self.length())
         ]
 
+    def next_waypoint(self, lat, lon):
+        """ Returns the name of the next waypoint on the route (i.e. the fix to which the aircraft is currently heading)
+        given a current position.
+
+        :param lat: Current latitude
+        :param lon: Current longitude
+        :return: The name of the waypoint on the route, or None if the last waypoint is passed.
+        """
+
+        # Make a copy of the route to avoid side effects.
+        truncated = self.copy()
+        truncated.truncate(lat, lon)
+
+        if truncated.length() == 0:
+            return None
+
+        return truncated.fix_names()[0]
 
     def truncate(self, initial_lat, initial_lon):
         """Truncates this route in light of a given start position by removing fixes that are already passed."""
@@ -132,8 +149,27 @@ class Route():
         if not self.projection:
             raise ValueError("Truncate route operation requires a non-empty projection attribute.")
 
-        # Retain only those route elements that are closer to the final fix than the start_position.
+        def fix_latitude(i):
+            return self.fix_points()[i].coords[0][1]
+
+        def fix_longitude(i):
+            return self.fix_points()[i].coords[0][0]
+
+        def distance_to_fix(i):
+            return GeoHelper.distance(lat1=initial_lat, lon1=initial_lon, lat2=fix_latitude(i), lon2=fix_longitude(i))
+
+        # Handle the case that the aircraft has passed the final fix (using only distances!).
+        distance_to_final_fix = distance_to_fix(-1)
+        distance_to_penultimate_fix = distance_to_fix(-2)
+        distance_between_final_fixes = GeoHelper.distance(lat1=fix_latitude(-1), lon1 = fix_longitude(-1),
+                                                          lat2=fix_latitude(-2), lon2 = fix_longitude(-2))
+
+        if distance_to_final_fix < distance_to_penultimate_fix and distance_to_penultimate_fix > distance_between_final_fixes:
+            self.fix_list = []
+            return
+
+        # Retain only those route elements that are closer to the final fix than the initial position.
         final_lon, final_lat = self.fix_points()[-1].coords[0]  # Note lon/lat order!
         self.fix_list = [self.fix_list[i] for i in range(self.length()) if
-                         GeoHelper.distance(lat1 = final_lat, lon1 = final_lon, lat2 = self.fix_points()[i].coords[0][1], lon2 = self.fix_points()[i].coords[0][0]) <
+                         GeoHelper.distance(lat1 = final_lat, lon1 = final_lon, lat2 = fix_latitude(i), lon2 = fix_longitude(i)) <
                          GeoHelper.distance(lat1 = final_lat, lon1 = final_lon, lat2 = initial_lat, lon2 = initial_lon)]
