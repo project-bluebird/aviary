@@ -63,49 +63,46 @@ class BlueskyParser(SectorParser):
 
     def polyalt_lines(self):
         """
-        Parses a geoJSON sector definition for sector polygon & altitude information and returns a list containing a BlueSky POLYALT commands of the form, one for each sector in the geoJSON:
+        Parses a geoJSON sector definition for sector polygon & altitude information and returns a list of
+        BlueSky POLYALT commands of the form, one for each sector in the geoJSON:
         f'00:00:00.00>POLYGON {sector_name} {upper_limit} {lower_limit} {lat1} {lon1} ... {latN} {lonN}'
-        Currently supports only single-sector scenarios.
         """
 
         start_time = self.scenario[sg.START_TIME_KEY] + ".00"
 
         sectors = self.sector_volume_properties()
-        if len(sectors) != 1:
-            raise Exception(
-                f"Expected precisely one sector; found {len(sectors)} sectors."
-            )
-        sector = sectors[0]
 
-        upper_limit = BS_FLIGHT_LEVEL + str(sector[se.UPPER_LIMIT_KEY])
-        lower_limit = BS_FLIGHT_LEVEL + str(sector[se.LOWER_LIMIT_KEY])
+        # Local function to return a single POLYALT line for a single sector.
+        def sector_polyalt_line(sector):
 
-        line = f"{start_time}{BS_PROMPT}{BS_POLY} {self.sector_name()} {upper_limit} {lower_limit}"
+            upper_limit = BS_FLIGHT_LEVEL + str(sector[se.UPPER_LIMIT_KEY])
+            lower_limit = BS_FLIGHT_LEVEL + str(sector[se.LOWER_LIMIT_KEY])
 
-        # Parse lat/long info.
-        polygon = self.sector_polygon()
-        for coords_list in polygon[gh.COORDINATES_KEY]:
+            line = f"{start_time}{BS_PROMPT}{BS_POLY} {self.sector_name()} {upper_limit} {lower_limit}"
+            orig_len = len(line)
+
+            # Parse lat/long info.
+            coords_list = self.sector_polygon()[gh.COORDINATES_KEY]
 
             # Coordinates list may be nested.
-            coords = coords_list
-            while len(coords) == 1:
-                coords = coords[0]
+            while len(coords_list) == 1:
+                coords_list = coords_list[0]
 
-            # Individual coordinate pairs are not part of the polyalt definition.
-            if isinstance(coords[0], float):
-                continue
+            assert len(coords_list) > 2, "Sector polygon must contain 3 or more coordinate pairs"
 
             # Note: longitudes appear first!
             latlongs = list(
                 chain.from_iterable(
-                    [[coord[LAT_INDEX], coord[LONG_INDEX]] for coord in coords]
+                    [[coord[LAT_INDEX], coord[LONG_INDEX]] for coord in coords_list]
                 )
             )
 
             line = f'{line} {" ".join(str(latlong) for latlong in latlongs)}'
+            assert len(line) > orig_len, "No latlon pairs added to line"
 
-        # Return a list containing the single line.
-        return [line]
+            return line
+
+        return [sector_polyalt_line(sector) for sector in sectors]
 
     def create_aircraft_lines(self):
         """
