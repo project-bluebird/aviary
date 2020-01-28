@@ -107,6 +107,3 @@ venv.bak/
 .idea
 
 .vscode/
-
-# Test output
-aviary/test/integration/scripts/*.csv

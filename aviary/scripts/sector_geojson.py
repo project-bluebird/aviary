@@ -9,6 +9,7 @@ Author: Tim Hobson, thobson@turing.ac.uk
 import traceback
 import argparse, sys
 
+import aviary.constants as C
 import aviary.sector.sector_shape as ss
 from aviary.sector.sector_element import SectorElement
 from aviary.utils.filename_helper import FilenameHelper
@@ -23,7 +24,8 @@ description = '''Run this script to generate an airspace sector GeoJSON file.
 #epilog = '''Generated file(s):'''
 epilog = ''''''
 
-def main():
+def main(argv=None):
+
     parser=argparse.ArgumentParser(description=description, epilog=epilog)
 
     #
@@ -44,7 +46,7 @@ def main():
 
     parser.add_argument('-d', dest='debug', help='Debug mode', action='store_true')
 
-    args=parser.parse_args()
+    args=parser.parse_args(argv)
 
     print(">>>>> Generating sector GeoJSON >>>>>")
 
@@ -70,7 +72,7 @@ def main():
             print(traceback.print_tb(tb))
         else:
             print('Re-run with the debug flag -d for a stack trace.')
-        exit()
+        return 1
 
     filename = FilenameHelper.sector_output_filename(filename_prefix=args.filename_prefix,
                                                      sector_name=args.sector_name,
@@ -81,6 +83,7 @@ def main():
     file = sector.write_geojson(filename = filename, path = args.output_path)
 
     print(f'SUCCESS! Wrote sector to {file}')
+    return 0
 
 if __name__ == "__main__":
-    main()
+    exit(main())
