@@ -35,7 +35,7 @@ def test_sector_geojson_script():
                                                      lower_limit=lower_limit,
                                                      upper_limit=upper_limit)
 
-    output_file = FilenameHelper.construct_filename(filename = filename, desired_extension=se.GEOJSON_EXTENSION,
+    output_file = FilenameHelper.construct_filename(filename = filename, desired_extension=C.GEOJSON_EXTENSION,
                                                     path = output_path)
 
     assert os.path.exists(output_file)

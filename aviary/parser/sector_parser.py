@@ -2,6 +2,7 @@
 Sector (GeoJSON) parser.
 """
 
+import aviary.constants as C
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
 import aviary.utils.geo_helper as gh
@@ -24,8 +25,8 @@ class SectorParser:
         # Decode the sector geoJSON strings.
         sector = geojson.load(sector_geojson)
 
-        if se.FEATURES_KEY not in sector:
-            raise ValueError(f"Sector geojson must contain {se.FEATURES_KEY} element")
+        if C.FEATURES_KEY not in sector:
+            raise ValueError(f"Sector geojson must contain {C.FEATURES_KEY} element")
 
         self.sector = sector
 
@@ -36,7 +37,7 @@ class SectorParser:
         """
 
         return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.PROPERTIES_KEY}.{se.TYPE_KEY}=={type_value}]",
+            f"$..{C.FEATURES_KEY}[?@.{C.PROPERTIES_KEY}.{C.TYPE_KEY}=={type_value}]",
             self.sector,
         )
 
@@ -47,7 +48,7 @@ class SectorParser:
         """
 
         return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.PROPERTIES_KEY}.{se.TYPE_KEY}=={type_value}].{se.PROPERTIES_KEY}",
+            f"$..{C.FEATURES_KEY}[?@.{C.PROPERTIES_KEY}.{C.TYPE_KEY}=={type_value}].{C.PROPERTIES_KEY}",
             self.sector,
         )
 
@@ -57,21 +58,21 @@ class SectorParser:
         Returns a list of dictionaries.
         """
 
-        return self.features_of_type(type_value=se.FIX_VALUE)
+        return self.features_of_type(type_value=C.FIX_VALUE)
 
     def fix_names(self):
         """
         Returns the names of the fixes in the sector as a list of strings.
         """
 
-        return [p[se.NAME_KEY] for p in self.properties_of_type(type_value=se.FIX_VALUE)]
+        return [p[C.NAME_KEY] for p in self.properties_of_type(type_value=C.FIX_VALUE)]
 
     def route_names(self):
         """
         Returns the names of the routes in the sector as a list of strings.
         """
 
-        return [p[se.NAME_KEY] for p in self.properties_of_type(type_value=se.ROUTE_VALUE)]
+        return [p[C.NAME_KEY] for p in self.properties_of_type(type_value=C.ROUTE_VALUE)]
 
     def sector_volume_properties(self):
         """
@@ -79,7 +80,7 @@ class SectorParser:
         Returns a list of dictionaries.
         """
 
-        return self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)
+        return self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)
 
     def geometries_of_type(self, type_value):
         """
@@ -88,7 +89,7 @@ class SectorParser:
         """
 
         return jp.match(
-            f"$..{se.FEATURES_KEY}[?@.{se.GEOMETRY_KEY}.{se.TYPE_KEY}=={type_value}].{se.GEOMETRY_KEY}",
+            f"$..{C.FEATURES_KEY}[?@.{C.GEOMETRY_KEY}.{C.TYPE_KEY}=={type_value}].{C.GEOMETRY_KEY}",
             self.sector,
         )
 
@@ -98,7 +99,7 @@ class SectorParser:
         Returns a list of dictionaries.
         """
 
-        return self.geometries_of_type(type_value=se.POLYGON_VALUE)
+        return self.geometries_of_type(type_value=C.POLYGON_VALUE)
 
     def sector_polygon(self):
         """
@@ -117,14 +118,14 @@ class SectorParser:
         Returns the sector name.
         """
 
-        return self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.NAME_KEY]
+        return self.properties_of_type(type_value=C.SECTOR_VALUE)[0][C.NAME_KEY]
 
     def sector_type(self):
         """
         Returns the sector type (SectorType enum).
         """
 
-        return ss.SectorType[self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.SHAPE_KEY]]
+        return ss.SectorType[self.properties_of_type(type_value=C.SECTOR_VALUE)[0][C.SHAPE_KEY]]
 
     def sector_origin(self):
         """
@@ -132,7 +133,7 @@ class SectorParser:
         :return: a shapely.geometry.point.Point object representing the origin of the sector.
         """
 
-        origin = self.properties_of_type(type_value=se.SECTOR_VALUE)[0][se.ORIGIN_KEY]
+        origin = self.properties_of_type(type_value=C.SECTOR_VALUE)[0][C.ORIGIN_KEY]
         return geom.Point(origin[0], origin[1])
 
     def sector_lower_limit(self):
@@ -141,7 +142,7 @@ class SectorParser:
         :return: an integer.
         """
 
-        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.LOWER_LIMIT_KEY])
+        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.LOWER_LIMIT_KEY])
 
     def sector_upper_limit(self):
         """
@@ -149,7 +150,7 @@ class SectorParser:
         :return: an integer.
         """
 
-        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.UPPER_LIMIT_KEY])
+        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.UPPER_LIMIT_KEY])
 
     def sector_length_nm(self):
         """
@@ -157,7 +158,7 @@ class SectorParser:
         :return: an integer.
         """
 
-        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.LENGTH_NM_KEY])
+        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.LENGTH_NM_KEY])
 
     def sector_airway_width_nm(self):
         """
@@ -165,7 +166,7 @@ class SectorParser:
         :return: an integer.
         """
 
-        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.AIRWAY_WIDTH_NM_KEY])
+        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.AIRWAY_WIDTH_NM_KEY])
 
     def waypoint_offset_nm(self):
         """
@@ -173,7 +174,7 @@ class SectorParser:
         :return: an integer.
         """
 
-        return int(self.properties_of_type(type_value=se.SECTOR_VOLUME_VALUE)[0][se.OFFSET_NM_KEY])
+        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.OFFSET_NM_KEY])
 
     def sector_centroid(self):
         """

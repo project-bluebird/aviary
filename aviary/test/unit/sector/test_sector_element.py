@@ -6,6 +6,7 @@ import geojson
 import shapely
 from io import StringIO
 
+import aviary.constants as C
 import aviary.sector.sector_element as se
 import aviary.sector.sector_shape as ss
 import aviary.utils.geo_helper as gh
@@ -138,97 +139,97 @@ def test_sector_geojson(i_element):
 
     result = i_element.sector_geojson()
 
-    assert sorted(result.keys()) == sorted([se.GEOMETRY_KEY, se.PROPERTIES_KEY, se.TYPE_KEY])
+    assert sorted(result.keys()) == sorted([C.GEOMETRY_KEY, C.PROPERTIES_KEY, C.TYPE_KEY])
 
-    assert result[se.TYPE_KEY] == se.FEATURE_VALUE
+    assert result[C.TYPE_KEY] == C.FEATURE_VALUE
 
-    assert isinstance(result[se.PROPERTIES_KEY], dict)
-    assert sorted(result[se.PROPERTIES_KEY].keys()) == \
-           sorted([se.CHILDREN_KEY, se.NAME_KEY, se.SHAPE_KEY, se.ORIGIN_KEY, se.TYPE_KEY])
+    assert isinstance(result[C.PROPERTIES_KEY], dict)
+    assert sorted(result[C.PROPERTIES_KEY].keys()) == \
+           sorted([C.CHILDREN_KEY, C.NAME_KEY, C.SHAPE_KEY, C.ORIGIN_KEY, C.TYPE_KEY])
 
-    assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.SECTOR_VALUE
-    assert result[se.PROPERTIES_KEY][se.SHAPE_KEY] == "I"
+    assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.SECTOR_VALUE
+    assert result[C.PROPERTIES_KEY][C.SHAPE_KEY] == "I"
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY], dict)
-    assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY].keys()) == \
-           sorted([se.ROUTE_VALUE, se.SECTOR_VOLUME_VALUE])
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY], dict)
+    assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY].keys()) == \
+           sorted([C.ROUTE_VALUE, C.SECTOR_VOLUME_VALUE])
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.ROUTE_VALUE], dict)
-    assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.ROUTE_VALUE].keys()) == \
-           [se.CHILDREN_NAMES_KEY]
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE], dict)
+    assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE].keys()) == \
+           [C.CHILDREN_NAMES_KEY]
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.ROUTE_VALUE][se.CHILDREN_NAMES_KEY], list)
-    assert len(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.ROUTE_VALUE][se.CHILDREN_NAMES_KEY]) == len(i_element.shape.route_names)
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE][C.CHILDREN_NAMES_KEY], list)
+    assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE][C.CHILDREN_NAMES_KEY]) == len(i_element.shape.route_names)
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.SECTOR_VOLUME_VALUE], dict)
-    assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.SECTOR_VOLUME_VALUE].keys()) == [se.CHILDREN_NAMES_KEY]
-    assert len(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.SECTOR_VOLUME_VALUE]) == 1
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE], dict)
+    assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE].keys()) == [C.CHILDREN_NAMES_KEY]
+    assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE]) == 1
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.SECTOR_VOLUME_VALUE][se.CHILDREN_NAMES_KEY], list)
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE][C.CHILDREN_NAMES_KEY], list)
 
 def test_boundary_geojson(i_element):
 
     result = i_element.boundary_geojson()
 
-    assert sorted(result.keys()) == sorted([se.GEOMETRY_KEY, se.PROPERTIES_KEY, se.TYPE_KEY])
+    assert sorted(result.keys()) == sorted([C.GEOMETRY_KEY, C.PROPERTIES_KEY, C.TYPE_KEY])
 
-    assert result[se.TYPE_KEY] == se.FEATURE_VALUE
+    assert result[C.TYPE_KEY] == C.FEATURE_VALUE
 
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
+    assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
 
-    assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POLYGON_VALUE
+    assert result[C.GEOMETRY_KEY][C.TYPE_KEY] == C.POLYGON_VALUE
 
     # Multiple coordinate pairs are stored as a list of tuples.
-    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
 
     # The I geometry contains 5 "bounding box" points (since the first and last are duplicates).
-    assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 5
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 5
 
     # # Check the order of coordinates is correct, i.e. (longitude, latitude):
-    assert result[se.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.2597, 51.0838)
+    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.2597, 51.0838)
 
-    assert sorted(result[se.PROPERTIES_KEY].keys()) == \
-           sorted([se.NAME_KEY, se.TYPE_KEY, se.UPPER_LIMIT_KEY, se.LOWER_LIMIT_KEY,
-                   se.LENGTH_NM_KEY, se.AIRWAY_WIDTH_NM_KEY, se.OFFSET_NM_KEY, se.CHILDREN_KEY])
+    assert sorted(result[C.PROPERTIES_KEY].keys()) == \
+           sorted([C.NAME_KEY, C.TYPE_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY,
+                   C.LENGTH_NM_KEY, C.AIRWAY_WIDTH_NM_KEY, C.OFFSET_NM_KEY, C.CHILDREN_KEY])
 
-    assert isinstance(result[se.PROPERTIES_KEY][se.NAME_KEY], str)
-    assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.SECTOR_VOLUME_VALUE
-    assert isinstance(result[se.PROPERTIES_KEY][se.UPPER_LIMIT_KEY], int)
-    assert isinstance(result[se.PROPERTIES_KEY][se.LOWER_LIMIT_KEY], int)
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY], dict)
+    assert isinstance(result[C.PROPERTIES_KEY][C.NAME_KEY], str)
+    assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.SECTOR_VOLUME_VALUE
+    assert isinstance(result[C.PROPERTIES_KEY][C.UPPER_LIMIT_KEY], int)
+    assert isinstance(result[C.PROPERTIES_KEY][C.LOWER_LIMIT_KEY], int)
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY], dict)
 
 def test_waypoint_geojson(i_element):
 
     name = 'b'.upper()
     result = i_element.waypoint_geojson(name)
 
-    assert sorted(result.keys()) == sorted([se.GEOMETRY_KEY, se.PROPERTIES_KEY, se.TYPE_KEY])
+    assert sorted(result.keys()) == sorted([C.GEOMETRY_KEY, C.PROPERTIES_KEY, C.TYPE_KEY])
 
-    assert result[se.TYPE_KEY] == se.FEATURE_VALUE
+    assert result[C.TYPE_KEY] == C.FEATURE_VALUE
 
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
-    assert result[se.GEOMETRY_KEY][se.TYPE_KEY] == se.POINT_VALUE
+    assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
+    assert result[C.GEOMETRY_KEY][C.TYPE_KEY] == C.POINT_VALUE
 
     # A single coordinate pair is stored as a tuple.
-    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], tuple)
-    assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], tuple)
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
 
-    assert sorted(result[se.PROPERTIES_KEY].keys()) == sorted([se.NAME_KEY, se.TYPE_KEY])
-    assert result[se.PROPERTIES_KEY][se.NAME_KEY] == name.upper()
-    assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.FIX_VALUE
+    assert sorted(result[C.PROPERTIES_KEY].keys()) == sorted([C.NAME_KEY, C.TYPE_KEY])
+    assert result[C.PROPERTIES_KEY][C.NAME_KEY] == name.upper()
+    assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.FIX_VALUE
 
     # Check the order of coordinates is correct, i.e. (longitude, latitude):
-    assert result[se.GEOMETRY_KEY][gh.COORDINATES_KEY] == (-0.1275, 51.9161)
+    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY] == (-0.1275, 51.9161)
 
 def test_geo_interface(y_element):
 
     result = y_element.__geo_interface__
 
-    assert sorted(result.keys()) == [se.FEATURES_KEY, se.TYPE_KEY]
+    assert sorted(result.keys()) == [C.FEATURES_KEY, C.TYPE_KEY]
 
     # The result contains one feature per route and per waypoint, plus one for the sector and one for the sector boundary/volume.
-    assert len(result[se.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 2
+    assert len(result[C.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 2
 
 
 def test_contains(i_element):
@@ -259,7 +260,7 @@ def test_serialisation(x_element):
     deserialised = geojson.loads(serialised)
 
     assert isinstance(deserialised, dict)
-    assert list(deserialised.keys()) == [se.TYPE_KEY, se.FEATURES_KEY]
+    assert list(deserialised.keys()) == [C.TYPE_KEY, C.FEATURES_KEY]
 
 
 def test_write_geojson(x_element):
@@ -281,7 +282,7 @@ def test_hash_sector_coordinates(x_element):
 
     result = x_element.hash_sector_coordinates()
     assert result == x_element.hash_sector_coordinates()
-    different_result = x_element.hash_sector_coordinates(se.FLOAT_PRECISION + 1)
+    different_result = x_element.hash_sector_coordinates(C.FLOAT_PRECISION + 1)
     assert not result == different_result
 
 
@@ -290,7 +291,7 @@ def test_deserialise(i_sector_geojson):
     result = se.SectorElement.deserialise(StringIO(i_sector_geojson))
 
     assert isinstance(result, se.SectorElement)
-    assert result.origin == se.DEFAULT_ORIGIN
+    assert result.origin == C.DEFAULT_ORIGIN
     assert result.shape.sector_type == ss.SectorType.I
 
     assert result.lower_limit == 50

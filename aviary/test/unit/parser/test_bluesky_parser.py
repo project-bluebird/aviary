@@ -3,6 +3,7 @@ import pytest
 import os
 from io import StringIO
 
+import aviary.constants as C
 import aviary.parser.bluesky_parser as bp
 
 import aviary.scenario.scenario_generator as sg
@@ -88,11 +89,11 @@ def test_route(target):
     assert isinstance(result, list)
     for fix in result:
         assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([se.GEOMETRY_KEY, rt.FIX_NAME_KEY])
+        assert sorted(fix.keys()) == sorted([C.GEOMETRY_KEY, rt.FIX_NAME_KEY])
         assert isinstance(fix[rt.FIX_NAME_KEY], str)
         assert fix[rt.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
-        assert isinstance(fix[se.GEOMETRY_KEY], dict)
-        assert sorted(fix[se.GEOMETRY_KEY].keys()) == sorted([se.TYPE_KEY, gh.COORDINATES_KEY])
+        assert isinstance(fix[C.GEOMETRY_KEY], dict)
+        assert sorted(fix[C.GEOMETRY_KEY].keys()) == sorted([C.TYPE_KEY, gh.COORDINATES_KEY])
 
 
 def test_create_aircraft_lines(target):

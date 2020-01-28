@@ -6,7 +6,7 @@ Represents a route through a sector shape or element.
 
 from shapely.geometry import LineString, mapping
 
-import aviary.sector.sector_element as se
+import aviary.constants as C
 from aviary.utils.geo_helper import GeoHelper
 
 FIX_NAME_KEY = "fixName"
@@ -95,22 +95,22 @@ class Route():
         """
 
         geojson = {
-            se.TYPE_KEY: se.FEATURE_VALUE,
-            se.PROPERTIES_KEY: {
-                se.NAME_KEY: self.name,
-                se.TYPE_KEY: se.ROUTE_VALUE,
-                se.CHILDREN_KEY: {
-                    se.FIX_VALUE: {
-                        se.CHILDREN_NAMES_KEY: self.fix_names()
+            C.TYPE_KEY: C.FEATURE_VALUE,
+            C.PROPERTIES_KEY: {
+                C.NAME_KEY: self.name,
+                C.TYPE_KEY: C.ROUTE_VALUE,
+                C.CHILDREN_KEY: {
+                    C.FIX_VALUE: {
+                        C.CHILDREN_NAMES_KEY: self.fix_names()
                     }
                 }
             },
-            se.GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection,
+            C.GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection,
                 geom = LineString(self.fix_points(unprojected = True))))
         }
 
         # Format the coordinates.
-        geojson = GeoHelper.format_coordinates(geojson, key = se.GEOMETRY_KEY, float_precision = se.FLOAT_PRECISION)
+        geojson = GeoHelper.format_coordinates(geojson, key = C.GEOMETRY_KEY, float_precision = C.FLOAT_PRECISION)
         return geojson
 
 
@@ -120,7 +120,7 @@ class Route():
         return [
             {
                 FIX_NAME_KEY: self.fix_names()[i],
-                se.GEOMETRY_KEY: mapping(self.fix_points()[i])
+                C.GEOMETRY_KEY: mapping(self.fix_points()[i])
             }
             for i in range(self.length())
         ]

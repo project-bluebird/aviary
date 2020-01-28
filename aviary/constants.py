@@ -1,0 +1,43 @@
+
+# DEFAULTS
+DEFAULT_SECTOR_NAME = "SECTOR"
+DEFAULT_ORIGIN = (-0.1275, 51.5)
+DEFAULT_LOWER_LIMIT = 60
+DEFAULT_UPPER_LIMIT = 460
+FLOAT_PRECISION = 4
+
+# CONSTANTS
+ELLIPSOID = "WGS84"
+GEOJSON_EXTENSION = "geojson"
+
+# JSON keys
+FEATURES_KEY = "features"
+NAME_KEY = "name"
+SHAPE_KEY = "shape"
+ORIGIN_KEY = "origin"
+TYPE_KEY = "type"
+PROPERTIES_KEY = "properties"
+LOWER_LIMIT_KEY = "lower_limit"
+UPPER_LIMIT_KEY = "upper_limit"
+LENGTH_NM_KEY = "length_nm"
+AIRWAY_WIDTH_NM_KEY = "airway_width_nm"
+OFFSET_NM_KEY = "offset_nm"
+ROUTES_KEY = "routes"
+GEOMETRY_KEY = "geometry"
+LATITUDE_KEY = "latitude"
+LONGITUDE_KEY = "longitude"
+LATITUDES_KEY = "latitudes"
+LONGITUDES_KEY = "longitudes"
+POINTS_KEY = "points"
+CHILDREN_KEY = "children"
+CHILDREN_NAMES_KEY = "names"
+
+# JSON values
+FEATURE_COLLECTION = "FeatureCollection"
+FEATURE_VALUE = "Feature"
+SECTOR_VALUE = "SECTOR"
+FIX_VALUE = "FIX"
+ROUTE_VALUE = "ROUTE"
+SECTOR_VOLUME_VALUE = "SECTOR_VOLUME"
+POLYGON_VALUE = "Polygon"
+POINT_VALUE = "Point"

@@ -3,6 +3,7 @@ import pytest
 
 import json
 
+import aviary.constants as C
 import aviary.sector.route as sr
 import aviary.sector.sector_element as se
 import aviary.utils.geo_helper as gh
@@ -39,24 +40,24 @@ def test_geojson(i_element):
     target = i_element.routes()[route_index]
     result = target.geojson()
 
-    assert sorted(result.keys()) == sorted([se.GEOMETRY_KEY, se.PROPERTIES_KEY, se.TYPE_KEY])
+    assert sorted(result.keys()) == sorted([C.GEOMETRY_KEY, C.PROPERTIES_KEY, C.TYPE_KEY])
 
-    assert result[se.TYPE_KEY] == se.FEATURE_VALUE
+    assert result[C.TYPE_KEY] == C.FEATURE_VALUE
 
-    assert sorted(result[se.PROPERTIES_KEY]) == \
-           sorted([se.CHILDREN_KEY, se.NAME_KEY, se.TYPE_KEY])
+    assert sorted(result[C.PROPERTIES_KEY]) == \
+           sorted([C.CHILDREN_KEY, C.NAME_KEY, C.TYPE_KEY])
 
-    assert result[se.PROPERTIES_KEY][se.NAME_KEY] == i_element.shape.route_names[route_index]
-    assert result[se.PROPERTIES_KEY][se.TYPE_KEY] == se.ROUTE_VALUE
-    assert sorted(result[se.PROPERTIES_KEY][se.CHILDREN_KEY].keys()) == [se.FIX_VALUE]
-    assert isinstance(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.FIX_VALUE][se.CHILDREN_NAMES_KEY], list)
-    assert len(result[se.PROPERTIES_KEY][se.CHILDREN_KEY][se.FIX_VALUE][se.CHILDREN_NAMES_KEY]) == len(i_element.shape.fixes)
+    assert result[C.PROPERTIES_KEY][C.NAME_KEY] == i_element.shape.route_names[route_index]
+    assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.ROUTE_VALUE
+    assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY].keys()) == [C.FIX_VALUE]
+    assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.FIX_VALUE][C.CHILDREN_NAMES_KEY], list)
+    assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.FIX_VALUE][C.CHILDREN_NAMES_KEY]) == len(i_element.shape.fixes)
 
-    assert isinstance(result[se.GEOMETRY_KEY], dict)
-    assert sorted(result[se.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, se.TYPE_KEY])
+    assert isinstance(result[C.GEOMETRY_KEY], dict)
+    assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
 
-    assert isinstance(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert len(result[se.GEOMETRY_KEY][gh.COORDINATES_KEY]) == len(i_element.shape.fixes)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == len(i_element.shape.fixes)
 
 
 def test_serialize(i_element):
@@ -68,7 +69,7 @@ def test_serialize(i_element):
     assert isinstance(result, list)
     for x in result:
         assert isinstance(x, dict)
-        assert list(x.keys()) == [sr.FIX_NAME_KEY, se.GEOMETRY_KEY]
+        assert list(x.keys()) == [sr.FIX_NAME_KEY, C.GEOMETRY_KEY]
 
     for i in range(target.length()):
         assert result[i][sr.FIX_NAME_KEY] == target.fix_names()[i]
@@ -78,7 +79,7 @@ def test_serialize(i_element):
 
     assert isinstance(deserialized, list)
     assert len(deserialized) == target.length()
-    assert list(deserialized[0].keys()) == [sr.FIX_NAME_KEY, se.GEOMETRY_KEY]
+    assert list(deserialized[0].keys()) == [sr.FIX_NAME_KEY, C.GEOMETRY_KEY]
 
     for i in range(target.length()):
         assert deserialized[i][sr.FIX_NAME_KEY] == target.fix_names()[i]

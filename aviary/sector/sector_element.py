@@ -11,63 +11,21 @@ from io import StringIO
 
 from shapely.geometry import mapping, Point
 
+import aviary.constants as C
 import aviary.sector.sector_shape as ss
 import aviary.parser.sector_parser as sp
 from aviary.utils.geo_helper import GeoHelper
 from aviary.utils.filename_helper import FilenameHelper
-
-# DEFAULTS
-DEFAULT_SECTOR_NAME = "SECTOR"
-DEFAULT_ORIGIN = (-0.1275, 51.5)
-DEFAULT_LOWER_LIMIT = 60
-DEFAULT_UPPER_LIMIT = 460
-FLOAT_PRECISION = 4
-
-# CONSTANTS
-ELLIPSOID = "WGS84"
-GEOJSON_EXTENSION = "geojson"
-
-# JSON keys
-FEATURES_KEY = "features"
-NAME_KEY = "name"
-SHAPE_KEY = "shape"
-ORIGIN_KEY = "origin"
-TYPE_KEY = "type"
-PROPERTIES_KEY = "properties"
-LOWER_LIMIT_KEY = "lower_limit"
-UPPER_LIMIT_KEY = "upper_limit"
-LENGTH_NM_KEY = "length_nm"
-AIRWAY_WIDTH_NM_KEY = "airway_width_nm"
-OFFSET_NM_KEY = "offset_nm"
-ROUTES_KEY = "routes"
-GEOMETRY_KEY = "geometry"
-LATITUDE_KEY = "latitude"
-LONGITUDE_KEY = "longitude"
-LATITUDES_KEY = "latitudes"
-LONGITUDES_KEY = "longitudes"
-POINTS_KEY = "points"
-CHILDREN_KEY = "children"
-CHILDREN_NAMES_KEY = "names"
-
-# JSON values
-FEATURE_COLLECTION = "FeatureCollection"
-FEATURE_VALUE = "Feature"
-SECTOR_VALUE = "SECTOR"
-FIX_VALUE = "FIX"
-ROUTE_VALUE = "ROUTE"
-SECTOR_VOLUME_VALUE = "SECTOR_VOLUME"
-POLYGON_VALUE = "Polygon"
-POINT_VALUE = "Point"
 
 class SectorElement():
     """An elemental sector of airspace"""
 
     def __init__(self,
                  type,
-                 name = DEFAULT_SECTOR_NAME,
-                 origin = DEFAULT_ORIGIN,
-                 lower_limit = DEFAULT_LOWER_LIMIT,
-                 upper_limit = DEFAULT_UPPER_LIMIT,
+                 name = C.DEFAULT_SECTOR_NAME,
+                 origin = C.DEFAULT_ORIGIN,
+                 lower_limit = C.DEFAULT_LOWER_LIMIT,
+                 upper_limit = C.DEFAULT_UPPER_LIMIT,
                  **kwargs):
         """
         SectorElement constructor.
@@ -84,7 +42,7 @@ class SectorElement():
 
         # Construct the proj-string (see https://proj.org/usage/quickstart.html)
         # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
-        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={ELLIPSOID} +units=kmi +no_defs'
+        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={C.ELLIPSOID} +units=kmi +no_defs'
 
         self.projection = Proj(proj_string, preserve_units=True)
 
@@ -152,23 +110,23 @@ class SectorElement():
         """
 
         # Build the list of features: one for the boundary, one for each fix and one for each route.
-        geojson = {TYPE_KEY: FEATURE_COLLECTION, FEATURES_KEY: []}
-        geojson[FEATURES_KEY].append(self.sector_geojson())
-        geojson[FEATURES_KEY].append(self.boundary_geojson())
-        geojson[FEATURES_KEY].extend([route.geojson() for route in self.routes()])
-        geojson[FEATURES_KEY].extend([self.waypoint_geojson(name) for name in self.shape.fixes.keys()])
+        geojson = {C.TYPE_KEY: C.FEATURE_COLLECTION, C.FEATURES_KEY: []}
+        geojson[C.FEATURES_KEY].append(self.sector_geojson())
+        geojson[C.FEATURES_KEY].append(self.boundary_geojson())
+        geojson[C.FEATURES_KEY].extend([route.geojson() for route in self.routes()])
+        geojson[C.FEATURES_KEY].extend([self.waypoint_geojson(name) for name in self.shape.fixes.keys()])
 
         return geojson
 
 
-    def hash_sector_coordinates(self, float_precision = FLOAT_PRECISION) -> str:
+    def hash_sector_coordinates(self, float_precision = C.FLOAT_PRECISION) -> str:
         """Returns hash of the sector boundary coordinates as string"""
 
         # Construct properly formatted coordinates before hashing.
         geojson = {
-            GEOMETRY_KEY: mapping(self.polygon())
+            C.GEOMETRY_KEY: mapping(self.polygon())
         }
-        coords = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = float_precision,
+        coords = GeoHelper.format_coordinates(geojson, key = C.GEOMETRY_KEY, float_precision = float_precision,
                                               as_geojson= False)
         return str(hash(tuple(coords)))
 
@@ -194,18 +152,18 @@ class SectorElement():
         """
 
         geojson = {
-            TYPE_KEY: FEATURE_VALUE,
-            PROPERTIES_KEY: {
-                NAME_KEY: self.name,
-                TYPE_KEY: SECTOR_VALUE,
-                SHAPE_KEY: self.shape.sector_type.name,
-                ORIGIN_KEY: self.origin,
-                CHILDREN_KEY: {
-                    SECTOR_VOLUME_VALUE : {CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
-                    ROUTE_VALUE: {CHILDREN_NAMES_KEY: self.shape.route_names}
+            C.TYPE_KEY: C.FEATURE_VALUE,
+            C.PROPERTIES_KEY: {
+                C.NAME_KEY: self.name,
+                C.TYPE_KEY: C.SECTOR_VALUE,
+                C.SHAPE_KEY: self.shape.sector_type.name,
+                C.ORIGIN_KEY: self.origin,
+                C.CHILDREN_KEY: {
+                    C.SECTOR_VOLUME_VALUE : {C.CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
+                    C.ROUTE_VALUE: {C.CHILDREN_NAMES_KEY: self.shape.route_names}
                 }
             },
-            GEOMETRY_KEY: {}
+            C.GEOMETRY_KEY: {}
         }
 
         return geojson
@@ -230,21 +188,21 @@ class SectorElement():
         """
 
         geojson = {
-            TYPE_KEY : FEATURE_VALUE,
-            GEOMETRY_KEY: mapping(self.polygon()),
-            PROPERTIES_KEY : {
-                NAME_KEY: self.hash_sector_coordinates(),
-                TYPE_KEY: SECTOR_VOLUME_VALUE,
-                LOWER_LIMIT_KEY: self.lower_limit,
-                UPPER_LIMIT_KEY: self.upper_limit,
-                LENGTH_NM_KEY: self.shape.length_nm,
-                AIRWAY_WIDTH_NM_KEY: self.shape.airway_width_nm,
-                OFFSET_NM_KEY: self.shape.offset_nm,
-                CHILDREN_KEY: {}
+            C.TYPE_KEY : C.FEATURE_VALUE,
+            C.GEOMETRY_KEY: mapping(self.polygon()),
+            C.PROPERTIES_KEY : {
+                C.NAME_KEY: self.hash_sector_coordinates(),
+                C.TYPE_KEY: C.SECTOR_VOLUME_VALUE,
+                C.LOWER_LIMIT_KEY: self.lower_limit,
+                C.UPPER_LIMIT_KEY: self.upper_limit,
+                C.LENGTH_NM_KEY: self.shape.length_nm,
+                C.AIRWAY_WIDTH_NM_KEY: self.shape.airway_width_nm,
+                C.OFFSET_NM_KEY: self.shape.offset_nm,
+                C.CHILDREN_KEY: {}
             }
         }
 
-        geojson = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = FLOAT_PRECISION)
+        geojson = GeoHelper.format_coordinates(geojson, key = C.GEOMETRY_KEY, float_precision = C.FLOAT_PRECISION)
         return geojson
 
 
@@ -273,22 +231,22 @@ class SectorElement():
         """
 
         geojson = {
-            TYPE_KEY: FEATURE_VALUE,
-            PROPERTIES_KEY: {
-                NAME_KEY: name.upper(),
-                TYPE_KEY: FIX_VALUE
+            C.TYPE_KEY: C.FEATURE_VALUE,
+            C.PROPERTIES_KEY: {
+                C.NAME_KEY: name.upper(),
+                C.TYPE_KEY: C.FIX_VALUE
             },
-            GEOMETRY_KEY: mapping(self.fix(fix_name = name))
+            C.GEOMETRY_KEY: mapping(self.fix(fix_name = name))
         }
 
-        geojson = GeoHelper.format_coordinates(geojson, key = GEOMETRY_KEY, float_precision = FLOAT_PRECISION)
+        geojson = GeoHelper.format_coordinates(geojson, key = C.GEOMETRY_KEY, float_precision = C.FLOAT_PRECISION)
         return geojson
 
 
     def write_geojson(self, filename, path = "."):
         """Write the geojson object to a file"""
 
-        file = FilenameHelper.construct_filename(filename=filename, desired_extension=GEOJSON_EXTENSION, path=path)
+        file = FilenameHelper.construct_filename(filename=filename, desired_extension=C.GEOJSON_EXTENSION, path=path)
 
         with open(file, 'w') as f:
             dump(self, f, indent = 4)

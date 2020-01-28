@@ -46,8 +46,8 @@ args=parser.parse_args()
 print(">>>>> Generating Cartesian scenario >>>>>")
 
 # Default parameters:
-lower_limit = se.DEFAULT_LOWER_LIMIT
-upper_limit = se.DEFAULT_UPPER_LIMIT
+lower_limit = C.DEFAULT_LOWER_LIMIT
+upper_limit = C.DEFAULT_UPPER_LIMIT
 
 default_flight_levels = list(range(lower_limit, upper_limit, 10))
 
@@ -85,8 +85,8 @@ if any([fl > upper_limit for fl in flight_levels]):
     raise ValueError(f'Flight levels must not exceed the sector lower limit of {upper_limit}')
 
 sector_element = se.SectorElement(type = SectorType[args.sector_type],
-                               name = se.DEFAULT_SECTOR_NAME,
-                               origin = se.DEFAULT_ORIGIN,
+                               name = C.DEFAULT_SECTOR_NAME,
+                               origin = C.DEFAULT_ORIGIN,
                                lower_limit = lower_limit,
                                upper_limit = lower_limit)
 

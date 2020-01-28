@@ -19,6 +19,7 @@ For the simplest metric, m_h and m_v take the form of v(d, c, C), a function of 
  - v(d) = -(d - c)/(C - c), otherwise.
 """
 
+import aviary.constants as C
 import aviary.utils.geo_helper as gh
 import aviary.metrics.utils as utils
 import aviary.sector.sector_element as se
@@ -37,7 +38,7 @@ def target(route):
     :param route: aircraft route (as defined by aviary.sector.Route)
     """
 
-    route_coordinates = [wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route]
+    route_coordinates = [wpt[C.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in route]
     return route_coordinates[-2]
 
 

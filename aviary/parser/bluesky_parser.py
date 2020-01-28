@@ -2,6 +2,7 @@
 Scenario parser for the BlueSky simulator.
 """
 
+import aviary.constants as C
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
 import aviary.scenario.scenario_generator as sg
@@ -75,8 +76,8 @@ class BlueskyParser(SectorParser):
         # Local function to return a single POLYALT line for a single sector.
         def sector_polyalt_line(sector):
 
-            upper_limit = BS_FLIGHT_LEVEL + str(sector[se.UPPER_LIMIT_KEY])
-            lower_limit = BS_FLIGHT_LEVEL + str(sector[se.LOWER_LIMIT_KEY])
+            upper_limit = BS_FLIGHT_LEVEL + str(sector[C.UPPER_LIMIT_KEY])
+            lower_limit = BS_FLIGHT_LEVEL + str(sector[C.LOWER_LIMIT_KEY])
 
             line = f"{start_time}{BS_PROMPT}{BS_POLY} {self.sector_name()} {upper_limit} {lower_limit}"
             orig_len = len(line)
@@ -130,7 +131,7 @@ class BlueskyParser(SectorParser):
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[se.PROPERTIES_KEY][se.NAME_KEY]} {fix[se.GEOMETRY_KEY][gh.COORDINATES_KEY][LAT_INDEX]} {fix[se.GEOMETRY_KEY][gh.COORDINATES_KEY][LONG_INDEX]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[C.PROPERTIES_KEY][C.NAME_KEY]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LAT_INDEX]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 
@@ -277,7 +278,7 @@ class BlueskyParser(SectorParser):
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
         route_coordinates = [
-            wpt[se.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in self.route(callsign)
+            wpt[C.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in self.route(callsign)
         ]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:
@@ -288,7 +289,7 @@ class BlueskyParser(SectorParser):
     def bearing(self, from_waypoint, to_waypoint):
         """Computes the compass bearing between two waypoints"""
 
-        geodesic = Geod(ellps=se.ELLIPSOID)
+        geodesic = Geod(ellps=C.ELLIPSOID)
 
         # Note: order of arguments is long, lat.
         fwd_azimuth, back_azimuth, distance = geodesic.inv(
