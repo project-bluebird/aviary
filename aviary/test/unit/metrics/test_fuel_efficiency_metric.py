@@ -43,3 +43,8 @@ def test_fuel_efficiency_metric():
     result = fuel_efficiency_metric(current_flight_level=100, requested_flight_level=200, initial_flight_level=400)
     assert result == -1 # Score is always in the interval [-1, 0].
 
+    ## Entered at requested flight level:
+
+    # No commands sent to aircraft
+    result = fuel_efficiency_metric(current_flight_level=200, requested_flight_level=200, initial_flight_level=200)
+    assert result == 0
