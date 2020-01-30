@@ -51,4 +51,6 @@ def fuel_efficiency_metric(current_flight_level, requested_flight_level, initial
 
     num = abs(max(requested_flight_level, initial_flight_level) - current_flight_level)
     denom = abs(requested_flight_level - initial_flight_level)
+    if denom == 0:
+        return 0
     return -1 * min(1, num/denom)
