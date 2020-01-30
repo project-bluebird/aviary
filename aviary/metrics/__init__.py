@@ -1,2 +1,3 @@
 from .separation_metric import pairwise_separation_metric
 from .sector_exit_metric import sector_exit_metric
+from .fuel_efficiency_metric import fuel_efficiency_metric
