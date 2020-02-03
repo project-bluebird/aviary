@@ -228,8 +228,9 @@ def test_geo_interface(y_element):
 
     assert sorted(result.keys()) == [C.FEATURES_KEY, C.TYPE_KEY]
 
-    # The result contains one feature per route and per waypoint, plus one for the sector and one for the sector boundary/volume.
-    assert len(result[C.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 2
+    # The result contains one feature per route and per fix, plus one
+    # for the sector, one for the sector boundary/volume and one for the FIR.
+    assert len(result[C.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 3
 
 
 def test_contains(i_element):
@@ -303,3 +304,5 @@ def test_deserialise(i_sector_geojson):
 
     # Check that re-serialisation produces the original GeoJSON string.
     assert str(geojson.dumps(result)) == i_sector_geojson.strip()
+
+    #print(str(geojson.dumps(result)))

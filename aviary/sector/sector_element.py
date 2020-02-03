@@ -120,7 +120,7 @@ class SectorElement():
                         C.CHILDREN_NAMES_KEY: self.shape.route_names
                         },
                     C.FIX_VALUE: {
-                        C.CHILDREN_NAMES_KEY: self.shape.fix_names
+                        C.CHILDREN_NAMES_KEY: list(self.shape.fixes.keys())
                     }
                 }
             },
