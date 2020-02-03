@@ -306,3 +306,8 @@ def test_deserialise(i_sector_geojson):
     assert str(geojson.dumps(result)) == i_sector_geojson.strip()
 
     #print(str(geojson.dumps(result)))
+
+def test_sector_is_valid_geojson(i_sector_geojson):
+    loaded = geojson.loads(i_sector_geojson)
+    # print(loaded.errors())
+    assert loaded.is_valid
