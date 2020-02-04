@@ -57,7 +57,7 @@ def test_geojson(i_element):
     assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
 
     assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == len(i_element.shape.fixes)
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0]) == len(i_element.shape.fixes)
 
 
 def test_serialize(i_element):
