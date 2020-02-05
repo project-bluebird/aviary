@@ -212,17 +212,17 @@ def test_waypoint_geojson(i_element):
     assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
     assert result[C.GEOMETRY_KEY][C.TYPE_KEY] == C.POINT_VALUE
 
-    # A single coordinate pair is stored as a tuple (nested in a list).
-    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
-    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0]) == 2
+    # A single coordinate pair is stored as a tuple.
+    #assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], tuple)
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
 
     assert sorted(result[C.PROPERTIES_KEY].keys()) == sorted([C.NAME_KEY, C.TYPE_KEY])
     assert result[C.PROPERTIES_KEY][C.NAME_KEY] == name.upper()
     assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.FIX_VALUE
 
     # Check the order of coordinates is correct, i.e. (longitude, latitude):
-    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.1275, 51.9161)
+    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY] == (-0.1275, 51.9161)
 
 def test_geo_interface(y_element):
 
