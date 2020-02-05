@@ -181,13 +181,14 @@ def test_boundary_geojson(i_element):
 
     # Multiple coordinate pairs are stored as a list of tuples.
     assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0], list)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0][0], tuple)
 
     # The I geometry contains 5 "bounding box" points (since the first and last are duplicates).
-    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 5
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0]) == 5
 
     # # Check the order of coordinates is correct, i.e. (longitude, latitude):
-    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.2597, 51.0838)
+    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0][0] == (-0.2597, 51.0838)
 
     assert sorted(result[C.PROPERTIES_KEY].keys()) == \
            sorted([C.NAME_KEY, C.TYPE_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY,
@@ -211,16 +212,17 @@ def test_waypoint_geojson(i_element):
     assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
     assert result[C.GEOMETRY_KEY][C.TYPE_KEY] == C.POINT_VALUE
 
-    # A single coordinate pair is stored as a tuple.
-    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], tuple)
-    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == 2
+    # A single coordinate pair is stored as a tuple (nested in a list).
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
+    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0], tuple)
+    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0]) == 2
 
     assert sorted(result[C.PROPERTIES_KEY].keys()) == sorted([C.NAME_KEY, C.TYPE_KEY])
     assert result[C.PROPERTIES_KEY][C.NAME_KEY] == name.upper()
     assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.FIX_VALUE
 
     # Check the order of coordinates is correct, i.e. (longitude, latitude):
-    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY] == (-0.1275, 51.9161)
+    assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0] == (-0.1275, 51.9161)
 
 def test_geo_interface(y_element):
 

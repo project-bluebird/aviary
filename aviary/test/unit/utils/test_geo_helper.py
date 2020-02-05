@@ -43,6 +43,7 @@ def test_format_coordinates(i_sector_geojson):
     result = GeoHelper.format_coordinates(json[C.FEATURES_KEY][3], key = key, float_precision = float_precision,
                                           as_geojson = False)
 
+    # Formatted coordinates are in a list of lists
     assert isinstance(result, list)
     expected = [tuple(round(num, float_precision) for num in longlat) for longlat in result]
     assert result == expected

@@ -49,7 +49,11 @@ class GeoHelper():
         if not as_geojson:
             return rounded
 
-        geojson[key][COORDINATES_KEY] = rounded
+        # Wrap in a nested list as per GeoJSON spec:
+        # http://wiki.geojson.org/GeoJSON_draft_version_6#Polygon
+        geojson_element = []
+        geojson_element.append(rounded)
+        geojson[key][COORDINATES_KEY] = geojson_element
         return geojson
 
 
