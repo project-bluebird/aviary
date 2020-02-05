@@ -131,7 +131,7 @@ class BlueskyParser(SectorParser):
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[C.PROPERTIES_KEY][C.NAME_KEY]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0][LAT_INDEX]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0][LONG_INDEX]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[C.PROPERTIES_KEY][C.NAME_KEY]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LAT_INDEX]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 

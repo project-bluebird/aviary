@@ -36,8 +36,10 @@ class GeoHelper():
         coords = list(geojson[key][COORDINATES_KEY])
 
         # Coordinates list may be nested.
+        nested = False
         while (isinstance(coords, list) and len(coords) == 1):
             coords = coords[0]
+            nested = True
 
         # Round to the given float precision, handling separately the cases of
         # a single coordinate pair versus a list of coordinate pairs.
@@ -51,8 +53,12 @@ class GeoHelper():
 
         # Wrap in a nested list as per GeoJSON spec:
         # http://wiki.geojson.org/GeoJSON_draft_version_6#Polygon
-        geojson_element = []
-        geojson_element.append(rounded)
+        if nested:
+            geojson_element = []
+            geojson_element.append(rounded)
+        else:
+            geojson_element = rounded
+
         geojson[key][COORDINATES_KEY] = geojson_element
         return geojson
 
