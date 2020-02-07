@@ -101,6 +101,34 @@ class SectorElement():
 
         return ret
 
+    def FIR_geojson(self):
+        """
+        Flight Info Region
+        """
+
+        geojson = {
+            C.TYPE_KEY: C.FEATURE_VALUE,
+            C.GEOMETRY_KEY: {},
+            C.PROPERTIES_KEY: {
+                C.NAME_KEY: self.name,
+                C.TYPE_KEY: C.FIR_VALUE,
+                C.CHILDREN_KEY: {
+                    C.SECTOR_VALUE : {
+                        C.CHILDREN_NAMES_KEY: [self.name]
+                    },
+                    C.ROUTE_VALUE: {
+                        C.CHILDREN_NAMES_KEY: self.shape.route_names
+                        },
+                    C.FIX_VALUE: {
+                        C.CHILDREN_NAMES_KEY: list(self.shape.fixes.keys())
+                    }
+                }
+            },
+
+        }
+
+        return geojson
+
 
     @property
     def __geo_interface__(self) -> dict:
@@ -111,6 +139,7 @@ class SectorElement():
 
         # Build the list of features: one for the boundary, one for each fix and one for each route.
         geojson = {C.TYPE_KEY: C.FEATURE_COLLECTION, C.FEATURES_KEY: []}
+        geojson[C.FEATURES_KEY].append(self.FIR_geojson())
         geojson[C.FEATURES_KEY].append(self.sector_geojson())
         geojson[C.FEATURES_KEY].append(self.boundary_geojson())
         geojson[C.FEATURES_KEY].extend([route.geojson() for route in self.routes()])
@@ -274,7 +303,3 @@ class SectorElement():
                              offset_nm = parser.waypoint_offset_nm(),
                              fix_names = parser.fix_names(),
                              route_names = parser.route_names())
-
-
-
-
