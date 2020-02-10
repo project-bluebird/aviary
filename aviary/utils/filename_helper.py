@@ -13,8 +13,7 @@ class FilenameHelper():
     def construct_filename(filename, desired_extension, path="."):
         """Constructs a full path filename with extension"""
 
-        extension = os.path.splitext(filename)[1]
-        if extension.upper() != desired_extension:
+        if not filename.lower().endswith(desired_extension):
             filename = filename + "." + desired_extension
 
         return os.path.join(path, filename)
