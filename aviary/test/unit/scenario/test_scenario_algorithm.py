@@ -112,6 +112,21 @@ def test_flight_level(target):
     result = target.flight_level()
     assert result == 200
 
+    # flight_levels: [200, 240, 280, 320, 360, 400]
+    with pytest.raises(ValueError):
+        target.flight_level(exclude_lowest=0.4, exclude_highest=0.6)
+
+    # Exclude all except the 280 level
+    result = target.flight_level(exclude_lowest=0.39, exclude_highest=0.59)
+    assert result == 280
+
+    # Exclude all except the 280 level
+    result = target.flight_level(exclude_lowest=0.2, exclude_highest=0.4)
+    assert result == 280
+
+    # Exclude up to the 320 level
+    result = target.flight_level(exclude_lowest=0.5)
+    assert result == 400
 
 def test_route(target):
 

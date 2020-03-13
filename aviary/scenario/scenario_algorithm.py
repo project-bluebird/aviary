@@ -104,10 +104,27 @@ class ScenarioAlgorithm(ABC):
         # Note: use the sector routes() method, *not* the shape routes().
         return random.choice(self.sector_element.routes())
 
-    def flight_level(self):
+    def flight_level(self, exclude_lowest = 0, exclude_highest = 0):
         """Returns a random flight level"""
 
-        return random.choice(self.flight_levels)
+        if exclude_lowest < 0 or exclude_highest < 0:
+            raise ValueError('Excluded flight level intervals must be positive')
+
+        if exclude_lowest + exclude_highest >= 1:
+            raise ValueError('Excluded flight level range must be less than one')
+
+        levels = self.flight_levels
+        level_range = max(levels) - min(levels)
+        if exclude_lowest > 0:
+            levels = list(filter(lambda l : (l > min(self.flight_levels) + exclude_lowest * level_range), levels))
+
+        if exclude_highest > 0:
+            levels = list(filter(lambda l : (l < max(self.flight_levels) - exclude_highest * level_range), levels))
+
+        if len(levels) == 0:
+            raise ValueError('All flight levels are excluded')
+
+        return random.choice(levels)
 
     def aircraft_type(self):
         """Returns a random aircraft type"""
