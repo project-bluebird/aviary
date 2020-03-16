@@ -8,7 +8,7 @@ Abstract base class representing a scenario generation algorithm.
 from abc import ABC, abstractmethod
 
 import random
-
+import numpy as np
 
 class ScenarioAlgorithm(ABC):
     """A scenario generation algorithm"""
@@ -22,10 +22,15 @@ class ScenarioAlgorithm(ABC):
         self, sector_element, aircraft_types=None, flight_levels=None, callsign_prefixes=None, seed=None
     ):
 
+        # If seed is None, use the system time.
+        if seed is None:
+            import time
+            seed = int(time.time() * 256)  # use fractional seconds
+
         self.seed = seed
         # TODO: make set_seed non-static and use the instance variable instead of an argument.
         # TODO: Also make ScenarioGenerator independent of the seed, except via a set_seed method that sets the seed in the algorithm.
-        ScenarioAlgorithm.set_seed(seed)
+        self.set_seed()
 
         self.sector_element = sector_element
         self.seen_callsigns = set()
@@ -88,9 +93,13 @@ class ScenarioAlgorithm(ABC):
     def aircraft_generator(self) -> dict:
         pass
 
-    @staticmethod
-    def set_seed(seed):
-        random.seed(seed)
+    #@staticmethod
+    def set_seed(self):
+        """
+        Seeds both the Python random and Numpy random modules' random number generators.
+        """
+        random.seed(self.seed)
+        np.random.seed(self.seed)
 
     def reset_seen_callsigns(self):
         """
@@ -98,13 +107,13 @@ class ScenarioAlgorithm(ABC):
         After resetting, duplicate callsigns (with the set generated before the reset) may occur."""
         self.seen_callsigns = set()
 
-    def route(self):
+    def choose_route(self):
         """Returns a random route"""
 
         # Note: use the sector routes() method, *not* the shape routes().
         return random.choice(self.sector_element.routes())
 
-    def flight_level(self, exclude_lowest = 0, exclude_highest = 0):
+    def choose_flight_level(self, exclude_lowest = 0, exclude_highest = 0):
         """Returns a random flight level"""
 
         if exclude_lowest < 0 or exclude_highest < 0:
@@ -126,7 +135,7 @@ class ScenarioAlgorithm(ABC):
 
         return random.choice(levels)
 
-    def aircraft_type(self):
+    def choose_aircraft_type(self):
         """Returns a random aircraft type"""
 
         return random.choice(self.aircraft_types)
@@ -146,13 +155,13 @@ class ScenarioAlgorithm(ABC):
                 self.seen_callsigns.add(ret)
                 yield ret
 
-    def departure_airport(self, route):
+    def choose_departure_airport(self, route):
         """Returns a suitable departure airport for the given route"""
 
         # TODO: currently a dummy implementation
         return "DEP"
 
-    def destination_airport(self, route):
+    def choose_destination_airport(self, route):
         """Returns a suitable destination airport for the given route"""
 
         # TODO: currently a dummy implementation

@@ -112,7 +112,7 @@ def main(argv=None):
     scenario_generator = ScenarioGenerator(scenario_algorithm = scenario_algorithm)
 
     try:
-        scenario = scenario_generator.generate_scenario(duration = 1, seed = args.seed)
+        scenario = scenario_generator.generate_scenario(duration = 1)
     except Exception as ex:
         print('ERROR: Scenario generation attempt aborted due to error:')
         print(ex)

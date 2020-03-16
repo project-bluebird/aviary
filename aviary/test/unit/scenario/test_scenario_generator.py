@@ -27,7 +27,7 @@ def test_generate_scenario(target_sector):
                               seed = 22)
 
     scen_gen = sg.ScenarioGenerator(target_scenario)
-    scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
+    scenario = scen_gen.generate_scenario(duration=duration)
 
     assert sg.START_TIME_KEY in scenario.keys()
     assert sg.AIRCRAFT_KEY in scenario.keys()
@@ -60,11 +60,12 @@ def test_generate_scenario(target_sector):
 
     # Check that scenario's generated with the same random seed are identical.
     for i in range(1):
-        scenario2 = scen_gen.generate_scenario(duration=duration, seed=seed)
+        scenario2 = scen_gen.generate_scenario(duration=duration)
         assert scenario == scenario2
 
 
 def test_generate_scenario_with_start_time(target_sector):
+
     seed = 83
     duration = 1000
     scenario_start_time = datetime.strptime("12:05:42", "%H:%M:%S")
@@ -75,10 +76,10 @@ def test_generate_scenario_with_start_time(target_sector):
                               aircraft_types = ['B747', 'B777'],
                               callsign_prefixes = ["SPEEDBIRD", "VJ", "DELTA", "EZY"],
                               flight_levels = [200, 240, 280, 320, 360, 400],
-                              seed = 22)
+                              seed = seed)
 
     scen_gen = sg.ScenarioGenerator(target_scenario, scenario_start_time)
-    scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
+    scenario = scen_gen.generate_scenario(duration=duration)
 
     total_time = 0
     for aircraft in scenario[sg.AIRCRAFT_KEY]:
@@ -110,7 +111,7 @@ def test_write_json_scenario(target_sector):
                               seed = 22)
 
     scen_gen = sg.ScenarioGenerator(target_scenario)
-    scenario = scen_gen.generate_scenario(duration=duration, seed=seed)
+    scenario = scen_gen.generate_scenario(duration=duration)
 
     filename = "test_scenario"
     here = os.path.abspath(os.path.dirname(__file__))

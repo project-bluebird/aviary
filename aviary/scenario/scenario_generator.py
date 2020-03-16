@@ -57,10 +57,10 @@ class ScenarioGenerator():
 
 
     # TODO: add an argument to specify which routes to be included in the scenario.
-    def generate_scenario(self, duration, seed = None) -> dict:
+    def generate_scenario(self, duration) -> dict:
         """Generates a list of aircraft creation data constituting a scenario."""
 
-        self.scenario_algorithm.set_seed(seed)
+        self.scenario_algorithm.set_seed()
         self.scenario_algorithm.reset_seen_callsigns()
 
         # Format the scenario start time.
