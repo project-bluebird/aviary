@@ -25,11 +25,9 @@ class ScenarioAlgorithm(ABC):
         # If seed is None, use the system time.
         if seed is None:
             import time
-            seed = int(time.time() * 256)  # use fractional seconds
+            seed = int(time.time() * 256) % (2**32 - 1) # use fractional seconds
 
         self.seed = seed
-        # TODO: make set_seed non-static and use the instance variable instead of an argument.
-        # TODO: Also make ScenarioGenerator independent of the seed, except via a set_seed method that sets the seed in the algorithm.
         self.set_seed()
 
         self.sector_element = sector_element

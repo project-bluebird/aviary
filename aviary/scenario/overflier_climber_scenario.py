@@ -44,9 +44,9 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         """Generates a sequence of two aircraft whose default trajectories intersect at the centre of the sector."""
 
         # Construct the overflier's route.
-        overflier_route = self.route()
-        overflier_departure = self.departure_airport(overflier_route)
-        overflier_destination = self.destination_airport(overflier_route)
+        overflier_route = self.choose_route()
+        overflier_departure = self.choose_departure_airport(overflier_route)
+        overflier_destination = self.choose_destination_airport(overflier_route)
 
         # Construct the climber's route, which is the reverse of the overflier's.
         climber_route = overflier_route.copy()
@@ -58,13 +58,13 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         climber_requested_flight_level = self.climber_requested_flight_level(overflier_flight_level)
 
         # Compute the time taken for the climber to reach the overflier's flight level
-        climber_aircraft_type = self.aircraft_type()
+        climber_aircraft_type = self.choose_aircraft_type()
         climb_time_to_conflict_level = self.trajectory_predictor.climb_time_between_levels(lower_level=climber_current_flight_level,
                                                                       upper_level=overflier_flight_level,
                                                                       aircraft_type=climber_aircraft_type)
 
         # Compute the distance travelled by the overflier during the climber's climb.
-        overflier_aircraft_type = self.aircraft_type()
+        overflier_aircraft_type = self.choose_aircraft_type()
         overflier_true_airspeed = self.trajectory_predictor.cruise_speed(overflier_flight_level, overflier_aircraft_type)
 
         # Get the horizontal distances travelled prior to the conflict.
