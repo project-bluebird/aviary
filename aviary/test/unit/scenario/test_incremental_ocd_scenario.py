@@ -30,6 +30,7 @@ def underlying(i_element, cruise_speed_dataframe, climb_time_dataframe, downtrac
 
 def test_aircraft_generator_from_empty(i_element):
 
+    # Start with an empty scenario.
     target = emps.EmptyScenario(sector_element=i_element)
 
     for i in range(10):
@@ -40,40 +41,11 @@ def test_aircraft_generator_from_empty(i_element):
 
         assert ctr == i
 
+        # Incrementally add one aircraft at a time.
         target = incs.IncrementalOcdScenario(
             underlying_scenario=target,
             seed=i
         )
-
-def test_aircraft_generator(underlying):
-
-    target = incs.IncrementalOcdScenario(
-        underlying_scenario=underlying,
-        seed = 22,
-    )
-
-    # Test across multiple generated scenarios.
-    ctr = 0
-    for x in target.aircraft_generator():
-
-        assert isinstance(x, dict)
-        assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
-                                    sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY, sg.ROUTE_KEY,
-                                    sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
-        # assert isinstance(x[sg.START_POSITION_KEY], tuple)
-        # assert not isinstance(x[sg.START_POSITION_KEY][0], tuple)
-        # assert x[sg.START_POSITION_KEY][0] == pytest.approx(-0.1275, 10e-8)
-
-        ctr = ctr + 1
-        if ctr == 1:
-            overflier = x
-        if ctr == 2:
-            climber = x
-        if ctr == 3:
-            extra = x
-
-    # Check that the scenario contains precisely three aircraft.
-    assert ctr == 3
 
 
 def test_choose_route_segment(i_element, underlying):
@@ -327,3 +299,34 @@ def test_choose_start_position(underlying):
                               lat2=result.y, lon2=result.x) < margin
     assert GeoHelper.distance(lat1=upper_bound_point.y, lon1=upper_bound_point.x,
                               lat2=result.y, lon2=result.x) < margin
+
+
+def test_aircraft_generator(underlying):
+
+    target = incs.IncrementalOcdScenario(
+        underlying_scenario=underlying,
+        seed = 22,
+    )
+
+    # Test across multiple generated scenarios.
+    ctr = 0
+    for x in target.aircraft_generator():
+
+        assert isinstance(x, dict)
+        assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
+                                    sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY, sg.ROUTE_KEY,
+                                    sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
+
+        ctr = ctr + 1
+        if ctr == 1:
+            overflier = x
+        if ctr == 2:
+            climber = x
+        if ctr == 3:
+            extra = x
+
+    # Check that the scenario contains precisely three aircraft.
+    assert ctr == 3
+
+
+# MOST IMP TODO: test the whole thing in a loop building up a scenario incrementally (and serialise it)

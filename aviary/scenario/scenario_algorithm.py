@@ -138,17 +138,16 @@ class ScenarioAlgorithm(ABC):
 
         return random.choice(self.aircraft_types)
 
-    def callsign_generator(self):
+    def callsign_generator(self, k=3):
         """Generates a random sequence of unique callsigns"""
 
-        k = 3
+        prefix = random.choice(self.callsign_prefixes)
+        suffix = "".join([str(x) for x in random.sample(range(0, 10), k=k)])
         while True:
-            suffix = "".join([str(x) for x in random.sample(range(0, 10), k=k)])
-            prefix = random.choice(self.callsign_prefixes)
             ret = prefix + suffix
-
             if ret in self.seen_callsigns:
-                k = k + 1
+                prefix = random.choice(self.callsign_prefixes)
+                suffix = "".join([str(x) for x in random.sample(range(0, 10), k=k)])
             else:
                 self.seen_callsigns.add(ret)
                 yield ret

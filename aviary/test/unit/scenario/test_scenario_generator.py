@@ -86,7 +86,7 @@ def test_generate_scenario_with_start_time(target_sector):
         assert sg.AIRCRAFT_TIMEDELTA_KEY in aircraft.keys()
         assert (
             datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S")
-            > scenario_start_time
+            >= scenario_start_time
         )
         inferred_aircraft_timedelta = (
             datetime.strptime(aircraft[sg.START_TIME_KEY], "%H:%M:%S")

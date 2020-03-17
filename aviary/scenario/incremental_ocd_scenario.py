@@ -48,6 +48,13 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
         :param overflier_cfl_range: number in (0, 1]. The range of possible flight levels from which initial FL will be picked for overfliers (e.g. 0.5 means the first half will be included)
         :param start_position_distribution: a probability distribution as a numpy array. The probability of starting in each route segement (also defines the number of segments).
         :param discrete_start_positions: boolean. If True, start positions are at the discrete endpoints of the route segements.
+
+        Defaults are:
+         - equal probability of overflier, climber or descender
+         - overfliers start in the upper half of the flight level range
+         - climbers start in the lower half of the flight level range and climb at least 30% of that range
+         - descenders start in the upper half of the flight level range and descend at least 30% of that range
+         - start position is a uniform random pick from the first half of the route.
         """
 
         if not isinstance(underlying_scenario, ScenarioAlgorithm):
@@ -105,34 +112,35 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
         """Returns the additional aircraft in this scenario, beyond those in the underlying scenario."""
 
         self.set_seed()
+        aircraft_type = self.choose_aircraft_type()
+        self.set_seed()
         phase = self.choose_flight_phase()
         self.set_seed()
         current_fl, requested_fl = self.choose_flight_levels(phase)
         cleared_fl = current_fl
-
-        # TODO. (Copied from PoissonScenario)
         self.set_seed()
         start_position = self.choose_start_position()
-
         self.set_seed()
         departure = self.choose_departure_airport(self.route)
         self.set_seed()
         destination = self.choose_destination_airport(self.route)
+
         # truncate the route i.e. remove the starting position fix
         # note coords of start_position are in lon/lat order
-        self.route.truncate(initial_lat=start_position[1], initial_lon=start_position[0])
+        route_copy = self.route.copy()
+        route_copy.truncate(initial_lat=start_position.y, initial_lon=start_position.x)
 
         return {
             sg.AIRCRAFT_TIMEDELTA_KEY: 0,
             sg.START_POSITION_KEY: start_position,
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
-            sg.AIRCRAFT_TYPE_KEY: self.choose_aircraft_type(),
+            sg.AIRCRAFT_TYPE_KEY: aircraft_type,
             sg.DEPARTURE_KEY: departure,
             sg.DESTINATION_KEY: destination,
             sg.CURRENT_FLIGHT_LEVEL_KEY: current_fl,
             sg.CLEARED_FLIGHT_LEVEL_KEY: cleared_fl,
             sg.REQUESTED_FLIGHT_LEVEL_KEY: requested_fl,
-            sg.ROUTE_KEY: self.route.serialize(),
+            sg.ROUTE_KEY: route_copy.serialize(),
         }
 
     def choose_flight_phase(self):
@@ -217,6 +225,10 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
                 break
             post_fix_index += 1
             lon1, lat1 = fixes[post_fix_index - 1].x, fixes[post_fix_index - 1].y
+            # print(f'post_fix_index: {post_fix_index}')
+            # print(f'len(fixes): {len(fixes)}')
+            # print(f'fixes[post_fix_index]: {fixes[0]}')
+            # print(f'fixes: {fixes}')
             lon2, lat2 = fixes[post_fix_index].x, fixes[post_fix_index].y
             post_fix_distance += GeoHelper.distance(lat1=lat1, lon1=lon1, lat2=lat2, lon2=lon2)
 
@@ -231,9 +243,7 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
         return np.random.choice(a=segment_indices, size=1, p=self.initial_position_distribution)[0]
 
     def segment_length(self):
-        """
-        Computes the physical length of each route segment in metres.
-        """
+        """Computes the physical length of each route segment in metres."""
 
         span = self.route.span()
         return span/len(self.initial_position_distribution)
