@@ -225,10 +225,6 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
                 break
             post_fix_index += 1
             lon1, lat1 = fixes[post_fix_index - 1].x, fixes[post_fix_index - 1].y
-            # print(f'post_fix_index: {post_fix_index}')
-            # print(f'len(fixes): {len(fixes)}')
-            # print(f'fixes[post_fix_index]: {fixes[0]}')
-            # print(f'fixes: {fixes}')
             lon2, lat2 = fixes[post_fix_index].x, fixes[post_fix_index].y
             post_fix_distance += GeoHelper.distance(lat1=lat1, lon1=lon1, lat2=lat2, lon2=lon2)
 

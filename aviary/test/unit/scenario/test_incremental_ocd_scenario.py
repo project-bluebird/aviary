@@ -318,15 +318,56 @@ def test_aircraft_generator(underlying):
                                     sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
 
         ctr = ctr + 1
-        if ctr == 1:
-            overflier = x
-        if ctr == 2:
-            climber = x
-        if ctr == 3:
-            extra = x
 
     # Check that the scenario contains precisely three aircraft.
     assert ctr == 3
 
 
-# MOST IMP TODO: test the whole thing in a loop building up a scenario incrementally (and serialise it)
+def test_incremental_aircraft_generator(underlying):
+
+    target = underlying
+
+    count_overfliers = 0
+    count_climbers = 0
+    count_descenders = 0
+
+    N = 30
+    for i in range(N):
+
+        ctr = 0
+        for x in target.aircraft_generator():
+
+            assert isinstance(x, dict)
+            assert sorted(x.keys()) == [sg.CALLSIGN_KEY, sg.CLEARED_FLIGHT_LEVEL_KEY, sg.CURRENT_FLIGHT_LEVEL_KEY,
+                                        sg.DEPARTURE_KEY, sg.DESTINATION_KEY, sg.REQUESTED_FLIGHT_LEVEL_KEY, sg.ROUTE_KEY,
+                                        sg.START_POSITION_KEY, sg.AIRCRAFT_TIMEDELTA_KEY, sg.AIRCRAFT_TYPE_KEY]
+
+            # On the last pass through the loop, keep track of the number of aircraft of each phase.
+            if i == N - 1:
+                if x[sg.CURRENT_FLIGHT_LEVEL_KEY] == x[sg.REQUESTED_FLIGHT_LEVEL_KEY]:
+                    count_overfliers += 1
+                if x[sg.CURRENT_FLIGHT_LEVEL_KEY] < x[sg.REQUESTED_FLIGHT_LEVEL_KEY]:
+                    count_climbers += 1
+                if x[sg.CURRENT_FLIGHT_LEVEL_KEY] > x[sg.REQUESTED_FLIGHT_LEVEL_KEY]:
+                    count_descenders += 1
+
+            ctr += 1
+
+        # Two aircraft in the underlying scenario, plus i (i.e. the number of incremental additions)
+        assert ctr == i + 2
+
+        # Incrementally add one aircraft at a time.
+        target = incs.IncrementalOcdScenario(
+            underlying_scenario=target,
+            seed=i,
+            overflier_prob=1/3,
+            climber_prob=1/3,
+            descender_prob=1/3,
+        )
+
+    # The target is now a scenario with N + 1 aircraft.
+    assert count_overfliers + count_climbers + count_descenders == (N - 1) + 2
+
+    assert count_overfliers == pytest.approx(N/3, rel=0.1)
+    assert count_climbers == pytest.approx(N/3, rel=0.1)
+    assert count_descenders == pytest.approx(N/3, rel=0.1)
