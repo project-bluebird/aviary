@@ -223,3 +223,107 @@ def test_choose_route_segment(i_element, underlying):
     assert result[1].y == pytest.approx(expected_point.y, 1e-10)
 
 
+def test_choose_start_position(underlying):
+
+    #
+    # Test with discrete start positions.
+    #
+
+    target = incs.IncrementalOcdScenario(
+        underlying_scenario=underlying,
+        seed = 22,
+        start_position_distribution = np.array([0, 1]),
+        discrete_start_positions=True
+    )
+
+    route = target.route
+    fixes = route.fix_points()
+
+    result = target.choose_start_position()
+
+    # The start position should be half way along the straight-line route.
+    expected_distance = (1/2) * GeoHelper.distance(lat1=fixes[0].y, lon1=fixes[0].x,
+                                           lat2=fixes[4].y, lon2=fixes[4].x)
+    expected_point = GeoHelper.waypoint_location(lat1=fixes[0].y, lon1=fixes[0].x,
+                                                 lat2=fixes[4].y, lon2=fixes[4].x,
+                                                 distance_m=expected_distance)
+
+    assert result.x == expected_point.x
+    assert result.y == pytest.approx(expected_point.y, 1e-10)
+
+    target = incs.IncrementalOcdScenario(
+        underlying_scenario=underlying,
+        seed = 22,
+        start_position_distribution = np.array([1, 0]),
+        discrete_start_positions=True
+    )
+
+    result = target.choose_start_position()
+
+    # The start position should coincide with the fix with index 0.
+    assert result.x == fixes[0].x
+    assert result.y == pytest.approx(fixes[0].y, 1e-10)
+
+    target = incs.IncrementalOcdScenario(
+        underlying_scenario=underlying,
+        seed = 22,
+        start_position_distribution = np.array([0, 0, 0, 0, 1, 0, 0]),
+        discrete_start_positions=True
+    )
+
+    result = target.choose_start_position()
+
+    # The start position should be four sevenths of the way along the straight-line route.
+    expected_distance = (4/7) * GeoHelper.distance(lat1=fixes[0].y, lon1=fixes[0].x,
+                                           lat2=fixes[4].y, lon2=fixes[4].x)
+    expected_point = GeoHelper.waypoint_location(lat1=fixes[0].y, lon1=fixes[0].x,
+                                                 lat2=fixes[4].y, lon2=fixes[4].x,
+                                                 distance_m=expected_distance)
+
+    assert result.x == expected_point.x
+    assert result.y == pytest.approx(expected_point.y, 1e-10)
+
+    #
+    # Test with continuous start positions.
+    #
+
+    target = incs.IncrementalOcdScenario(
+        underlying_scenario=underlying,
+        seed = 22,
+        start_position_distribution = np.array([0, 0, 0, 0, 1, 0, 0]),
+        discrete_start_positions=False
+    )
+
+    result = target.choose_start_position()
+
+    # The start position should be on the straight-line route.
+    assert result.x == fixes[0].x
+    assert result.y >= fixes[0].y
+    assert result.x == fixes[4].x
+    assert result.y <= fixes[4].y
+
+    # The start position should be between four and five sevenths of the way along the straight-line route.
+    route_span = GeoHelper.distance(lat1=fixes[0].y, lon1=fixes[0].x,
+                                           lat2=fixes[4].y, lon2=fixes[4].x)
+    expected_distance = (4.5/7) * route_span
+    expected_point = GeoHelper.waypoint_location(lat1=fixes[0].y, lon1=fixes[0].x,
+                                                 lat2=fixes[4].y, lon2=fixes[4].x,
+                                                 distance_m=expected_distance)
+
+    # The margin of uncertainty is the length on one route segment: one seventh of the span of the route.
+    margin = route_span/7
+
+    assert GeoHelper.distance(lat1=expected_point.y, lon1=expected_point.x,
+                              lat2=result.y, lon2=result.x) < margin/2
+
+    lower_bound_point = GeoHelper.waypoint_location(lat1=fixes[0].y, lon1=fixes[0].x,
+                                                 lat2=fixes[4].y, lon2=fixes[4].x,
+                                                 distance_m=(4/7) * route_span)
+    upper_bound_point = GeoHelper.waypoint_location(lat1=fixes[0].y, lon1=fixes[0].x,
+                                                 lat2=fixes[4].y, lon2=fixes[4].x,
+                                                 distance_m=(5/7) * route_span)
+
+    assert GeoHelper.distance(lat1=lower_bound_point.y, lon1=lower_bound_point.x,
+                              lat2=result.y, lon2=result.x) < margin
+    assert GeoHelper.distance(lat1=upper_bound_point.y, lon1=upper_bound_point.x,
+                              lat2=result.y, lon2=result.x) < margin

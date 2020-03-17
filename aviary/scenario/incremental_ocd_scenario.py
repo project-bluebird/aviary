@@ -164,14 +164,16 @@ class IncrementalOcdScenario(ScenarioAlgorithm):
     def choose_start_position(self):
         """Picks an aircraft starting position"""
 
-        segment = self.choose_route_segment()
+        segment_startpoint, segment_endpoint = self.choose_route_segment()
 
         # If initial positions are discrete, return the start of the chosen route segment.
         if self.discrete_initial_positions:
-            return segment[0]
+            return segment_startpoint
 
-        # TODO.
         # If initial positions are continuous, return a uniform random sample along the chosen route segment.
+        offset = np.random.uniform(low=0.0, high=self.segment_length(), size = 1)
+        return GeoHelper.waypoint_location(lat1=segment_startpoint.y, lon1=segment_startpoint.x,
+                                           lat2=segment_endpoint.y, lon2=segment_endpoint.x, distance_m=offset)
 
     def choose_route_segment(self):
         """Picks a route segment for the aircraft start position"""
