@@ -63,7 +63,7 @@ Run the `sector_geojson.py` script passing the following command line arguments:
 
 Example:
 ```
-sector_geojson.py  --sector_type=X --sector_name="X-sector" --origin=51.5,-0.1275 --lower_limit=140 --upper_limit=400
+sector_geojson.py  --sector_type=X --sector_name="X-sector" --origin=-0.1275,51.5 --lower_limit=140 --upper_limit=400
 ```
 
 ### Scenario generation
