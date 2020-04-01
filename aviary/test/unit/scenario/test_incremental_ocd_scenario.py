@@ -76,7 +76,7 @@ def test_choose_route_segment(i_element, underlying):
                                                  lat2=fixes[4].y, lon2=fixes[4].x,
                                                  distance_m=expected_distance)
     assert result[1].x == expected_point.x
-    assert result[1].y == expected_point.y
+    assert result[1].y == pytest.approx(expected_point.y, 1e-10)
 
     target = incs.IncrementalOcdScenario(
         underlying_scenario=underlying,

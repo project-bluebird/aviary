@@ -58,7 +58,7 @@ def test_span(i_element):
     result = target.span()
 
     # Route spans ~130km distance.
-    assert result == 129638.88301925106
+    assert result == pytest.approx(129638.88301925106, 1e-10)
 
 def test_geojson(i_element):
 
@@ -196,4 +196,3 @@ def test_truncate(i_element):
 
     target.truncate(initial_lat = latE - 1, initial_lon = lonA)
     assert not target.fix_list
-
