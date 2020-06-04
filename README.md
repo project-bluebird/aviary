@@ -83,6 +83,8 @@ To generate a simple overflier-climber scenario, run the `overflier_climber.py` 
  - `filename_prefix` Output filename prefix (optional)
  - `output_path` Output file path (optional)
 
+**Note:** to enable any user to generate overflier-climber scenarios, approximate CSV lookup tables for the aircraft cruise speed, climb time and downtrack distance are provided in the `aviary/resources` directory. Three aircraft types are included (A320, A343 and DH8D), each of which may be found in the BlueSky simulator's OpenAP aircraft performance model. These tables contain simple approximations, obtained by linear (in the case of cruise speed) and cubic spline (in the case of climb time and downtrack distance) interpolation, and should **not** be supposed to accurately represent aircraft performance at all levels. In particular, the climb time and downtrack distance approximations for the A320 & A343 aircraft types are **not** accurate above FL ~300.
+
 Example:
 ```
 overflier_climber.py --cruise_speed=cruise_speed.csv --cruise_speed_index=FL --climb_time=climb_time.csv --climb_time_index=FL --downtrack_distance=downtrack_distances.csv --downtrack_distance_index=FL --sector_type=I --aircraft_types=B77W,A320,A346 --flight_levels=300,360,400 --thinking_time=60 --seed=22
