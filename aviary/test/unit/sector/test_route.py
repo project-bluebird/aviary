@@ -7,6 +7,22 @@ import aviary.constants as C
 import aviary.sector.route as sr
 import aviary.sector.sector_element as se
 import aviary.utils.geo_helper as gh
+import shapely.geometry as geom
+
+def test_fix_points(i_element):
+
+    route_index = 1
+
+    target = i_element.routes()[route_index]
+    result = target.fix_points()
+
+    assert isinstance(result, list)
+    for p in result:
+        assert isinstance(p, geom.Point)
+        assert isinstance(p.coords[0], tuple)
+        assert isinstance(p.x, float) # longitude
+        assert isinstance(p.y, float) # latitude
+
 
 def test_reverse(i_element):
 
@@ -33,6 +49,16 @@ def test_reverse(i_element):
     assert target.fix_points()[2] == result.fix_points()[2]
     assert target.fix_points()[3] == result.fix_points()[1]
     assert target.fix_points()[4] == result.fix_points()[0]
+
+def test_span(i_element):
+
+    route_index = 1
+    target = i_element.routes()[route_index]
+
+    result = target.span()
+
+    # Route spans ~130km distance.
+    assert result == pytest.approx(129638.88301925106, 1e-10)
 
 def test_geojson(i_element):
 
@@ -170,4 +196,3 @@ def test_truncate(i_element):
 
     target.truncate(initial_lat = latE - 1, initial_lon = lonA)
     assert not target.fix_list
-

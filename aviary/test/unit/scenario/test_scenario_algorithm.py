@@ -78,9 +78,9 @@ def test_callsign_generator(target):
     ctr = 0
     for x in target.callsign_generator():
         if ctr == 0:
-            assert x == "EZY230"
+            assert x == "VJ307"
         if ctr == 1:
-            assert x == "SPEEDBIRD215"
+            assert x == "VJ159"
         if ctr > 1:
             break
         ctr = ctr + 1
@@ -88,34 +88,49 @@ def test_callsign_generator(target):
 
 def test_aircraft_type(target):
 
-    result = target.aircraft_type()
+    result = target.choose_aircraft_type()
     assert result == "B747"
 
-    result = target.aircraft_type()
+    result = target.choose_aircraft_type()
     assert result == "B747"
 
-    result = target.aircraft_type()
+    result = target.choose_aircraft_type()
     assert result == "B747"
 
-    result = target.aircraft_type()
+    result = target.choose_aircraft_type()
     assert result == "B777"
 
 
 def test_flight_level(target):
 
-    result = target.flight_level()
+    result = target.choose_flight_level()
     assert result == 240
 
-    result = target.flight_level()
+    result = target.choose_flight_level()
     assert result == 240
 
-    result = target.flight_level()
+    result = target.choose_flight_level()
     assert result == 200
 
+    # flight_levels: [200, 240, 280, 320, 360, 400]
+    with pytest.raises(ValueError):
+        target.choose_flight_level(exclude_lowest=0.4, exclude_highest=0.6)
+
+    # Exclude all except the 280 level
+    result = target.choose_flight_level(exclude_lowest=0.39, exclude_highest=0.59)
+    assert result == 280
+
+    # Exclude all except the 280 level
+    result = target.choose_flight_level(exclude_lowest=0.2, exclude_highest=0.4)
+    assert result == 280
+
+    # Exclude up to the 320 level
+    result = target.choose_flight_level(exclude_lowest=0.5)
+    assert result == 400
 
 def test_route(target):
 
-    result = target.route()
+    result = target.choose_route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -124,7 +139,7 @@ def test_route(target):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route()
+    result = target.choose_route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -133,7 +148,7 @@ def test_route(target):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route()
+    result = target.choose_route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "E"
@@ -142,7 +157,7 @@ def test_route(target):
     assert result.fix_names()[3] == "B"
     assert result.fix_names()[4] == "A"
 
-    result = target.route()
+    result = target.choose_route()
     assert isinstance(result, Route)
 
     assert result.fix_names()[0] == "A"

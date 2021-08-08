@@ -23,14 +23,14 @@ class CartesianScenario(ScenarioAlgorithm):
 
         for flight_level in self.flight_levels:
             for aircraft_type in self.aircraft_types:
-                route = self.route()
+                route = self.choose_route()
                 yield {
                     sg.AIRCRAFT_TIMEDELTA_KEY: 0,
                     sg.START_POSITION_KEY: route.fix_points()[0].coords[0],
                     sg.CALLSIGN_KEY: next(self.callsign_generator()),
                     sg.AIRCRAFT_TYPE_KEY: aircraft_type,
-                    sg.DEPARTURE_KEY: self.departure_airport(route),
-                    sg.DESTINATION_KEY: self.destination_airport(route),
+                    sg.DEPARTURE_KEY: self.choose_departure_airport(route),
+                    sg.DESTINATION_KEY: self.choose_destination_airport(route),
                     sg.CURRENT_FLIGHT_LEVEL_KEY: flight_level,
                     sg.CLEARED_FLIGHT_LEVEL_KEY: flight_level,
                     sg.REQUESTED_FLIGHT_LEVEL_KEY: flight_level,

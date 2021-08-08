@@ -25,11 +25,11 @@ class PoissonScenario(ScenarioAlgorithm):
         """Generates a sequence of aircraft constituting a scenario."""
 
         while True:
-            current_flight_level = int(self.flight_level())
-            route = self.route()
+            current_flight_level = int(self.choose_flight_level())
+            route = self.choose_route()
             start_position = route.fix_points()[0].coords[0]
-            departure = self.departure_airport(route)
-            destination = self.destination_airport(route)
+            departure = self.choose_departure_airport(route)
+            destination = self.choose_destination_airport(route)
             # truncate the route i.e. remove the starting position fix
             # note coords of start_position are in lon/lat order
             route.truncate(initial_lat=start_position[1], initial_lon=start_position[0])
@@ -37,11 +37,11 @@ class PoissonScenario(ScenarioAlgorithm):
                 sg.AIRCRAFT_TIMEDELTA_KEY: random.expovariate(lambd=self.arrival_rate),
                 sg.START_POSITION_KEY: start_position,
                 sg.CALLSIGN_KEY: next(self.callsign_generator()),
-                sg.AIRCRAFT_TYPE_KEY: self.aircraft_type(),
+                sg.AIRCRAFT_TYPE_KEY: self.choose_aircraft_type(),
                 sg.DEPARTURE_KEY: departure,
                 sg.DESTINATION_KEY: destination,
                 sg.CURRENT_FLIGHT_LEVEL_KEY: current_flight_level,
                 sg.CLEARED_FLIGHT_LEVEL_KEY: current_flight_level,
-                sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.flight_level()),
+                sg.REQUESTED_FLIGHT_LEVEL_KEY: int(self.choose_flight_level()),
                 sg.ROUTE_KEY: route.serialize(),
             }

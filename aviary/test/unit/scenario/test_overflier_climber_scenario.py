@@ -33,9 +33,9 @@ def test_callsign_generator(target):
     ctr = 0
     for x in target.callsign_generator():
         if ctr == 0:
-            assert x == 'VJ597'
+            assert x == 'DELTA573'
         if ctr == 1:
-            assert x == 'SPEEDBIRD681'
+            assert x == 'EZY891'
         if ctr > 1:
             break
         ctr = ctr + 1

@@ -44,9 +44,9 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         """Generates a sequence of two aircraft whose default trajectories intersect at the centre of the sector."""
 
         # Construct the overflier's route.
-        overflier_route = self.route()
-        overflier_departure = self.departure_airport(overflier_route)
-        overflier_destination = self.destination_airport(overflier_route)
+        overflier_route = self.choose_route()
+        overflier_departure = self.choose_departure_airport(overflier_route)
+        overflier_destination = self.choose_destination_airport(overflier_route)
 
         # Construct the climber's route, which is the reverse of the overflier's.
         climber_route = overflier_route.copy()
@@ -58,13 +58,13 @@ class OverflierClimberScenario(ScenarioAlgorithm):
         climber_requested_flight_level = self.climber_requested_flight_level(overflier_flight_level)
 
         # Compute the time taken for the climber to reach the overflier's flight level
-        climber_aircraft_type = self.aircraft_type()
+        climber_aircraft_type = self.choose_aircraft_type()
         climb_time_to_conflict_level = self.trajectory_predictor.climb_time_between_levels(lower_level=climber_current_flight_level,
                                                                       upper_level=overflier_flight_level,
                                                                       aircraft_type=climber_aircraft_type)
 
         # Compute the distance travelled by the overflier during the climber's climb.
-        overflier_aircraft_type = self.aircraft_type()
+        overflier_aircraft_type = self.choose_aircraft_type()
         overflier_true_airspeed = self.trajectory_predictor.cruise_speed(overflier_flight_level, overflier_aircraft_type)
 
         # Get the horizontal distances travelled prior to the conflict.
@@ -81,15 +81,15 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         # Compute the initial position of the overflier.
         # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
-        o_initial_lon, o_initial_lat = GeoHelper.waypoint_location(lat1, lon1, o_lat2, o_lon2, overflier_horizontal_distance)
+        o_initial = GeoHelper.waypoint_location(lat1, lon1, o_lat2, o_lon2, overflier_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        overflier_route.truncate(initial_lat = o_initial_lat, initial_lon = o_initial_lon)
+        overflier_route.truncate(initial_lat = o_initial.y, initial_lon = o_initial.x)
 
         # Construct the overflier.
         yield {
             sg.AIRCRAFT_TIMEDELTA_KEY: 0,
-            sg.START_POSITION_KEY: (o_initial_lon, o_initial_lat), # Order is (lon, lat).
+            sg.START_POSITION_KEY: (o_initial.x, o_initial.y), # Order is (lon, lat).
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: overflier_aircraft_type,
             sg.DEPARTURE_KEY: overflier_departure,
@@ -108,14 +108,14 @@ class OverflierClimberScenario(ScenarioAlgorithm):
 
         # Compute the initial position of the climber.
         # Note: this assumes that the route is a straight line from the initial fix to the central fix (conflict point).
-        c_initial_lon, c_initial_lat = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
+        c_initial = GeoHelper.waypoint_location(lat1, lon1, c_lat2, c_lon2, climber_horizontal_distance)
 
         # Truncate the route in light of the modified starting position.
-        climber_route.truncate(initial_lat = c_initial_lat, initial_lon = c_initial_lon)
+        climber_route.truncate(initial_lat = c_initial.y, initial_lon = c_initial.x)
 
         yield {
             sg.AIRCRAFT_TIMEDELTA_KEY: 0,
-            sg.START_POSITION_KEY: (c_initial_lon, c_initial_lat), # Order is (lon, lat)
+            sg.START_POSITION_KEY: (c_initial.x, c_initial.y), # Order is (lon, lat)
             sg.CALLSIGN_KEY: next(self.callsign_generator()),
             sg.AIRCRAFT_TYPE_KEY: climber_aircraft_type,
             sg.DEPARTURE_KEY: overflier_destination, # Reversed overflier departure/destination.

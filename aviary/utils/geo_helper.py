@@ -4,6 +4,7 @@ Helper class for computing geometric and geographic quantities.
 # author: Tim Hobson
 # email: thobson@turing.ac.uk
 
+from shapely.geometry import Point
 from shapely.ops import transform
 from functools import partial
 
@@ -67,14 +68,15 @@ class GeoHelper():
     def waypoint_location(lat1, lon1, lat2, lon2, distance_m, geod = Geodesic.WGS84):
         """
         Computes the location of waypoint at a given distance (in metres) from
-        point (lat1, lon1) in the direction of (lat2, lon2).
+        point (lat1, lon1) in the direction of (lat2, lon2). Returns a Shapely Point.
 
         Based on the example at https://geographiclib.sourceforge.io/html/python/examples.html#computing-waypoints
         """
 
         l = geod.InverseLine(lat1, lon1, lat2, lon2)
         g = l.Position(distance_m, Geodesic.STANDARD)
-        return g['lon2'], g['lat2']
+
+        return Point(g['lon2'], g['lat2'])
 
 
     @staticmethod

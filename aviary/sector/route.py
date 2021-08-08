@@ -63,13 +63,25 @@ class Route():
 
 
     def fix_points(self, unprojected = False):
-        """Returns the coordinates of the fixes in the route"""
+        """Returns the coordinates of the fixes in the route as a list of Shapely Points"""
 
         # Project the coordinates unless the projection attribute is not None or unprojected is True.
         if unprojected or self.projection is None:
             return [i[1] for i in self.fix_list]
 
         return [GeoHelper.__inv_project__(self.projection, geom=i[1]) for i in self.fix_list]
+
+
+    def span(self):
+        """Computes the total distance in metres spanned by the route"""
+
+        p1 = None
+        distances = list()
+        for p2 in self.fix_points(unprojected=False):
+            if p1 is not None:
+                distances.append(GeoHelper.distance(lat1=p1.y, lon1=p1.x, lat2=p2.y, lon2=p2.x))
+            p1 = p2
+        return sum(distances)
 
 
     @property
