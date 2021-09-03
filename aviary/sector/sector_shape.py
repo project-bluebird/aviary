@@ -25,62 +25,15 @@ OFFSET_NM = 10
 
 EPSILON = 1e-10 # Small number used as a tolerance when determining routes.
 
-class SectorType(Enum):
-    I = "I",
-    X = "X",
-    Y = "Y"
+# class SectorType(Enum):
+#     I = "I",
+#     X = "X",
+#     Y = "Y",
+#     D = "D"
 
 class SectorShape:
     """A 2D sector shape with waypoint fixes"""
 
-    ###
-    ### Default fix names:
-    ###
-
-    # I fixes from top to bottom:
-    #
-    #   'spirt'
-    #   'air'
-    #   'water'
-    #   'earth'
-    #   'fiyre'
-    #
-    i_fix_names = ['spirt', 'air', 'water', 'earth', 'fiyre']
-
-    # X fixes anticlockwise from the top:
-    #
-    #                  'sin'
-    #                 'gates'
-    # 'siren' 'witch' 'abyss' 'demon' 'satan'
-    #                 'haunt'
-    #                 'limbo'
-    #
-    x_fix_names = ['sin', 'gates', 'siren', 'witch', 'abyss', 'haunt', 'limbo', 'demon', 'satan']
-
-    # Y fixes from the centre outwards starting in the top-left branch:
-    #
-    #       'ghost'              'god'
-    #            'bishp'   'canon'
-    #                  'tri'
-    #                  'son'
-    #                 'deacn'
-    #
-    y_fix_names = ['ghost', 'bishp', 'god', 'canon', 'tri', 'son', 'deacn']
-
-    ###
-    ###  Default route names:
-    ###
-
-    # I routes: 1) increasing in y-coordinate 2) decreasing in y-coordinate
-    i_route_names = ['ascension', 'fallen']
-
-    # X routes: 1) vertical increasing in y-coordinate 2) vertical descreasing in y-coordinate
-    #           3) horizontal increasing in x-coordinate 4) horizontal descreasing in x-coordinate
-    x_route_names = ['purgatory', 'blasphemer', 'damnation', 'redemption']
-
-    # Y routes: 1) increasing in y-coordinate through left branch 2) decreasing in y-coordinate through left branch
-    #           3) increasing in y-coordinate through right branch 4) decreasing in y-coordinate through right branch
-    y_route_names = ['almighty', 'ethereal', 'everlasting', 'divine']
 
     @abstractmethod
     def routes(self) -> list:
@@ -91,37 +44,37 @@ class SectorShape:
         """
         pass
 
-
-    @staticmethod
-    def shape_constructor(type):
-        """Parse a ShapeType (enum value) into a SectorShape constructor."""
-        if type == SectorType.I:
-            return IShape
-        if type == SectorType.X:
-            return XShape
-        if type == SectorType.Y:
-            return YShape
-        raise ValueError(f'Invalid shape type: {type}.')
-
+    # @staticmethod
+    # def shape_constructor(type):
+    #     """Parse a ShapeType (enum value) into a SectorShape constructor."""
+    #     if type == SectorType.I:
+    #         return IShape
+    #     if type == SectorType.X:
+    #         return XShape
+    #     if type == SectorType.Y:
+    #         return YShape
+    #     if type == SectorType.D:
+    #         return DShape
+    #     raise ValueError(f'Invalid shape type: {type}.')
 
     def __init__(self,
-                 sector_type: SectorType,
+                 # sector_type: SectorType,
                  polygon: geom.base.BaseGeometry,
                  fix_names,
                  route_names,
-                 length_nm,
-                 airway_width_nm,
-                 offset_nm
+                 # length_nm,
+                 # airway_width_nm,
+                 # offset_nm
                  ):
 
-        if not isinstance(sector_type, SectorType):
-            raise KeyError("Type must be a SectorType")
+        # if not isinstance(sector_type, SectorType):
+        #     raise KeyError("Type must be a SectorType")
 
-        self._sector_type = sector_type
+        # self._sector_type = sector_type
         self._polygon = polygon
-        self._length_nm = length_nm
-        self._airway_width_nm = airway_width_nm
-        self._offset_nm = offset_nm
+        # self._length_nm = length_nm
+        # self._airway_width_nm = airway_width_nm
+        # self._offset_nm = offset_nm
 
         fix_points = self.__fix_points__()
 
@@ -137,19 +90,19 @@ class SectorShape:
             raise ValueError(f'route_names must have length {len_routes}')
 
 
-    @property
-    def sector_type(self):
-        """
-        Sector type property
-
-        :return: A SectorType enum value
-        """
-        return self._sector_type
+    # @property
+    # def sector_type(self):
+    #     """
+    #     Sector type property
+    #
+    #     :return: A SectorType enum value
+    #     """
+    #     return self._sector_type
 
     # Make the sector_type property immutable.
-    @sector_type.setter
-    def sector_type(self, sector_type):
-        raise Exception("sector_type is immutable")
+    # @sector_type.setter
+    # def sector_type(self, sector_type):
+    #     raise Exception("sector_type is immutable")
 
     @property
     def polygon(self):
@@ -188,56 +141,79 @@ class SectorShape:
     def route_names(self, route_names):
         raise Exception("route_names are immutable")
 
-    @property
-    def length_nm(self):
-        """
-        Sector length property
+    # @property
+    # def length_nm(self):
+    #     """
+    #     Sector length property
+    #
+    #     :return: The sector length in nautical miles
+    #     """
+    #     return self._length_nm
+    #
+    # # Make the length_nm property immutable.
+    # @length_nm.setter
+    # def length_nm(self, length_nm):
+    #     raise Exception("length_nm is immutable")
+    #
+    # @property
+    # def airway_width_nm(self):
+    #     """
+    #     Airway width property
+    #
+    #     :return: The airway width in nautical miles
+    #     """
+    #     return self._airway_width_nm
+    #
+    # # Make the airway_width_nm property immutable.
+    # @airway_width_nm.setter
+    # def airway_width_nm(self, airway_width_nm):
+    #     raise Exception("airway_width_nm is immutable")
+    #
+    # @property
+    # def offset_nm(self):
+    #     """
+    #     Offset property
+    #
+    #     :return: The external fix offset distance in nautical miles
+    #     """
+    #     return self._offset_nm
+    #
+    # # Make the offset_nm property immutable.
+    # @offset_nm.setter
+    # def offset_nm(self, offset_nm):
+    #     raise Exception("offset_nm is immutable")
 
-        :return: The sector length in nautical miles
-        """
-        return self._length_nm
-
-    # Make the length_nm property immutable.
-    @length_nm.setter
-    def length_nm(self, length_nm):
-        raise Exception("length_nm is immutable")
-
-    @property
-    def airway_width_nm(self):
-        """
-        Airway width property
-
-        :return: The airway width in nautical miles
-        """
-        return self._airway_width_nm
-
-    # Make the airway_width_nm property immutable.
-    @airway_width_nm.setter
-    def airway_width_nm(self, airway_width_nm):
-        raise Exception("airway_width_nm is immutable")
-
-    @property
-    def offset_nm(self):
-        """
-        Offset property
-
-        :return: The external fix offset distance in nautical miles
-        """
-        return self._offset_nm
-
-    # Make the offset_nm property immutable.
-    @offset_nm.setter
-    def offset_nm(self, offset_nm):
-        raise Exception("offset_nm is immutable")
 
 
 class IShape(SectorShape):
+
+    ###
+    ### Default names:
+    ###
+
+    # I fixes from top to bottom:
+    #
+    #   'spirt'
+    #   'air'
+    #   'water'
+    #   'earth'
+    #   'fiyre'
+    #
+    i_fix_names = ['spirt', 'air', 'water', 'earth', 'fiyre']
+
+    # I routes: 1) increasing in y-coordinate 2) decreasing in y-coordinate
+    i_route_names = ['ascension', 'fallen']
 
     def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
                  airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
 
         if airway_width_nm > length_nm:
             raise ValueError(f'I sector width {airway_width_nm} must not exceed length {length_nm}')
+
+        self.length_nm = length_nm
+        self.airway_width_nm = airway_width_nm
+        self.offset_nm = offset_nm
+        self.sector_type = "I"
 
         if fix_names is None:
             fix_names = self.i_fix_names
@@ -251,13 +227,16 @@ class IShape(SectorShape):
                   (0.5 * airway_width_nm, 0.5 * length_nm),
                   (0.5 * airway_width_nm, -0.5 * length_nm)]
 
-        super(IShape, self).__init__(sector_type = SectorType.I,
+        super(IShape, self).__init__(
+                                    # sector_type = SectorType.I,
                                      polygon = geom.Polygon(points),
                                      fix_names = fix_names,
                                      route_names = route_names,
-                                     length_nm = length_nm,
-                                     airway_width_nm = airway_width_nm,
-                                     offset_nm = offset_nm)
+                                     )
+                                     # length_nm = length_nm,
+                                     # airway_width_nm = airway_width_nm,
+                                     # offset_nm = offset_nm)
+
 
     def __fix_points__(self):
         """Compute the locations of the fixes """
@@ -295,8 +274,31 @@ class IShape(SectorShape):
 
 class XShape(SectorShape):
 
+    ###
+    ### Default names:
+    ###
+
+    # X fixes anticlockwise from the top:
+    #
+    #                  'sin'
+    #                 'gates'
+    # 'siren' 'witch' 'abyss' 'demon' 'satan'
+    #                 'haunt'
+    #                 'limbo'
+    #
+    x_fix_names = ['sin', 'gates', 'siren', 'witch', 'abyss', 'haunt', 'limbo', 'demon', 'satan']
+
+    # X routes: 1) vertical increasing in y-coordinate 2) vertical descreasing in y-coordinate
+    #           3) horizontal increasing in x-coordinate 4) horizontal descreasing in x-coordinate
+    x_route_names = ['purgatory', 'blasphemer', 'damnation', 'redemption']
+
     def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
                  airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
+
+        self.length_nm = length_nm
+        self.airway_width_nm = airway_width_nm
+        self.offset_nm = offset_nm
+        self.sector_type = "X"
 
         if fix_names is None:
             fix_names = self.x_fix_names
@@ -307,13 +309,15 @@ class XShape(SectorShape):
         i = IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
         polygon = cascaded_union([i.polygon, rotate(i.polygon, 90)])
 
-        super(XShape, self).__init__(sector_type = SectorType.X,
+        super(XShape, self).__init__(
+                                    # sector_type = SectorType.X,
                                      polygon = polygon,
                                      fix_names = fix_names,
                                      route_names = route_names,
-                                     length_nm = length_nm,
-                                     airway_width_nm = airway_width_nm,
-                                     offset_nm = offset_nm)
+                                     )
+                                     # length_nm = length_nm,
+                                     # airway_width_nm = airway_width_nm,
+                                     # offset_nm = offset_nm)
 
     def __fix_points__(self):
 
@@ -370,8 +374,32 @@ class XShape(SectorShape):
 
 class YShape(SectorShape):
 
+    ###
+    ### Default names:
+    ###
+
+
+    # Y fixes from the centre outwards starting in the top-left branch:
+    #
+    #       'ghost'              'god'
+    #            'bishp'   'canon'
+    #                  'tri'
+    #                  'son'
+    #                 'deacn'
+    #
+    y_fix_names = ['ghost', 'bishp', 'god', 'canon', 'tri', 'son', 'deacn']
+
+    # Y routes: 1) increasing in y-coordinate through left branch 2) decreasing in y-coordinate through left branch
+    #           3) increasing in y-coordinate through right branch 4) decreasing in y-coordinate through right branch
+    y_route_names = ['almighty', 'ethereal', 'everlasting', 'divine']
+
     def __init__(self, length_nm = LENGTH_NM, fix_names = None, route_names = None,
                  airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
+
+        self.length_nm = length_nm
+        self.airway_width_nm = airway_width_nm
+        self.offset_nm = offset_nm
+        self.sector_type = "Y"
 
         if fix_names is None:
             fix_names = self.y_fix_names
@@ -388,13 +416,15 @@ class YShape(SectorShape):
         # Shift the polygon so its centre is at the origin.
         polygon = translate(offset_polygon, xoff = 0.0, yoff = - length_nm / 4)
 
-        super(YShape, self).__init__(sector_type = SectorType.Y,
+        super(YShape, self).__init__(
+                                    # sector_type = SectorType.Y,
                                      polygon = polygon,
                                      fix_names = fix_names,
                                      route_names = route_names,
-                                     length_nm = length_nm,
-                                     airway_width_nm = airway_width_nm,
-                                     offset_nm = offset_nm)
+                                     )
+                                     # length_nm = length_nm,
+                                     # airway_width_nm = airway_width_nm,
+                                     # offset_nm = offset_nm)
 
     def __fix_points__(self):
 

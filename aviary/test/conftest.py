@@ -13,7 +13,6 @@ import aviary.scenario.overflier_climber_scenario as ocs
 def i_element():
     """Test fixture: an I-shaped sector element object."""
 
-    type = ss.SectorType.I
     name = "EARTH"
     origin = (-0.1275, 51.5)
     fix_names = ['a', 'b', 'c', 'd', 'e']
@@ -21,33 +20,38 @@ def i_element():
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit,
-                            fix_names = fix_names, route_names = route_names)
+
+    shape = ss.IShape(fix_names = fix_names, route_names = route_names)
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
 def x_element():
     """Test fixture: an X-shaped sector element object."""
 
-    type = ss.SectorType.X
+    # type = ss.SectorType.X
     name = "HELL"
     origin = (-0.1275, 51.5)
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+
+    shape = ss.XShape()
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
 def y_element():
     """Test fixture: a Y-shaped sector element object."""
 
-    type = ss.SectorType.Y
+    # type = ss.SectorType.Y
     name = "HEAVEN"
     origin = (-0.1275, 51.5)
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+
+    shape = ss.YShape()
+    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
 @pytest.fixture(scope="function")
