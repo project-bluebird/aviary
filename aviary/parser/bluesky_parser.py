@@ -83,7 +83,7 @@ class BlueskyParser(SectorParser):
             orig_len = len(line)
 
             # Parse lat/long info.
-            coords_list = self.sector_polygon()[C.COORDINATES_KEY]
+            coords_list = list(self.sector_polygon().exterior.coords)
 
             # Coordinates list may be nested.
             while len(coords_list) == 1:

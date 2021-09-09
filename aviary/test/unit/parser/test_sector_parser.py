@@ -130,14 +130,14 @@ def test_sector_origin(target):
     assert result.coords[0] == C.DEFAULT_ORIGIN
 
 
-# def test_sector_centroid(target):
-#     result = target.sector_centroid()
-#
-#     # Sector centroid is approximately, but not exactly, equal to the origin
-#     # passed to the SectorElement constructor (as the centroid is computed
-#     # from the coordinates of the polygon, resulting in a small numerical error).
-#     assert not result.coords[0] == C.DEFAULT_ORIGIN
-#     assert result.coords[0] == pytest.approx(C.DEFAULT_ORIGIN, 0.0001)
+def test_sector_centroid(target):
+    result = target.sector_centroid()
+
+    # Sector centroid is approximately, but not exactly, equal to the origin
+    # passed to the SectorElement constructor (as the centroid is computed
+    # from the coordinates of the polygon, resulting in a small numerical error).
+    assert not result.coords[0] == C.DEFAULT_ORIGIN
+    assert result.coords[0] == pytest.approx(C.DEFAULT_ORIGIN, 0.0001)
 #
 
 # def test_sector_lower_limit(target):

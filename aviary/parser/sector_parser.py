@@ -207,17 +207,18 @@ class SectorParser:
     #
     #     return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.OFFSET_NM_KEY])
 
-    # def sector_centroid(self):
-    #     """
-    #     Returns the centroid of the sector polygon.
-    #     :return: a shapely.geometry.point.Point object representing the centroid of the sector.
-    #     """
-    #
-    #     # Determine the centroid of the sector polygon.
-    #     coords = self.sector_polygon()[C.COORDINATES_KEY]
-    #
-    #     while len(coords) == 1:
-    #         coords = coords[0]
-    #
-    #     polygon = geom.Polygon(coords)
-    #     return polygon.centroid
+    def sector_centroid(self):
+        """
+        Returns the centroid of the sector polygon.
+        :return: a shapely.geometry.point.Point object representing the centroid of the sector.
+        """
+
+        # Determine the centroid of the sector polygon.
+        # coords = self.sector_polygon()[C.COORDINATES_KEY]
+        #
+        # while len(coords) == 1:
+        #     coords = coords[0]
+        #
+        # polygon = geom.Polygon(coords)
+        polygon = self.sector_polygon()
+        return polygon.centroid
