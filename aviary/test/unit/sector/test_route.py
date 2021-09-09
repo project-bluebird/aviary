@@ -125,7 +125,7 @@ def test_truncate(i_element):
 
     # Get the A to E route for the I sector.
     target = i_element.routes()[1]
-    full_route = i_element.routes()[1]#.copy()
+    full_route = i_element.routes()[1].copy()
 
     lonA, latA = target.fix_points()[0].coords[0]
     lonB, latB = target.fix_points()[1].coords[0]
@@ -143,32 +143,31 @@ def test_truncate(i_element):
     assert target.fix_list == full_route.fix_list
 
     # If we start from halfway between fixes B and C, the truncated route omits both fixes A and B.
-    target = i_element.routes()[1]
+    target = i_element.routes()[1].copy()
 
     # If we start from halfway between fixes A and B, the truncated route omits only fix A.
     target.truncate(initial_lat = (latA + latB)/2, initial_lon = lonA)
     assert target.fix_list == full_route.fix_list[1:]
 
     # If we start from halfway between fixes B and C, the truncated route omits both fixes A and B.
-    target = i_element.routes()[1]
+    target = i_element.routes()[1].copy()
 
     target.truncate(initial_lat = (latB + latC)/2, initial_lon = lonA)
     assert target.fix_list == full_route.fix_list[2:]
 
     # If we start from halfway between fixes C and D, the truncated route omits fixes A, B and C.
-    target = i_element.routes()[1]
+    target = i_element.routes()[1].copy()
 
     target.truncate(initial_lat = (latC + latD)/2, initial_lon = lonA)
     assert target.fix_list == full_route.fix_list[3:]
 
     # If we start from halfway between fixes D and E, the truncated route omits both fixes A, B, C and D.
-    target = i_element.routes()[1]
+    target = i_element.routes()[1].copy()
 
     target.truncate(initial_lat = (latD + latE)/2, initial_lon = lonA)
     assert target.fix_list == full_route.fix_list[4:]
 
     # If we start from south of fix E, the truncated route has an empty fix list.
-    target = i_element.routes()[1]
-
+    target = i_element.routes()[1].copy()
     target.truncate(initial_lat = latE - 1, initial_lon = lonA)
     assert not target.fix_list
