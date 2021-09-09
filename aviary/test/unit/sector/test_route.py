@@ -6,7 +6,7 @@ import json
 import aviary.constants as C
 import aviary.sector.route as sr
 import aviary.sector.sector_element as se
-import aviary.utils.geo_helper as gh
+# import aviary.utils.geo_helper as gh
 
 # TODO - go over tests and check correctness of behaviour
 
@@ -57,10 +57,10 @@ def test_geojson(i_element):
     assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.FIX_VALUE][C.CHILDREN_NAMES_KEY]) == len(i_element.shape.fixes)
 
     assert isinstance(result[C.GEOMETRY_KEY], dict)
-    assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([gh.COORDINATES_KEY, C.TYPE_KEY])
+    assert sorted(result[C.GEOMETRY_KEY].keys()) == sorted([C.COORDINATES_KEY, C.TYPE_KEY])
 
-    assert isinstance(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY], list)
-    assert len(result[C.GEOMETRY_KEY][gh.COORDINATES_KEY]) == len(i_element.shape.fixes)
+    assert isinstance(result[C.GEOMETRY_KEY][C.COORDINATES_KEY], list)
+    assert len(result[C.GEOMETRY_KEY][C.COORDINATES_KEY]) == len(i_element.shape.fixes)
 
 
 def test_serialize(i_element):

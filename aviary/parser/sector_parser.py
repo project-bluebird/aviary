@@ -5,7 +5,7 @@ Sector (GeoJSON) parser.
 import aviary.constants as C
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
-import aviary.utils.geo_helper as gh
+# import aviary.utils.geo_helper as gh
 
 from aviary.sector.route import Route
 
@@ -214,7 +214,7 @@ class SectorParser:
     #     """
     #
     #     # Determine the centroid of the sector polygon.
-    #     coords = self.sector_polygon()[gh.COORDINATES_KEY]
+    #     coords = self.sector_polygon()[C.COORDINATES_KEY]
     #
     #     while len(coords) == 1:
     #         coords = coords[0]

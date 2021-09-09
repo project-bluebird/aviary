@@ -9,7 +9,7 @@ import aviary.parser.bluesky_parser as bp
 import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
-import aviary.utils.geo_helper as gh
+# import aviary.utils.geo_helper as gh
 
 
 @pytest.fixture(scope="function")
@@ -93,7 +93,7 @@ def test_route(target):
         assert isinstance(fix[rt.FIX_NAME_KEY], str)
         assert fix[rt.FIX_NAME_KEY] in ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]
         assert isinstance(fix[C.GEOMETRY_KEY], dict)
-        assert sorted(fix[C.GEOMETRY_KEY].keys()) == sorted([C.TYPE_KEY, gh.COORDINATES_KEY])
+        assert sorted(fix[C.GEOMETRY_KEY].keys()) == sorted([C.TYPE_KEY, C.COORDINATES_KEY])
 
 
 def test_create_aircraft_lines(target):
@@ -145,4 +145,3 @@ def test_valid_polyalt_command(target):
     lines = target.all_lines()
     for polyalt_command in [l for l in lines if "POLYALT" in l]:
         assert len(polyalt_command.split(">")[1].split()) >= 6
-

@@ -10,7 +10,7 @@ import aviary.scenario.scenario_generator as sg
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
-import aviary.utils.geo_helper as gh
+# import aviary.utils.geo_helper as gh
 
 import shapely.geometry as geom
 
@@ -85,7 +85,7 @@ def test_geometries_of_type(target):
     assert len(result) == 5
     for fix in result:
         assert isinstance(fix, dict)
-        assert sorted(fix.keys()) == sorted([C.TYPE_KEY, gh.COORDINATES_KEY])
+        assert sorted(fix.keys()) == sorted([C.TYPE_KEY, C.COORDINATES_KEY])
 
 
 def test_polygon_geometries(target):
@@ -102,11 +102,11 @@ def test_sector_polygon(target):
     result = target.sector_polygon()
 
     assert isinstance(result, geom.polygon.BaseGeometry)
-    # assert sorted(result.keys()) == sorted([C.TYPE_KEY, gh.COORDINATES_KEY])
+    # assert sorted(result.keys()) == sorted([C.TYPE_KEY, C.COORDINATES_KEY])
     #
     # # coordinates are nested list - at lowest level should have 5 coordinates
     # # the first and last coordinate is the same
-    # coords = result[gh.COORDINATES_KEY]
+    # coords = result[C.COORDINATES_KEY]
     # while len(coords) == 1:
     #     coords = coords[0]
     # assert len(coords) == 5
