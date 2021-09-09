@@ -24,18 +24,15 @@ class Route():
     """
 
     def __init__(self,
-                # name,
                 fix_list,
                 projection = None):
         """
         Route class constructor.
 
-        :param name: The name of the route
         :param fix_list: A list of (str, shapely.point.Point) pairs
         :param projection: (optional) a pyproj Projection object
         """
 
-        # self.name = name
         self.fix_list = fix_list
         self.projection = projection
 
@@ -49,7 +46,6 @@ class Route():
     def reverse(self):
         """Reverses the Route instance"""
 
-        # self.name = self.name[::-1]
         self.fix_list = self.fix_list[::-1]
 
 
