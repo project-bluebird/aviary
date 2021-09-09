@@ -67,9 +67,9 @@ class SectorParser:
         Returns the fixes in the sector as a list of (name, shapely.Point)
         """
 
-        return [[fix[C.PROPERTIES_KEY][C.NAME_KEY],
-                geom.Point(fix[C.GEOMETRY_KEY][C.COORDINATES_KEY])]
-                for fix in self.fix_features()]
+        return dict((fix[C.PROPERTIES_KEY][C.NAME_KEY],
+                geom.Point(fix[C.GEOMETRY_KEY][C.COORDINATES_KEY]))
+                for fix in self.fix_features())
 
     def fix_names(self):
         """

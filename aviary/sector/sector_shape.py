@@ -68,18 +68,26 @@ class SectorShape:
 
 class PolygonShape(SectorShape):
 
+    """
+    :param polygon: geom.polygon.BaseGeometry
+    :param fixes: dictionary, {str:geom.Point}
+    :param routes: list of aviary.sector.Route objects
+    """
+
     def __init__(self, polygon, fixes, routes):
-        assert isinstance(polygon, geom.polygon.BaseGeometry)
 
-        for fix in fixes:
-            assert isinstance(fix[0], str)
-            assert isinstance(fix[1], geom.Point)
-        fix_names = [fix[0] for fix in fixes]
+        assert isinstance(polygon, geom.polygon.BaseGeometry), "Sector polygon must be a Shapely polygon object"
+        assert isinstance(fixes, dict), "Invalid fixes format, expected a dictionary"
+        assert isinstance(routes, list), "Invalid routes format, expected a list"
 
+        assert all(isinstance(fix, str) for fix in fixes.keys()), "Fix names must be strings"
+        assert all(isinstance(fix, geom.Point) for fix in fixes.values()), "Fix coordinates must be Shapely Point objects"
+
+        fix_names = fixes.keys()
         for route in routes:
-            assert isinstance(route, Route)
+            assert isinstance(route, Route), "Each route must be aviary.sector.Route class"
             for fix in route.fix_names():
-                assert fix in fix_names
+                assert fix in fix_names, f"Route fix {fix} must be in included in fixes"
 
         self._polygon = polygon
         self._fixes = fixes
