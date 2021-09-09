@@ -7,6 +7,8 @@ import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
 import aviary.utils.geo_helper as gh
 
+from aviary.sector.route import Route
+
 import geojson
 import jsonpath_rw_ext as jp
 
@@ -60,12 +62,41 @@ class SectorParser:
 
         return self.features_of_type(type_value=C.FIX_VALUE)
 
+    def fixes(self):
+        """
+        Returns the fixes in the sector as a list of (name, shapely.Point)
+        """
+
+        return [[fix[C.PROPERTIES_KEY][C.NAME_KEY],
+                geom.Point(fix[C.GEOMETRY_KEY][C.COORDINATES_KEY])]
+                for fix in self.fix_features()]
+
     def fix_names(self):
         """
         Returns the names of the fixes in the sector as a list of strings.
         """
 
         return [p[C.NAME_KEY] for p in self.properties_of_type(type_value=C.FIX_VALUE)]
+
+    def route_features(self):
+        """
+        Filters the features to retain those with 'type': 'ROUTE'.
+        """
+
+        return self.features_of_type(type_value=C.ROUTE_VALUE)
+
+    def routes(self):
+        """
+        Return a list of aviary.sector.Route instances
+        """
+
+        routes = self.route_features()
+        result = []
+        for route in routes:
+            fix_points = route[C.GEOMETRY_KEY][C.COORDINATES_KEY]
+            names = route[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.FIX_VALUE][C.CHILDREN_NAMES_KEY]
+            result.append(Route(fix_list=list(zip(names, fix_points))))
+        return result
 
     def route_names(self):
         """
@@ -103,7 +134,7 @@ class SectorParser:
 
     def sector_polygon(self):
         """
-        Returns a dictionary containing the coordinates of the sector polygon.
+        Returns the sector polygon as shapely.Polygon.
         """
 
         polygons = self.polygon_geometries()
@@ -111,7 +142,7 @@ class SectorParser:
             raise Exception(
                 f"Expected precisely one polygon; found {len(polygons)} polygons."
             )
-        return polygons[0]
+        return geom.Polygon(polygons[0]['coordinates'][0])
 
     def sector_name(self):
         """
@@ -125,7 +156,7 @@ class SectorParser:
         Returns the sector type (SectorType enum).
         """
 
-        return ss.SectorType[self.properties_of_type(type_value=C.SECTOR_VALUE)[0][C.SHAPE_KEY]]
+        return self.properties_of_type(type_value=C.SECTOR_VALUE)[0][C.SHAPE_KEY]
 
     def sector_origin(self):
         """
@@ -152,42 +183,41 @@ class SectorParser:
 
         return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.UPPER_LIMIT_KEY])
 
-    def sector_length_nm(self):
-        """
-        Returns the parsed sector length.
-        :return: an integer.
-        """
+    # def sector_length_nm(self):
+    #     """
+    #     Returns the parsed sector length.
+    #     :return: an integer.
+    #     """
+    #
+    #     return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.LENGTH_NM_KEY])
+    #
+    # def sector_airway_width_nm(self):
+    #     """
+    #     Returns the parsed sector airway width.
+    #     :return: an integer.
+    #     """
+    #
+    #     return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.AIRWAY_WIDTH_NM_KEY])
+    #
+    # def waypoint_offset_nm(self):
+    #     """
+    #     Returns the parsed waypoint offset.
+    #     :return: an integer.
+    #     """
+    #
+    #     return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.OFFSET_NM_KEY])
 
-        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.LENGTH_NM_KEY])
-
-    def sector_airway_width_nm(self):
-        """
-        Returns the parsed sector airway width.
-        :return: an integer.
-        """
-
-        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.AIRWAY_WIDTH_NM_KEY])
-
-    def waypoint_offset_nm(self):
-        """
-        Returns the parsed waypoint offset.
-        :return: an integer.
-        """
-
-        return int(self.properties_of_type(type_value=C.SECTOR_VOLUME_VALUE)[0][C.OFFSET_NM_KEY])
-
-    def sector_centroid(self):
-        """
-        Returns the centroid of the sector polygon.
-        :return: a shapely.geometry.point.Point object representing the centroid of the sector.
-        """
-
-        # Determine the centroid of the sector polygon.
-        coords = self.sector_polygon()[gh.COORDINATES_KEY]
-
-        while len(coords) == 1:
-            coords = coords[0]
-
-        polygon = geom.Polygon(coords)
-        return polygon.centroid
-
+    # def sector_centroid(self):
+    #     """
+    #     Returns the centroid of the sector polygon.
+    #     :return: a shapely.geometry.point.Point object representing the centroid of the sector.
+    #     """
+    #
+    #     # Determine the centroid of the sector polygon.
+    #     coords = self.sector_polygon()[gh.COORDINATES_KEY]
+    #
+    #     while len(coords) == 1:
+    #         coords = coords[0]
+    #
+    #     polygon = geom.Polygon(coords)
+    #     return polygon.centroid

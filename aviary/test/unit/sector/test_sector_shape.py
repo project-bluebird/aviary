@@ -6,9 +6,9 @@ import shapely.geometry as geom
 
 import aviary.sector.sector_shape as ss
 
-def test_sector_type():
+# def test_sector_type():
 
-    i = ss.IShape()
+    # i = ss.IShape()
     # assert i.sector_type == ss.SectorType.I
     #
     # x = ss.XShape()
@@ -71,9 +71,9 @@ def test_i_polygon():
 def test_i_route_names():
 
     route_names = ['up', 'down']
-    target = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e'], route_names = route_names)
+    target = ss.IShape(fix_names=['a', 'b', 'c', 'd', 'e']) #, route_names = route_names)
 
-    assert target.route_names == [i.upper() for i in route_names]
+    # assert target.route_names == [i.upper() for i in route_names]
 
 
 def test_i_fixes():
@@ -139,7 +139,7 @@ def test_i_routes():
     offset_nm = 25
 
     i = ss.IShape(length_nm=length_nm, offset_nm =  offset_nm)
-    result = i.routes()
+    result = i.routes
 
     assert isinstance(result, list)
 
@@ -171,7 +171,7 @@ def test_x_routes():
 
     length_nm = 10
     x = ss.XShape(length_nm=length_nm)
-    result = x.routes()
+    result = x.routes
 
     assert isinstance(result, list)
 
@@ -205,7 +205,7 @@ def test_y_routes():
 
     length_nm = 50
     y = ss.YShape(length_nm=length_nm)
-    result = y.routes()
+    result = y.routes
 
     assert isinstance(result, list)
 

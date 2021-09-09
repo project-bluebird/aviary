@@ -16,12 +16,12 @@ def i_element():
     name = "EARTH"
     origin = (-0.1275, 51.5)
     fix_names = ['a', 'b', 'c', 'd', 'e']
-    route_names = ['up', 'down']
+    # route_names = ['up', 'down']
 
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.IShape(fix_names = fix_names, route_names = route_names)
+    shape = ss.IShape(fix_names = fix_names) #, route_names = route_names)
     return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 

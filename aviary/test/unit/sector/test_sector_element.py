@@ -66,11 +66,11 @@ def test_sector_element():
 
 def test_sector_element_with_names():
 
-    route_names = ['up', 'down']
+    # route_names = ['up', 'down']
     fix_names = ['a', 'b', 'c', 'd', 'e']
 
-    shape = ss.IShape(fix_names = fix_names,
-                      route_names = route_names)
+    shape = ss.IShape(fix_names = fix_names)
+                      # route_names = route_names)
     target = se.SectorElement(shape = shape,
                               name = "I-Sector-with-names",
                               origin = (0, 40),
@@ -79,8 +79,8 @@ def test_sector_element_with_names():
 
     assert isinstance(target, se.SectorElement)
     # assert target.shape.sector_type == ss.SectorType.I
-    assert target.routes()[0].name == 'UP'
-    assert target.routes()[1].name == 'DOWN'
+    # assert target.routes()[0].name == 'UP'
+    # assert target.routes()[1].name == 'DOWN'
 
     assert 'A' in target.shape.fixes
     assert 'B' in target.shape.fixes
@@ -89,9 +89,9 @@ def test_sector_element_with_names():
     assert 'E' in target.shape.fixes
 
 
-def test_fix(i_element):
-
-    result = i_element.fix(fix_name = "D")
+# def test_fix(i_element):
+#
+#     result = i_element.fix(fix_name = "D")
 
 def test_polygon(i_element):
 
@@ -165,7 +165,7 @@ def test_sector_geojson(i_element):
            [C.CHILDREN_NAMES_KEY]
 
     assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE][C.CHILDREN_NAMES_KEY], list)
-    assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE][C.CHILDREN_NAMES_KEY]) == len(i_element.shape.route_names)
+    assert len(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.ROUTE_VALUE][C.CHILDREN_NAMES_KEY]) == len(i_element.shape.routes)
 
     assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE], dict)
     assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.SECTOR_VOLUME_VALUE].keys()) == [C.CHILDREN_NAMES_KEY]
@@ -197,8 +197,8 @@ def test_boundary_geojson(i_element):
     assert result[C.GEOMETRY_KEY][gh.COORDINATES_KEY][0][0] == (-0.2597, 51.0838)
 
     assert sorted(result[C.PROPERTIES_KEY].keys()) == \
-           sorted([C.NAME_KEY, C.TYPE_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY,
-                   C.LENGTH_NM_KEY, C.AIRWAY_WIDTH_NM_KEY, C.OFFSET_NM_KEY, C.CHILDREN_KEY])
+           sorted([C.NAME_KEY, C.TYPE_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY, C.CHILDREN_KEY])
+                   # C.LENGTH_NM_KEY, C.AIRWAY_WIDTH_NM_KEY, C.OFFSET_NM_KEY, C.CHILDREN_KEY])
 
     assert isinstance(result[C.PROPERTIES_KEY][C.NAME_KEY], str)
     assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.SECTOR_VOLUME_VALUE
@@ -238,7 +238,7 @@ def test_geo_interface(y_element):
 
     # The result contains one feature per route and per fix, plus one
     # for the sector, one for the sector boundary/volume and one for the FIR.
-    assert len(result[C.FEATURES_KEY]) == len(y_element.shape.route_names) + len(y_element.shape.fixes) + 3
+    assert len(result[C.FEATURES_KEY]) == len(y_element.shape.routes) + len(y_element.shape.fixes) + 3
 
 
 def test_contains(i_element):
@@ -295,9 +295,9 @@ def test_hash_sector_coordinates(x_element):
     assert not result == different_result
 
 
-# def test_deserialise(i_sector_geojson):
+def test_deserialise(i_sector_geojson):
 #
-#     result = se.SectorElement.deserialise(StringIO(i_sector_geojson))
+    result = se.SectorElement.deserialise(StringIO(i_sector_geojson))
 #
 #     assert isinstance(result, se.SectorElement)
 #     assert result.origin == C.DEFAULT_ORIGIN

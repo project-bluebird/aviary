@@ -96,7 +96,7 @@ class SectorElement():
         """
 
         # Return route objects.
-        ret = self.shape.routes()
+        ret = self.shape.routes
         for route in ret:
             route.projection = self.projection
 
@@ -118,7 +118,7 @@ class SectorElement():
                         C.CHILDREN_NAMES_KEY: [self.name]
                     },
                     C.ROUTE_VALUE: {
-                        C.CHILDREN_NAMES_KEY: self.shape.route_names
+                        C.CHILDREN_NAMES_KEY: [route.hash_route() for route in self.routes()]
                         },
                     C.FIX_VALUE: {
                         C.CHILDREN_NAMES_KEY: list(self.shape.fixes.keys())
@@ -190,7 +190,7 @@ class SectorElement():
                 C.ORIGIN_KEY: self.origin,
                 C.CHILDREN_KEY: {
                     C.SECTOR_VOLUME_VALUE : {C.CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
-                    C.ROUTE_VALUE: {C.CHILDREN_NAMES_KEY: self.shape.route_names}
+                    C.ROUTE_VALUE: {C.CHILDREN_NAMES_KEY: [route.hash_route() for route in self.routes()]}
                 }
             },
             C.GEOMETRY_KEY: {}
@@ -225,9 +225,9 @@ class SectorElement():
                 C.TYPE_KEY: C.SECTOR_VOLUME_VALUE,
                 C.LOWER_LIMIT_KEY: self.lower_limit,
                 C.UPPER_LIMIT_KEY: self.upper_limit,
-                C.LENGTH_NM_KEY: self.shape.length_nm,
-                C.AIRWAY_WIDTH_NM_KEY: self.shape.airway_width_nm,
-                C.OFFSET_NM_KEY: self.shape.offset_nm,
+                # C.LENGTH_NM_KEY: self.shape.length_nm,
+                # C.AIRWAY_WIDTH_NM_KEY: self.shape.airway_width_nm,
+                # C.OFFSET_NM_KEY: self.shape.offset_nm,
                 C.CHILDREN_KEY: {}
             }
         }
@@ -284,23 +284,25 @@ class SectorElement():
         return file
 
 
-    # @staticmethod
-    # def deserialise(sector_geojson):
-    #     """
-    #     Deserialises a SectorElement instance from a GeoJSON.
-    #
-    #     :param sector_geojson: Text stream from which a sector GeoJSON may be read.
-    #     :return: a SectorElement instance
-    #     """
-    #
-    #     parser = sp.SectorParser(sector_geojson)
-    #     return SectorElement(type = parser.sector_type(),
-    #                          name = parser.sector_name(),
-    #                          origin = parser.sector_origin().coords[0],
-    #                          lower_limit = parser.sector_lower_limit(),
-    #                          upper_limit = parser.sector_upper_limit(),
-    #                          length_nm = parser.sector_length_nm(),
-    #                          airway_width_nm = parser.sector_airway_width_nm(),
-    #                          offset_nm = parser.waypoint_offset_nm(),
-    #                          fix_names = parser.fix_names(),
-    #                          route_names = parser.route_names())
+    @staticmethod
+    def deserialise(sector_geojson):
+        """
+        Deserialises a SectorElement instance from a GeoJSON.
+
+        :param sector_geojson: Text stream from which a sector GeoJSON may be read.
+        :return: a SectorElement instance
+        """
+        parser = sp.SectorParser(sector_geojson)
+
+        shape = ss.PolygonShape(
+            polygon = parser.sector_polygon(),
+            fixes = parser.fixes(),
+            routes = parser.routes()
+        )
+        return SectorElement(
+            shape = shape,
+            name = parser.sector_name(),
+            origin = parser.sector_origin().coords[0],
+            lower_limit = parser.sector_lower_limit(),
+            upper_limit = parser.sector_upper_limit(),
+        )

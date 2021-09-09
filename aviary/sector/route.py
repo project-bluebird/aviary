@@ -23,7 +23,10 @@ class Route():
 
     """
 
-    def __init__(self, name, fix_list, projection = None):
+    def __init__(self,
+                # name,
+                fix_list,
+                projection = None):
         """
         Route class constructor.
 
@@ -32,7 +35,7 @@ class Route():
         :param projection: (optional) a pyproj Projection object
         """
 
-        self.name = name
+        # self.name = name
         self.fix_list = fix_list
         self.projection = projection
 
@@ -40,13 +43,13 @@ class Route():
     def copy(self):
         """Returns a deep copy of a Route instance"""
 
-        return Route(self.name, fix_list = self.fix_list.copy(), projection = self.projection)
+        return Route(fix_list = self.fix_list.copy(), projection = self.projection)
 
 
     def reverse(self):
         """Reverses the Route instance"""
 
-        self.name = self.name[::-1]
+        # self.name = self.name[::-1]
         self.fix_list = self.fix_list[::-1]
 
 
@@ -80,6 +83,9 @@ class Route():
         """
         return self.geojson()
 
+    def hash_route(self) -> str:
+        """Returns hash of the sector route (fix names)"""
+        return str(hash(tuple(self.fix_names())))
 
     def geojson(self) -> dict:
         """
@@ -97,7 +103,7 @@ class Route():
         geojson = {
             C.TYPE_KEY: C.FEATURE_VALUE,
             C.PROPERTIES_KEY: {
-                C.NAME_KEY: self.name,
+                C.NAME_KEY: self.hash_route(),
                 C.TYPE_KEY: C.ROUTE_VALUE,
                 C.CHILDREN_KEY: {
                     C.FIX_VALUE: {
