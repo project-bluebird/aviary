@@ -5,23 +5,18 @@ from numpy import sin, pi
 import shapely.geometry as geom
 
 import aviary.sector.sector_shape as ss
+from aviary.utils.geo_helper import GeoHelper
 
-# def test_sector_type():
+def test_polygon_shape():
 
-    # i = ss.IShape()
-    # assert i.sector_type == ss.SectorType.I
-    #
-    # x = ss.XShape()
-    # assert x.sector_type == ss.SectorType.X
-    #
-    # y = ss.YShape()
-    # assert y.sector_type == ss.SectorType.Y
-    #
-    # # Test immutability of the sector_type
-    # with pytest.raises(Exception):
-    #     i.sector_type = ss.SectorType.X
-    #
-    # assert i.sector_type == ss.SectorType.I
+    # TODO: implement tests
+    with pytest.raises(AssertionError):
+        target = ss.PolygonShape([], [], [])
+
+    ishape = ss.IShape()
+    print(ishape.fixes)
+    target = ss.PolygonShape(ishape.polygon, ishape.fixes, ishape.routes)
+
 
 def test_i_polygon():
 
@@ -36,14 +31,14 @@ def test_i_polygon():
     assert target.airway_width_nm == airway_width_nm
     assert target.offset_nm == offset_nm
 
-    result = target.polygon
+    result = GeoHelper.__project__(target.projection, target.polygon)
 
     assert isinstance(result, geom.polygon.BaseGeometry)
 
-    assert result.bounds[0] == - airway_width_nm / 2
-    assert result.bounds[1] == - length_nm / 2
-    assert result.bounds[2] == airway_width_nm / 2
-    assert result.bounds[3] == length_nm / 2
+    assert result.bounds[0] == pytest.approx(- airway_width_nm / 2)
+    assert result.bounds[1] == pytest.approx(- length_nm / 2)
+    assert result.bounds[2] == pytest.approx(airway_width_nm / 2)
+    assert result.bounds[3] == pytest.approx(length_nm / 2)
 
     longShape = ss.IShape(length_nm = 2 * length_nm,
                        airway_width_nm = airway_width_nm)
@@ -51,17 +46,17 @@ def test_i_polygon():
                        airway_width_nm = 2 * airway_width_nm)
 
     x, y = result.exterior.coords.xy
-    long_x, long_y = longShape.polygon.exterior.coords.xy
-    wide_x, wide_y = wideShape.polygon.exterior.coords.xy
+    long_x, long_y = GeoHelper.__project__(longShape.projection, longShape.polygon).exterior.coords.xy
+    wide_x, wide_y = GeoHelper.__project__(wideShape.projection, wideShape.polygon).exterior.coords.xy
 
     # Check that the "length" of the I shape runs along the y-axis, and the "width" along the x-axis.
-    assert long_x == x
+    assert long_x == pytest.approx(x)
     assert long_y[0] < y[0]
     assert long_y[1] > y[1]
     assert long_y[2] > y[2]
     assert long_y[3] < y[3]
 
-    assert wide_y == y
+    assert wide_y == pytest.approx(y)
     assert wide_x[0] < x[0]
     assert wide_x[1] < x[1]
     assert wide_x[2] > x[2]
@@ -153,18 +148,18 @@ def test_i_routes():
     # Each route is a list of dictionary items (representing fixes) of the form: (name, Point).
 
     # result[0] is increasing along the y-axis
-    assert result[0].fix_points()[0].y == -1 * (i.offset_nm + (length_nm / 2))
-    assert result[0].fix_points()[1].y == -1 * (length_nm / 2)
-    assert result[0].fix_points()[2].y == 0
-    assert result[0].fix_points()[3].y == length_nm / 2
-    assert result[0].fix_points()[4].y == i.offset_nm + (length_nm / 2)
+    assert GeoHelper.__project__(i.projection, result[0].fix_points()[0]).y == pytest.approx(-1 * (i.offset_nm + (length_nm / 2)))
+    assert GeoHelper.__project__(i.projection, result[0].fix_points()[1]).y == pytest.approx(-1 * (length_nm / 2), abs=1e-5)
+    assert GeoHelper.__project__(i.projection, result[0].fix_points()[2]).y == pytest.approx(0, abs=1e-5)
+    assert GeoHelper.__project__(i.projection, result[0].fix_points()[3]).y == pytest.approx(length_nm / 2)
+    assert GeoHelper.__project__(i.projection, result[0].fix_points()[4]).y == pytest.approx(i.offset_nm + (length_nm / 2))
 
     # result[1] is decreasing along the y-axis
-    assert result[1].fix_points()[0].y == i.offset_nm + (length_nm / 2)
-    assert result[1].fix_points()[1].y == length_nm / 2
-    assert result[1].fix_points()[2].y == 0
-    assert result[1].fix_points()[3].y == -1 * (length_nm / 2)
-    assert result[1].fix_points()[4].y == -1 * (i.offset_nm + (length_nm / 2))
+    assert GeoHelper.__project__(i.projection, result[1].fix_points()[0]).y == pytest.approx(i.offset_nm + (length_nm / 2))
+    assert GeoHelper.__project__(i.projection, result[1].fix_points()[1]).y == pytest.approx(length_nm / 2)
+    assert GeoHelper.__project__(i.projection, result[1].fix_points()[2]).y == pytest.approx(0, abs=1e-5)
+    assert GeoHelper.__project__(i.projection, result[1].fix_points()[3]).y == pytest.approx(-1 * (length_nm / 2))
+    assert GeoHelper.__project__(i.projection, result[1].fix_points()[4]).y == pytest.approx(-1 * (i.offset_nm + (length_nm / 2)))
 
 
 def test_x_routes():
@@ -187,18 +182,18 @@ def test_x_routes():
     # Each element of 'result' is a list of dictionary items (representing fixes) of the form: (name, Point).
 
     # result[0] is increasing in the y-coordinate
-    assert result[0].fix_points()[0].y == -1 * (x.offset_nm + (length_nm / 2))
-    assert result[0].fix_points()[1].y == -1 * (length_nm / 2)
-    assert result[0].fix_points()[2].y == 0
-    assert result[0].fix_points()[3].y == length_nm / 2
-    assert result[0].fix_points()[4].y == x.offset_nm + (length_nm / 2)
+    assert GeoHelper.__project__(x.projection, result[0].fix_points()[0]).y == pytest.approx(-1 * (x.offset_nm + (length_nm / 2)))
+    assert GeoHelper.__project__(x.projection, result[0].fix_points()[1]).y == pytest.approx(-1 * (length_nm / 2))
+    assert GeoHelper.__project__(x.projection, result[0].fix_points()[2]).y == pytest.approx(0, abs=1e-5)
+    assert GeoHelper.__project__(x.projection, result[0].fix_points()[3]).y == pytest.approx(length_nm / 2)
+    assert GeoHelper.__project__(x.projection, result[0].fix_points()[4]).y == pytest.approx(x.offset_nm + (length_nm / 2))
 
     # result[1] is decreasing in the y-coordinate
-    assert result[1].fix_points()[0].y == x.offset_nm + (length_nm / 2)
-    assert result[1].fix_points()[1].y == length_nm / 2
-    assert result[1].fix_points()[2].y == 0
-    assert result[1].fix_points()[3].y == -1 * (length_nm / 2)
-    assert result[1].fix_points()[4].y == -1 * (x.offset_nm + (length_nm / 2))
+    assert GeoHelper.__project__(x.projection, result[1].fix_points()[0]).y == pytest.approx(x.offset_nm + (length_nm / 2))
+    assert GeoHelper.__project__(x.projection, result[1].fix_points()[1]).y == pytest.approx(length_nm / 2)
+    assert GeoHelper.__project__(x.projection, result[1].fix_points()[2]).y == pytest.approx(0, abs=1e-5)
+    assert GeoHelper.__project__(x.projection, result[1].fix_points()[3]).y == pytest.approx(-1 * (length_nm / 2))
+    assert GeoHelper.__project__(x.projection, result[1].fix_points()[4]).y == pytest.approx(-1 * (x.offset_nm + (length_nm / 2)))
 
 
 def test_y_routes():
@@ -223,15 +218,15 @@ def test_y_routes():
     # result[0] is increasing in the y-coordinate and up the left branch of the Y.
 
     # x-coordinates:
-    assert result[0].fix_points()[0].x == pytest.approx(0)
-    assert result[0].fix_points()[1].x == pytest.approx(0)
-    assert result[0].fix_points()[2].x == pytest.approx(0)
-    assert result[0].fix_points()[3].x < 0
-    assert result[0].fix_points()[4].x < result[0].fix_points()[3].x
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[0]).x == pytest.approx(0)
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[1]).x == pytest.approx(0)
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[2]).x == pytest.approx(0)
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[3]).x < 0
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[4]).x < result[0].fix_points()[3].x
 
     # y-coordinates:
-    assert result[0].fix_points()[0].y == -1 * (y.offset_nm + length_nm / 2)
-    assert result[0].fix_points()[1].y == -1 * (length_nm / 2)
-    assert result[0].fix_points()[2].y == pytest.approx(0) # Centre of the shape is at the origin
-    assert result[0].fix_points()[3].y == pytest.approx(length_nm / 2 * sin(pi / 6))
-    assert result[0].fix_points()[4].y == pytest.approx((y.offset_nm + length_nm / 2) * sin(pi / 6))
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[0]).y == pytest.approx(-1 * (y.offset_nm + length_nm / 2))
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[1]).y == pytest.approx(-1 * (length_nm / 2))
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[2]).y == pytest.approx(0, abs=1e-5) # Centre of the shape is at the origin
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[3]).y == pytest.approx(length_nm / 2 * sin(pi / 6))
+    assert GeoHelper.__project__(y.projection, result[0].fix_points()[4]).y == pytest.approx((y.offset_nm + length_nm / 2) * sin(pi / 6))

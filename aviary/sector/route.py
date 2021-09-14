@@ -24,8 +24,8 @@ class Route():
     """
 
     def __init__(self,
-                fix_list,
-                projection = None):
+                fix_list):
+                # projection = None):
         """
         Route class constructor.
 
@@ -34,13 +34,13 @@ class Route():
         """
 
         self.fix_list = fix_list
-        self.projection = projection
+        # self.projection = projection
 
 
     def copy(self):
         """Returns a deep copy of a Route instance"""
 
-        return Route(fix_list = self.fix_list.copy(), projection = self.projection)
+        return Route(fix_list = self.fix_list.copy())#, projection = self.projection)
 
 
     def reverse(self):
@@ -61,14 +61,14 @@ class Route():
         return [i[0] for i in self.fix_list]
 
 
-    def fix_points(self, unprojected = False):
+    def fix_points(self):
         """Returns the coordinates of the fixes in the route"""
 
         # Project the coordinates unless the projection attribute is not None or unprojected is True.
-        if unprojected or self.projection is None:
-            return [i[1] for i in self.fix_list]
+        # if unprojected or self.projection is None:
+        return [i[1] for i in self.fix_list]
 
-        return [GeoHelper.__inv_project__(self.projection, geom=i[1]) for i in self.fix_list]
+        # return [GeoHelper.__inv_project__(self.projection, geom=i[1]) for i in self.fix_list]
 
 
     @property
@@ -107,8 +107,10 @@ class Route():
                     }
                 }
             },
-            C.GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection,
-                geom = LineString(self.fix_points(unprojected = True))))
+            #TODO: remove transform AND figure out correct format (LINESTRING??)
+            # C.GEOMETRY_KEY: mapping(GeoHelper.__inv_project__(self.projection,
+            #     geom = LineString(self.fix_points(unprojected = True))))
+            C.GEOMETRY_KEY: mapping(LineString(self.fix_points()))
         }
 
         # Format the coordinates.
@@ -148,8 +150,8 @@ class Route():
     def truncate(self, initial_lat, initial_lon):
         """Truncates this route in light of a given start position by removing fixes that are already passed."""
 
-        if not self.projection:
-            raise ValueError("Truncate route operation requires a non-empty projection attribute.")
+        # if not self.projection:
+        #     raise ValueError("Truncate route operation requires a non-empty projection attribute.")
 
         def fix_latitude(i):
             return self.fix_points()[i].coords[0][1]

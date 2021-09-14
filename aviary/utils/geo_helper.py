@@ -21,6 +21,10 @@ class GeoHelper():
 
         return transform(partial(projection, inverse=True), geom)
 
+    @staticmethod
+    def __project__(projection, geom):
+        """Helper for doing a geometric projection"""
+        return transform(projection, geom)
 
     @staticmethod
     def format_coordinates(geojson, key, float_precision, as_geojson = True):

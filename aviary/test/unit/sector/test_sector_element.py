@@ -243,7 +243,8 @@ def test_geo_interface(y_element):
 
 def test_contains(i_element):
 
-    boundaries = gh.GeoHelper().__inv_project__(i_element.projection, i_element.shape.polygon)
+    # boundaries = gh.GeoHelper().__inv_project__(i_element.projection, i_element.shape.polygon)
+    boundaries = i_element.shape.polygon
     exterior = list(boundaries.exterior.coords)
 
     centre = i_element.centre_point()
@@ -295,8 +296,12 @@ def test_hash_sector_coordinates(x_element):
     assert not result == different_result
 
 
-def test_deserialise(i_sector_geojson):
+def test_deserialise(i_sector_geojson, i_element):
 #
+    print(list(i_element.shape.polygon.exterior.coords))
+    print(i_element.sector_geojson())
+
+    #TODO: update tests
     result = se.SectorElement.deserialise(StringIO(i_sector_geojson))
 #
 #     assert isinstance(result, se.SectorElement)
@@ -310,8 +315,9 @@ def test_deserialise(i_sector_geojson):
 #     assert result.shape.airway_width_nm == 20
 #     assert result.shape.offset_nm == 40
 #
-#     # Check that re-serialisation produces the original GeoJSON string.
-#     assert str(geojson.dumps(result)) == i_sector_geojson.strip()
+#     # Check that re-serialisation produces the original GeoJSON string
+    print(geojson.dumps(result))
+    assert str(geojson.dumps(result)) == i_sector_geojson.strip()
 
 
 def test_sector_is_valid_geojson(i_sector_geojson):

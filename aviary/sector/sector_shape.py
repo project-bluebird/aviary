@@ -1,29 +1,29 @@
 """
 Construction of 2D polygons (including I, X, Y shapes) for use as
 cross-sections of airspace sector elements.
-
-TODO:
-    - support gluing together simple I, X, Y elements to construct more complex sector shapes.
 """
 # author: Tim Hobson
 # email: thobson@turing.ac.uk
 
 
 from enum import Enum
+from pyproj import Proj
 
 import shapely.geometry as geom
 from shapely.ops import cascaded_union
 from shapely.affinity import rotate, translate
 from abc import abstractmethod
 
+import aviary.constants as C
 from aviary.sector.route import Route
+from aviary.utils.geo_helper import GeoHelper
 
 # Default sector dimensions:
 LENGTH_NM = 50
 AIRWAY_WIDTH_NM = 10
 OFFSET_NM = 10
 
-EPSILON = 1e-10 # Small number used as a tolerance when determining routes.
+EPSILON = 1e-5 # Small number used as a tolerance when determining routes.
 
 
 class SectorShape:
@@ -74,7 +74,7 @@ class PolygonShape(SectorShape):
     :param routes: list of aviary.sector.Route objects
     """
 
-    def __init__(self, polygon, fixes, routes):
+    def __init__(self, polygon, fixes, routes, type="P"):
 
         assert isinstance(polygon, geom.polygon.BaseGeometry), "Sector polygon must be a Shapely polygon object"
         assert isinstance(fixes, dict), "Invalid fixes format, expected a dictionary"
@@ -93,7 +93,51 @@ class PolygonShape(SectorShape):
         self._fixes = fixes
         self._routes = routes
 
-class IShape(SectorShape):
+        self.sector_type = type
+
+
+class GeneratedShape(SectorShape):
+
+    def __init__(length_nm = LENGTH_NM, airway_width_nm = AIRWAY_WIDTH_NM,
+                 offset_nm = OFFSET_NM, origin = C.DEFAULT_ORIGIN):
+
+        self.length_nm = length_nm
+        self.airway_width_nm = airway_width_nm
+        self.offset_nm = offset_nm
+        self.origin = origin
+
+    def i_polygon(self, airway_width_nm=None, length_nm=None):
+        """
+        All the generated shapes use an I shaped polygon as a building block
+        """
+        if airway_width_nm is None:
+            airway_width_nm = self.airway_width_nm
+        if length_nm is None:
+            length_nm = self.length_nm
+        points = [(-0.5 * airway_width_nm, -0.5 * length_nm),
+                  (-0.5 * airway_width_nm, 0.5 * length_nm),
+                  (0.5 * airway_width_nm, 0.5 * length_nm),
+                  (0.5 * airway_width_nm, -0.5 * length_nm)]
+        return geom.Polygon(points)
+
+    def create_projection(self, origin):
+        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={C.ELLIPSOID} +units=kmi +no_defs'
+        self.projection = Proj(proj_string)
+
+    def transform(self, geom):
+        """
+        geom can be polygon or point
+        """
+        return GeoHelper.__inv_project__(self.projection, geom=geom)
+
+    def create_fixes(self, fix_names, fix_points):
+        if len(fix_names) != len(fix_points):
+            raise ValueError(f'fix_names must have length {len(fix_points)}')
+        return dict(zip([fix_name.upper() for fix_name in fix_names],
+                                [self.transform(fix) for fix in fix_points]))
+
+
+class IShape(GeneratedShape):
 
     # I fixes from top to bottom:
     #
@@ -106,7 +150,8 @@ class IShape(SectorShape):
     i_fix_names = ['spirt', 'air', 'water', 'earth', 'fiyre']
 
     def __init__(self, length_nm = LENGTH_NM, fix_names = None,
-                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM,
+                 origin = C.DEFAULT_ORIGIN):
 
         if airway_width_nm > length_nm:
             raise ValueError(f'I sector width {airway_width_nm} must not exceed length {length_nm}')
@@ -114,31 +159,31 @@ class IShape(SectorShape):
         self.length_nm = length_nm
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
+        self.origin = origin
         self.sector_type = "I"
 
         if fix_names is None:
             fix_names = self.i_fix_names
 
+        self.create_projection(self.origin)
+
         # Set the polygon points
-        points = [(-0.5 * airway_width_nm, -0.5 * length_nm),
-                  (-0.5 * airway_width_nm, 0.5 * length_nm),
-                  (0.5 * airway_width_nm, 0.5 * length_nm),
-                  (0.5 * airway_width_nm, -0.5 * length_nm)]
+        # points = [(-0.5 * airway_width_nm, -0.5 * length_nm),
+        #           (-0.5 * airway_width_nm, 0.5 * length_nm),
+        #           (0.5 * airway_width_nm, 0.5 * length_nm),
+        #           (0.5 * airway_width_nm, -0.5 * length_nm)]
+        # self._polygon = self.transform(geom.Polygon(points))
+        self._polygon = self.transform(self.i_polygon())
 
-        self._polygon = geom.Polygon(points)
+        fix_points = self.__fix_points__(self.i_polygon())
+        self._fixes = self.create_fixes(fix_names, fix_points)
+        self._routes = self.create_routes()
 
-        fix_points = self.__fix_points__()
-        if len(fix_names) != len(fix_points):
-            raise ValueError(f'fix_names must have length {len(fix_points)}')
-
-        self._fixes = dict(zip([fix_name.upper() for fix_name in fix_names], fix_points))
-        self._routes = self.__routes__()
-
-    def __fix_points__(self):
+    def __fix_points__(self, polygon):
         """Compute the locations of the fixes """
 
-        x_min, y_min, x_max, y_max = self.polygon.bounds
-        x_mid, y_mid = self.polygon.centroid.coords[0]
+        x_min, y_min, x_max, y_max = polygon.bounds
+        x_mid, y_mid = polygon.centroid.coords[0]
 
         fix_points = [geom.Point(x_mid, y_max + self.offset_nm), # top exterior
                   geom.Point(x_mid, y_max), # top
@@ -148,7 +193,7 @@ class IShape(SectorShape):
 
         return fix_points
 
-    def __routes__(self):
+    def create_routes(self):
         """
         Compute the valid routes through the sector.
 
@@ -157,12 +202,13 @@ class IShape(SectorShape):
 
         # Order by increasing y-coordinate to get the "ascending" route.
         ascending_fix_list = sorted(list(self.fixes.items()), key = lambda item : item[1].coords[0][1])
+
         ascending_y = Route(fix_list = ascending_fix_list)
         # Reverse the order of fixes to get the "descending" route.
         descending_y = Route(fix_list = ascending_fix_list[::-1])
         return [ascending_y, descending_y]
 
-class XShape(SectorShape):
+class XShape(GeneratedShape):
 
     # X fixes anticlockwise from the top:
     #
@@ -178,32 +224,33 @@ class XShape(SectorShape):
     #           3) horizontal increasing in x-coordinate 4) horizontal descreasing in x-coordinate
 
     def __init__(self, length_nm = LENGTH_NM, fix_names = None,
-                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM,
+                 origin = C.DEFAULT_ORIGIN):
 
         self.length_nm = length_nm
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
+        self.origin = origin
         self.sector_type = "X"
 
         if fix_names is None:
             fix_names = self.x_fix_names
 
-        i = IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
-        polygon = cascaded_union([i.polygon, rotate(i.polygon, 90)])
+        self.create_projection(self.origin)
 
-        self._polygon = polygon
+        # i = IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
+        # polygon = cascaded_union([i.polygon, rotate(i.polygon, 90)])
+        polygon = cascaded_union([self.i_polygon(), rotate(self.i_polygon(), 90)])
+        self._polygon = self.transform(polygon)
 
-        fix_points = self.__fix_points__()
-        if len(fix_names) != len(fix_points):
-            raise ValueError(f'fix_names must have length {len(fix_points)}')
+        fix_points = self.__fix_points__(polygon)
+        self._fixes = self.create_fixes(fix_names, fix_points)
+        self._routes = self.create_routes()
 
-        self._fixes = dict(zip([fix_name.upper() for fix_name in fix_names], fix_points))
-        self._routes = self.__routes__()
+    def __fix_points__(self, polygon):
 
-    def __fix_points__(self):
-
-        x_mid, y_mid = self.polygon.centroid.coords[0]
-        x_min, y_min, x_max, y_max = self.polygon.bounds
+        x_mid, y_mid = polygon.centroid.coords[0]
+        x_min, y_min, x_max, y_max = polygon.bounds
 
         fix_points = [geom.Point(x_mid, y_max + self.offset_nm), # top exterior
                       geom.Point(x_mid, y_max), # top
@@ -217,7 +264,7 @@ class XShape(SectorShape):
 
         return fix_points
 
-    def __routes__(self):
+    def create_routes(self):
         """
         Compute the valid routes through the sector.
 
@@ -225,9 +272,9 @@ class XShape(SectorShape):
         """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
-        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < EPSILON, self.fixes.items()))
+        vertical_fixes = list(filter(lambda item : abs(GeoHelper.__project__(self.projection, item[1]).coords[0][0]) < EPSILON, self.fixes.items()))
         # Get the fixes on the horizontal line (i.e. with zero y coordinate).
-        horizontal_fixes = list(filter(lambda item : abs(item[1].coords[0][1]) < EPSILON, self.fixes.items()))
+        horizontal_fixes = list(filter(lambda item : abs(GeoHelper.__project__(self.projection, item[1]).coords[0][1]) < EPSILON, self.fixes.items()))
 
         # Order by increasing y-coordinate to get the "ascending_y" route.
         ascending_y_fix_list = sorted(vertical_fixes, key = lambda item : item[1].coords[0][1])
@@ -247,7 +294,7 @@ class XShape(SectorShape):
 
         return [ascending_y, descending_y, ascending_x, descending_x]
 
-class YShape(SectorShape):
+class YShape(GeneratedShape):
 
     # Y fixes from the centre outwards starting in the top-left branch:
     #
@@ -263,45 +310,46 @@ class YShape(SectorShape):
     #           3) increasing in y-coordinate through right branch 4) decreasing in y-coordinate through right branch
 
     def __init__(self, length_nm = LENGTH_NM, fix_names = None,
-                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM):
+                 airway_width_nm = AIRWAY_WIDTH_NM, offset_nm = OFFSET_NM,
+                 origin = C.DEFAULT_ORIGIN):
 
         self.length_nm = length_nm
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
+        self.origin = origin
         self.sector_type = "Y"
 
         if fix_names is None:
             fix_names = self.y_fix_names
 
+        self.create_projection(self.origin)
+
         # Use an I shape of half length here, so Y sector scale matches that of I & X.
-        i = IShape(length_nm = length_nm / 2, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
-        x_mid, y_mid = i.polygon.centroid.coords[0]
-        x_min, y_min, x_max, y_max = i.polygon.bounds
-        offset_polygon = cascaded_union([i.polygon, rotate(i.polygon, -120, origin=(x_mid, y_max)), rotate(i.polygon, 120, origin=(x_mid, y_max))])
+        # i = IShape(length_nm = length_nm / 2, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
+        i_polygon = self.i_polygon(length_nm = length_nm / 2, airway_width_nm = airway_width_nm)
+        x_mid, y_mid = i_polygon.centroid.coords[0]
+        x_min, y_min, x_max, y_max = i_polygon.bounds
+        offset_polygon = cascaded_union([i_polygon, rotate(i_polygon, -120, origin=(x_mid, y_max)), rotate(i_polygon, 120, origin=(x_mid, y_max))])
 
         # Shift the polygon so its centre is at the origin.
         polygon = translate(offset_polygon, xoff = 0.0, yoff = - length_nm / 4)
+        self._polygon = self.transform(polygon)
 
-        self._polygon = polygon
+        fix_points = self.__fix_points__(polygon)
+        self._fixes = self.create_fixes(fix_names, fix_points)
+        self._routes = self.create_routes()
 
-        fix_points = self.__fix_points__()
-        if len(fix_names) != len(fix_points):
-            raise ValueError(f'fix_names must have length {len(fix_points)}')
+    def __fix_points__(self, polygon):
 
-        self._fixes = dict(zip([fix_name.upper() for fix_name in fix_names], fix_points))
-        self._routes = self.__routes__()
-
-    def __fix_points__(self):
-
-        coords = list(self.polygon.exterior.coords)
+        coords = list(polygon.exterior.coords)
         xy_min, xy_max = self.minmax_xy(coords)
         xmin, ymin = xy_min
         bottom = self.__get_centre__([geom.Point(pt) for pt in self.__get_coords__(coords, xmin)])
-        bottom = geom.Point(self.polygon.centroid.coords[0][0], bottom.coords[0][1])
+        bottom = geom.Point(polygon.centroid.coords[0][0], bottom.coords[0][1])
         _x, _y = bottom.coords[0]
         bottom_outer = geom.Point(_x, _y - self.offset_nm)
 
-        origin = self.polygon.centroid
+        origin = polygon.centroid
         fix_points = [rotate(bottom_outer, angle=-120, origin=origin), # left exterior
                       rotate(bottom, -120, origin=origin), # left
                       rotate(bottom_outer, angle=120, origin=origin), # right exterior
@@ -323,7 +371,7 @@ class YShape(SectorShape):
     def __get_centre__(self, coords):
         return geom.Point(geom.GeometryCollection(coords).centroid.coords[0])
 
-    def __routes__(self):
+    def create_routes(self):
         """
         Compute the valid routes through the sector.
 
@@ -331,10 +379,10 @@ class YShape(SectorShape):
         """
 
         # Get the fixes on the vertical line (i.e. with zero x coordinate).
-        vertical_fixes = list(filter(lambda item : abs(item[1].coords[0][0]) < EPSILON, self.fixes.items()))
+        vertical_fixes = list(filter(lambda item : abs(GeoHelper.__project__(self.projection,item[1]).coords[0][0]) < EPSILON, self.fixes.items()))
 
         # Get the fixes on the left arm, possibly including the vertical fixes.
-        all_left_fixes = list(filter(lambda item : item[1].coords[0][0] < 0, self.fixes.items()))
+        all_left_fixes = list(filter(lambda item : GeoHelper.__project__(self.projection,item[1]).coords[0][0] < 0, self.fixes.items()))
 
         # Get the fixes strictly on the left arm (not including the vertical fixes).
         left_fixes = list(filter(lambda item : item[0] not in [it[0] for it in vertical_fixes], all_left_fixes))

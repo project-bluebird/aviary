@@ -23,7 +23,7 @@ class SectorElement():
     def __init__(self,
                  shape,
                  name = C.DEFAULT_SECTOR_NAME,
-                 origin = C.DEFAULT_ORIGIN,
+                 # origin = C.DEFAULT_ORIGIN,
                  lower_limit = C.DEFAULT_LOWER_LIMIT,
                  upper_limit = C.DEFAULT_UPPER_LIMIT,
                  **kwargs):
@@ -38,17 +38,13 @@ class SectorElement():
         """
 
         self.name = name
-        self.origin = origin
+        # self.origin = origin
 
         # Construct the proj-string (see https://proj.org/usage/quickstart.html)
         # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
-        proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={C.ELLIPSOID} +units=kmi +no_defs'
+        # proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={C.ELLIPSOID} +units=kmi +no_defs'
         # proj_string = Proj(init="epsg:4326").definition_string()
-        self.projection = Proj(proj_string)
-
-        # Construct the shape.
-        # f = ss.SectorShape.shape_constructor(type)
-        # shape = f(**kwargs)
+        # self.projection = Proj(proj_string)
 
         self.shape = shape
         self.lower_limit = lower_limit
@@ -60,8 +56,8 @@ class SectorElement():
         The sector polygon
         :return: a Shapely Polygon
         """
-        # return self.shape.polygon
-        return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon)
+        return self.shape.polygon
+        # return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon)
 
     def fix(self, fix_name):
         """The Point associated with a particular fix"""
@@ -70,8 +66,8 @@ class SectorElement():
         if not fix_name in list(fixes.keys()):
             raise ValueError(f'No fix exists named {fix_name}')
 
-        # return fixes[fix_name]
-        return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name])
+        return fixes[fix_name]
+        # return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name])
 
 
     def fix_location(self, fix_name):
@@ -97,9 +93,8 @@ class SectorElement():
 
         # Return route objects.
         ret = self.shape.routes
-        for route in ret:
-            route.projection = self.projection
-
+        # for route in ret:
+        #     route.projection = self.projection
         return ret
 
     def FIR_geojson(self):
@@ -187,7 +182,7 @@ class SectorElement():
                 C.NAME_KEY: self.name,
                 C.TYPE_KEY: C.SECTOR_VALUE,
                 C.SHAPE_KEY: self.shape.sector_type,
-                C.ORIGIN_KEY: self.origin,
+                # C.ORIGIN_KEY: self.origin,
                 C.CHILDREN_KEY: {
                     C.SECTOR_VOLUME_VALUE : {C.CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
                     C.ROUTE_VALUE: {C.CHILDREN_NAMES_KEY: [route.hash_route() for route in self.routes()]}
@@ -241,7 +236,9 @@ class SectorElement():
         Return a boolean indicating whether a point (lon, lat, flight_level) is inside the sector boundary.
         """
 
-        point = Point(self.projection(lon, lat))
+        # point = Point(self.projection(lon, lat))
+        # TODO: SHOULD THIS LON/LAT BE PROJECTED ???
+        point = Point(lon, lat)
         return (
             self.shape.polygon.contains(point) and
             (self.lower_limit <= flight_level <= self.upper_limit)
@@ -297,12 +294,13 @@ class SectorElement():
         shape = ss.PolygonShape(
             polygon = parser.sector_polygon(),
             fixes = parser.fixes(),
-            routes = parser.routes()
+            routes = parser.routes(),
+            type = parser.sector_type()
         )
         return SectorElement(
             shape = shape,
             name = parser.sector_name(),
-            origin = parser.sector_origin().coords[0],
+            # origin = parser.sector_origin().coords[0],
             lower_limit = parser.sector_lower_limit(),
             upper_limit = parser.sector_upper_limit(),
         )

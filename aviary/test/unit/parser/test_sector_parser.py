@@ -14,6 +14,7 @@ import aviary.sector.route as rt
 
 import shapely.geometry as geom
 
+# TODO: remove old tests, implement tests for new methods
 
 @pytest.fixture(scope="function")
 def target(i_sector_geojson):
