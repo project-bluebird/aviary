@@ -27,7 +27,31 @@ EPSILON = 1e-5 # Small number used as a tolerance when determining routes.
 
 
 class SectorShape:
-    """A 2D sector shape with waypoint fixes"""
+    """A 2D sector shape with waypoint fixes
+
+    :param polygon: geom.polygon.BaseGeometry
+    :param fixes: dictionary, {str:geom.Point}
+    :param routes: list of aviary.sector.Route objects
+    """
+
+    def __init__(self, polygon, fixes, routes):
+
+        assert isinstance(polygon, geom.polygon.BaseGeometry), "Sector polygon must be a Shapely polygon object"
+        assert isinstance(fixes, dict), "Invalid fixes format, expected a dictionary"
+        assert isinstance(routes, list), "Invalid routes format, expected a list"
+
+        assert all(isinstance(fix, str) for fix in fixes.keys()), "Fix names must be strings"
+        assert all(isinstance(fix, geom.Point) for fix in fixes.values()), "Fix coordinates must be Shapely Point objects"
+
+        fix_names = fixes.keys()
+        for route in routes:
+            assert isinstance(route, Route), "Each route must be aviary.sector.Route class"
+            for fix in route.fix_names():
+                assert fix in fix_names, f"Route fix {fix} must be in included in fixes"
+
+        self._polygon = polygon
+        self._fixes = fixes
+        self._routes = routes
 
     @property
     def polygon(self):
@@ -66,45 +90,45 @@ class SectorShape:
     def routes(self, routes):
         raise Exception("routes are immutable")
 
-class PolygonShape(SectorShape):
-
-    """
-    :param polygon: geom.polygon.BaseGeometry
-    :param fixes: dictionary, {str:geom.Point}
-    :param routes: list of aviary.sector.Route objects
-    """
-
-    def __init__(self, polygon, fixes, routes, type="P"):
-
-        assert isinstance(polygon, geom.polygon.BaseGeometry), "Sector polygon must be a Shapely polygon object"
-        assert isinstance(fixes, dict), "Invalid fixes format, expected a dictionary"
-        assert isinstance(routes, list), "Invalid routes format, expected a list"
-
-        assert all(isinstance(fix, str) for fix in fixes.keys()), "Fix names must be strings"
-        assert all(isinstance(fix, geom.Point) for fix in fixes.values()), "Fix coordinates must be Shapely Point objects"
-
-        fix_names = fixes.keys()
-        for route in routes:
-            assert isinstance(route, Route), "Each route must be aviary.sector.Route class"
-            for fix in route.fix_names():
-                assert fix in fix_names, f"Route fix {fix} must be in included in fixes"
-
-        self._polygon = polygon
-        self._fixes = fixes
-        self._routes = routes
-
-        self.sector_type = type
+# class PolygonShape(SectorShape):
+#
+#     """
+#     :param polygon: geom.polygon.BaseGeometry
+#     :param fixes: dictionary, {str:geom.Point}
+#     :param routes: list of aviary.sector.Route objects
+#     """
+#
+#     def __init__(self, polygon, fixes, routes, type="P"):
+#
+#         assert isinstance(polygon, geom.polygon.BaseGeometry), "Sector polygon must be a Shapely polygon object"
+#         assert isinstance(fixes, dict), "Invalid fixes format, expected a dictionary"
+#         assert isinstance(routes, list), "Invalid routes format, expected a list"
+#
+#         assert all(isinstance(fix, str) for fix in fixes.keys()), "Fix names must be strings"
+#         assert all(isinstance(fix, geom.Point) for fix in fixes.values()), "Fix coordinates must be Shapely Point objects"
+#
+#         fix_names = fixes.keys()
+#         for route in routes:
+#             assert isinstance(route, Route), "Each route must be aviary.sector.Route class"
+#             for fix in route.fix_names():
+#                 assert fix in fix_names, f"Route fix {fix} must be in included in fixes"
+#
+#         self._polygon = polygon
+#         self._fixes = fixes
+#         self._routes = routes
+#
+#         self.sector_type = type
 
 
 class GeneratedShape(SectorShape):
 
-    def __init__(length_nm = LENGTH_NM, airway_width_nm = AIRWAY_WIDTH_NM,
-                 offset_nm = OFFSET_NM, origin = C.DEFAULT_ORIGIN):
+    # def __init__(length_nm = LENGTH_NM, airway_width_nm = AIRWAY_WIDTH_NM,
+    #              offset_nm = OFFSET_NM, origin = C.DEFAULT_ORIGIN):
 
-        self.length_nm = length_nm
-        self.airway_width_nm = airway_width_nm
-        self.offset_nm = offset_nm
-        self.origin = origin
+        # self.length_nm = length_nm
+        # self.airway_width_nm = airway_width_nm
+        # self.offset_nm = offset_nm
+        # self.origin = origin
 
     def i_polygon(self, airway_width_nm=None, length_nm=None):
         """
@@ -160,7 +184,7 @@ class IShape(GeneratedShape):
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
         self.origin = origin
-        self.sector_type = "I"
+        # self.sector_type = "I"
 
         if fix_names is None:
             fix_names = self.i_fix_names
@@ -173,9 +197,10 @@ class IShape(GeneratedShape):
         #           (0.5 * airway_width_nm, 0.5 * length_nm),
         #           (0.5 * airway_width_nm, -0.5 * length_nm)]
         # self._polygon = self.transform(geom.Polygon(points))
-        self._polygon = self.transform(self.i_polygon())
+        polygon = self.i_polygon()
+        self._polygon = self.transform(polygon)
 
-        fix_points = self.__fix_points__(self.i_polygon())
+        fix_points = self.__fix_points__(polygon)
         self._fixes = self.create_fixes(fix_names, fix_points)
         self._routes = self.create_routes()
 
@@ -231,7 +256,7 @@ class XShape(GeneratedShape):
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
         self.origin = origin
-        self.sector_type = "X"
+        # self.sector_type = "X"
 
         if fix_names is None:
             fix_names = self.x_fix_names
@@ -240,15 +265,20 @@ class XShape(GeneratedShape):
 
         # i = IShape(length_nm = length_nm, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
         # polygon = cascaded_union([i.polygon, rotate(i.polygon, 90)])
-        polygon = cascaded_union([self.i_polygon(), rotate(self.i_polygon(), 90)])
+        # polygon = cascaded_union([self.i_polygon(), rotate(self.i_polygon(), 90)])
+        polygon = self.__polygon__()
         self._polygon = self.transform(polygon)
 
-        fix_points = self.__fix_points__(polygon)
+        fix_points = self.__fix_points__()
         self._fixes = self.create_fixes(fix_names, fix_points)
         self._routes = self.create_routes()
 
-    def __fix_points__(self, polygon):
+    def __polygon__(self):
+        return cascaded_union([self.i_polygon(), rotate(self.i_polygon(), 90)])
 
+    def __fix_points__(self):
+
+        polygon = self.__polygon__()
         x_mid, y_mid = polygon.centroid.coords[0]
         x_min, y_min, x_max, y_max = polygon.bounds
 
@@ -317,7 +347,7 @@ class YShape(GeneratedShape):
         self.airway_width_nm = airway_width_nm
         self.offset_nm = offset_nm
         self.origin = origin
-        self.sector_type = "Y"
+        # self.sector_type = "Y"
 
         if fix_names is None:
             fix_names = self.y_fix_names
@@ -326,18 +356,29 @@ class YShape(GeneratedShape):
 
         # Use an I shape of half length here, so Y sector scale matches that of I & X.
         # i = IShape(length_nm = length_nm / 2, airway_width_nm = airway_width_nm, offset_nm = offset_nm)
-        i_polygon = self.i_polygon(length_nm = length_nm / 2, airway_width_nm = airway_width_nm)
-        x_mid, y_mid = i_polygon.centroid.coords[0]
-        x_min, y_min, x_max, y_max = i_polygon.bounds
-        offset_polygon = cascaded_union([i_polygon, rotate(i_polygon, -120, origin=(x_mid, y_max)), rotate(i_polygon, 120, origin=(x_mid, y_max))])
-
-        # Shift the polygon so its centre is at the origin.
-        polygon = translate(offset_polygon, xoff = 0.0, yoff = - length_nm / 4)
+        # i_polygon = self.i_polygon(length_nm = length_nm / 2, airway_width_nm = airway_width_nm)
+        # x_mid, y_mid = i_polygon.centroid.coords[0]
+        # x_min, y_min, x_max, y_max = i_polygon.bounds
+        # offset_polygon = cascaded_union([i_polygon, rotate(i_polygon, -120, origin=(x_mid, y_max)), rotate(i_polygon, 120, origin=(x_mid, y_max))])
+        #
+        # # Shift the polygon so its centre is at the origin.
+        # polygon = translate(offset_polygon, xoff = 0.0, yoff = - length_nm / 4)
+        polygon = self.__polygon__()
         self._polygon = self.transform(polygon)
 
         fix_points = self.__fix_points__(polygon)
         self._fixes = self.create_fixes(fix_names, fix_points)
         self._routes = self.create_routes()
+
+    def __polygon__(self):
+        i_polygon = self.i_polygon(length_nm = self.length_nm / 2, airway_width_nm = self.airway_width_nm)
+        x_mid, y_mid = i_polygon.centroid.coords[0]
+        x_min, y_min, x_max, y_max = i_polygon.bounds
+        offset_polygon = cascaded_union([i_polygon, rotate(i_polygon, -120, origin=(x_mid, y_max)), rotate(i_polygon, 120, origin=(x_mid, y_max))])
+
+        # Shift the polygon so its centre is at the origin.
+        polygon = translate(offset_polygon, xoff = 0.0, yoff = - self.length_nm / 4)
+        return polygon
 
     def __fix_points__(self, polygon):
 

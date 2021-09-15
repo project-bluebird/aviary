@@ -7,15 +7,15 @@ import shapely.geometry as geom
 import aviary.sector.sector_shape as ss
 from aviary.utils.geo_helper import GeoHelper
 
-def test_polygon_shape():
+def test_sector_shape():
 
     # TODO: implement tests
     with pytest.raises(AssertionError):
-        target = ss.PolygonShape([], [], [])
+        target = ss.SectorShape([], [], [])
 
     ishape = ss.IShape()
     print(ishape.fixes)
-    target = ss.PolygonShape(ishape.polygon, ishape.fixes, ishape.routes)
+    target = ss.SectorShape(ishape.polygon, ishape.fixes, ishape.routes)
 
 
 def test_i_polygon():

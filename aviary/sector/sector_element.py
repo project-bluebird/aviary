@@ -181,7 +181,7 @@ class SectorElement():
             C.PROPERTIES_KEY: {
                 C.NAME_KEY: self.name,
                 C.TYPE_KEY: C.SECTOR_VALUE,
-                C.SHAPE_KEY: self.shape.sector_type,
+                # C.SHAPE_KEY: self.shape.sector_type,
                 # C.ORIGIN_KEY: self.origin,
                 C.CHILDREN_KEY: {
                     C.SECTOR_VOLUME_VALUE : {C.CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
@@ -291,11 +291,11 @@ class SectorElement():
         """
         parser = sp.SectorParser(sector_geojson)
 
-        shape = ss.PolygonShape(
+        shape = ss.SectorShape(
             polygon = parser.sector_polygon(),
             fixes = parser.fixes(),
             routes = parser.routes(),
-            type = parser.sector_type()
+            # type = parser.sector_type()
         )
         return SectorElement(
             shape = shape,
