@@ -47,7 +47,7 @@ def test_fix_features(target):
 def test_fix_names(target):
 
     result = target.fix_names()
-    assert result == [name.upper() for name in ss.IShape.i_fix_names]
+    assert result == [name.upper() for name in ss.GeneratedShape(sector_type="I").i_fix_names]
 
 #
 # def test_route_names(target):
@@ -74,8 +74,8 @@ def test_sector_volume_properties(target):
     assert len(result) == 1
     assert isinstance(result[0], dict)
     assert sorted(result[0].keys()) == sorted([C.NAME_KEY, C.TYPE_KEY,
-                                               C.CHILDREN_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY,
-                                               C.LENGTH_NM_KEY, C.AIRWAY_WIDTH_NM_KEY, C.OFFSET_NM_KEY])
+                                               C.CHILDREN_KEY, C.UPPER_LIMIT_KEY, C.LOWER_LIMIT_KEY,])
+                                               # C.LENGTH_NM_KEY, C.AIRWAY_WIDTH_NM_KEY, C.OFFSET_NM_KEY])
 
 
 def test_geometries_of_type(target):

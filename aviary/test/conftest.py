@@ -21,7 +21,7 @@ def i_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.IShape(fix_names = fix_names) #, route_names = route_names)
+    shape = ss.GeneratedShape(sector_type="I", fix_names = fix_names) #, route_names = route_names)
     return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
@@ -35,7 +35,7 @@ def x_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.XShape()
+    shape = ss.GeneratedShape(sector_type="X")
     return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 
@@ -50,7 +50,7 @@ def y_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.YShape()
+    shape = ss.GeneratedShape(sector_type="Y")
     return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
 
 

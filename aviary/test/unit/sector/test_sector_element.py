@@ -18,21 +18,21 @@ def test_sector_element():
     length_nm = 50
     airway_width_nm = 10
 
-    shape = ss.IShape(length_nm = length_nm,
+    shape = ss.GeneratedShape(sector_type="I", length_nm = length_nm,
                        airway_width_nm = airway_width_nm)
     sector = se.SectorElement(shape = shape,
                               name = "I-Sector",
                               origin = origin,
                               )
 
-    shape = ss.IShape(length_nm = 2 * length_nm,
+    shape = ss.GeneratedShape(sector_type="I", length_nm = 2 * length_nm,
                        airway_width_nm = airway_width_nm)
     longSector = se.SectorElement(shape = shape,
                               name = "Long-I-Sector",
                               origin = origin,
                               )
 
-    shape = ss.IShape(length_nm = length_nm,
+    shape = ss.GeneratedShape(sector_type="I", length_nm = length_nm,
                         airway_width_nm = 2 * airway_width_nm)
     wideSector = se.SectorElement(shape = shape,
                               name = "Wide-I-Sector",
@@ -69,7 +69,7 @@ def test_sector_element_with_names():
     # route_names = ['up', 'down']
     fix_names = ['a', 'b', 'c', 'd', 'e']
 
-    shape = ss.IShape(fix_names = fix_names)
+    shape = ss.GeneratedShape(sector_type="I", fix_names = fix_names)
                       # route_names = route_names)
     target = se.SectorElement(shape = shape,
                               name = "I-Sector-with-names",
@@ -151,10 +151,11 @@ def test_sector_geojson(i_element):
 
     assert isinstance(result[C.PROPERTIES_KEY], dict)
     assert sorted(result[C.PROPERTIES_KEY].keys()) == \
-           sorted([C.CHILDREN_KEY, C.NAME_KEY, C.SHAPE_KEY, C.ORIGIN_KEY, C.TYPE_KEY])
+           sorted([C.CHILDREN_KEY, C.NAME_KEY, C.TYPE_KEY])
+           # sorted([C.CHILDREN_KEY, C.NAME_KEY, C.SHAPE_KEY, C.ORIGIN_KEY, C.TYPE_KEY])
 
     assert result[C.PROPERTIES_KEY][C.TYPE_KEY] == C.SECTOR_VALUE
-    assert result[C.PROPERTIES_KEY][C.SHAPE_KEY] == "I"
+    # assert result[C.PROPERTIES_KEY][C.SHAPE_KEY] == "I"
 
     assert isinstance(result[C.PROPERTIES_KEY][C.CHILDREN_KEY], dict)
     assert sorted(result[C.PROPERTIES_KEY][C.CHILDREN_KEY].keys()) == \
