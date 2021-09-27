@@ -4,10 +4,13 @@ Could also go somewhere else.
 """
 #from numpy import float
 from typing import Dict
+from numpy.core.numeric import cross
 import pandas as pd
-from shapely.geometry import Polygon, Point, box #polygon#, box
+from shapely.geometry import Polygon, Point, box, LineString, linestring #polygon#, box
 import shapely.geometry as geom
+from shapely.prepared import prep
 from aviary.sector.route import Route
+import numpy as np
 
 # !---! From sector_shape.py !--!
 def create_fixes(fix_names, fix_points):
@@ -109,7 +112,8 @@ def load_waypoints():
 
 
 # Generate a sector polygon
-sector_poly, floor, ceiling = load_sector(sector_name="11", sector_part=1)
+ip_sectorname="11"
+sector_poly, floor, ceiling = load_sector(sector_name=ip_sectorname, sector_part=1)
 
 # Load the waypoints (fixes)
 waypoints, all_fix_names, all_fix_points, all_fix_dict = load_waypoints()
@@ -153,7 +157,8 @@ sector_waypoints, sector_fix_names, sector_fix_points = get_boundary_waypoints(s
 # Get all waypoints in the rectangular field of view (fov)
 fov_waypoints, fov_fix_names, fov_fix_points = get_boundary_waypoints(field_of_view, waypoints)
 
-print(len(sector_waypoints), len(fov_waypoints), len(waypoints))
+# print("For this particular sector, the 3 waypoints, FOV waypoints and total waypoints = ")
+# print(len(sector_waypoints), len(fov_waypoints), len(waypoints))
 
 # with open('test.svg', 'w') as f:
 #     f.write(sector_poly._repr_svg_())
@@ -183,7 +188,7 @@ def get_boundary_routes(boundary_fix_name: str, all_fix_dict):
     #Check to see if any of the boundary_fix_names appear in the split_points column
     mask = all_routes['split_points'].apply(lambda x: any([k in x for k in boundary_fix_name]))
     bounded_routes = all_routes[mask]
-    print(bounded_routes)
+    # print(bounded_routes)
     num_routes=len(bounded_routes)
 
     # Get the shapely point for each of the fixes(split points)
@@ -197,8 +202,8 @@ def get_boundary_routes(boundary_fix_name: str, all_fix_dict):
             fix_points.append(fix_point)
             entry=(names, fix_point)
             fix_list.append(entry)
-        op_bounded_routes.append(Route(fix_names, fix_points))
-    print("num routes = ", num_routes)
+        op_bounded_routes.append(Route(fix_list))
+    # print("num routes = ", num_routes)
     return op_bounded_routes
 
 def split_fixes(delimited_fix_list: str):
@@ -208,16 +213,96 @@ def split_fixes(delimited_fix_list: str):
         op.append(i)
     return op
 
-
-#get_boundary_routes(sector_fix_names)
-eg_fix_list=['DVR', 'LONAM']
-eg_route_list = get_boundary_routes(eg_fix_list, all_fix_dict)
-print("bounded routes = " , eg_route_list)
-
+print('************')
+print("There are ", len(sector_fix_names), " fixes in sector ", ip_sectorname, " = ", sector_fix_names)
+get_boundary_routes(sector_fix_names, all_fix_dict)
+# eg_fix_list=['DVR', 'LONAM']
+# eg_route_list = get_boundary_routes(eg_fix_list, all_fix_dict)
+# print("bounded routes = " , eg_route_list)
 sector_route_list = get_boundary_routes(sector_fix_names, all_fix_dict)
-print(sector_fix_names)
-print("sector routes = ", sector_route_list)
-print('sector contains this many waypoints', len(sector_fix_names))
+print("There are ", len(sector_route_list), " routes in sector ", ip_sectorname)
+
+print("There are ", len(fov_fix_names), " fixes in the sector and surrounding field of view for ", ip_sectorname, " = ", fov_fix_names)
+fov_route_list = get_boundary_routes(fov_fix_names, all_fix_dict)
+print("There are ", len(fov_route_list), " routes in the field of view surrounding sector ", ip_sectorname)
+
+def get_pseudo_fix(boundary_polygon, boundary_route_list):
+    """
+    Generate a list of psuedo fixes (waypoints) that are on routes that cross a sector boundary
+    Input:
+    sector polygon (to work out where the edges intecept)
+    sector waypoint ??? might not need as have route list which has waypoints in it
+    route list (as this in my definition includes any route that has at least 1 waypoint/fix in the polygon)
+    output:
+    pseudo_fixes. Naming convention = inside-poly-name_outside-poly-name
+
+    Assumes routes are 'linear' not 'circular' 
+    Ignore waypoints that are already on the sector edge
+    """
+    # Loop through all waypoints on each route and give them a true/false if they are inside the
+    # sector polygon (waypoints on the polygon edge count as inside)
+    # Then do a line/point comparison between the polygon and any adjacent True/False waypoints
+
+    ring = LineString(list(boundary_polygon.exterior.coords))
+
+    pseudo_fix_list=[]
+    pseudo_fix_points=[]
+
+    for i, route in enumerate(sector_route_list):
+        # Get the individual route list
+        ind_route_fix_list = route.__dict__.get('fix_list')
+        fix, coords = zip(*ind_route_fix_list)
+        # Make a boolean mask to only look at points that cross the polgon boundary
+        fixmask=[]
+        for point in coords:
+            fixmask.append(boundary_polygon.contains(point)) # May need to add a bit here about not intersecting
+        # Look for where it changes from true to false
+        crossover=np.argwhere(np.diff(fixmask)).squeeze()
+        for _ in range(crossover.size):
+            first=crossover.item(_)
+            second = first +1
+            pos1=coords[first]
+            pos2=coords[second]
+            l=LineString([pos1, pos2])
+            pseudopoint=l.intersection(ring)
+            pseudoname=fix[first]+"_"+fix[second]
+            pseudo_fix_list.append(pseudoname)
+            pseudo_fix_points.append(pseudopoint)
+            print(pseudoname, pseudopoint)
+        #     print(crossover, crossover.size)
+
+    print(pseudo_fix_list)
+    print(len(pseudo_fix_points))
+    return(77)
+    
+pseudo= get_pseudo_fix(sector_poly, sector_route_list)
+print(pseudo)
+
+# polygon = [(-1571236.8349707182, 8989180.222117377), (1599362.9654156454, 8924317.946336618), (-1653179.0745812152, 8922145.163675062), (-1626237.6614402141, 8986445.107619021)]
+
+# Point_X = -1627875.474
+# Point_Y = 8955472.968
+
+# line = geom.LineString(polygon)
+# point = geom.Point(Point_X, Point_Y)
+# polygon = geom.Polygon(line)
+
+# print(polygon.contains(point))
+
+
+# for i, route in enumerate(sector_route_list):
+#     ind_route_fix_list = route.__dict__.get('fix_list')
+#     first,snd = zip(*ind_route_fix_list)
+#     print(i, first)
+    #print(i, type(route), route.__dict__.get('fix_list')(0))
+# print(sector_fix_names)
+# print("sector routes = ", len(sector_route_list), type(sector_route_list), sector_route_list[0])
+# print("---------")
+# print(sector_route_list)
+# print("----------")
+# print('sector contains this many waypoints', len(sector_fix_names))
+
+
 
 # i_fix_names = ['spirt', 'air', 'water', 'earth', 'fiyre']
 # aa=1.0
@@ -230,4 +315,8 @@ print('sector contains this many waypoints', len(sector_fix_names))
 #           geom.Point(aa, dd), # middle
 #           geom.Point(aa, ee), # bottom
 #           geom.Point(aa, ee - cc)] # bottom exterior
-# print(Route(i_fix_names, i_fix_points))
+# print(Route(i_fix_points))
+# i_route = Route(i_fix_points)
+# print(type(i_route))
+# # print(i_fix_names)
+# # print(i_fix_points)
