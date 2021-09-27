@@ -366,7 +366,24 @@ class GeneratedShape(SectorShape):
         return geom.Point(geom.GeometryCollection(coords).centroid.coords[0])
 
 
+class NewSectorShape():
+    """
+    A definition for sector shapes that reads real-world sector 
+    information from an external source 
+    
+    :param polygon: geom.polygon.BaseGeometry
+    :param fixes: dictionary, {str:geom.Point}
+    :param routes: list of aviary.sector.Route objects
+    
+    :return Something to be passed to SectorElement
+    """
+    def __init__(self, polygon, fixes, routes) -> None:
+        self.polygon = polygon
+        self.fixes = fixes
+        self.routes = routes
 
+        # self.upper_lim = upper_lim
+        # self.lower_lim = lower_lim
 
 # class IShape(GeneratedShape):
 #

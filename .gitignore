@@ -107,3 +107,9 @@ venv.bak/
 .idea
 
 .vscode/
+.DS_Store
+
+# NATS stuff:
+routes.csv
+sectors.csv
+waypoints.csv
