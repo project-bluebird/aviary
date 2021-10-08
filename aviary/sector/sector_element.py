@@ -22,34 +22,18 @@ class SectorElement():
 
     def __init__(self,
                  shape,
-                 name = C.DEFAULT_SECTOR_NAME,
-                 # origin = C.DEFAULT_ORIGIN,
-                 lower_limit = C.DEFAULT_LOWER_LIMIT,
-                 upper_limit = C.DEFAULT_UPPER_LIMIT,
-                 **kwargs):
+                 name = C.DEFAULT_SECTOR_NAME):
         """
         SectorElement constructor.
 
         :param shape: a SectorShape (class)
         :param name: the name of the sector element
-        :param origin: the origin coordinates as a (longitude, latitude) tuple
-        :param lower_limit: the lower flight level limit
-        :param upper_limit: the upper flight level limit
         """
 
         self.name = name
-        # self.origin = origin
-
-        # Construct the proj-string (see https://proj.org/usage/quickstart.html)
-        # Note the unit kmi is "International Nautical Mile" (for full list run $ proj -lu).
-        # proj_string = f'+proj=stere +lat_0={origin[1]} +lon_0={origin[0]} +k=1 +x_0=0 +y_0=0 +ellps={C.ELLIPSOID} +units=kmi +no_defs'
-        # proj_string = Proj(init="epsg:4326").definition_string()
-        # self.projection = Proj(proj_string)
-
         self.shape = shape
-        self.lower_limit = lower_limit
-        self.upper_limit = upper_limit
-
+        self.lower_limit = shape.lower_limit
+        self.upper_limit = shape.upper_limit
 
     def polygon(self):
         """
@@ -57,7 +41,6 @@ class SectorElement():
         :return: a Shapely Polygon
         """
         return self.shape.polygon
-        # return GeoHelper.__inv_project__(self.projection, geom=self.shape.polygon)
 
     def fix(self, fix_name):
         """The Point associated with a particular fix"""
@@ -67,8 +50,6 @@ class SectorElement():
             raise ValueError(f'No fix exists named {fix_name}')
 
         return fixes[fix_name]
-        # return GeoHelper.__inv_project__(self.projection, geom = fixes[fix_name])
-
 
     def fix_location(self, fix_name):
         """The long/lat coordinates of a named fix"""
@@ -93,8 +74,6 @@ class SectorElement():
 
         # Return route objects.
         ret = self.shape.routes
-        # for route in ret:
-        #     route.projection = self.projection
         return ret
 
     def FIR_geojson(self):
@@ -181,7 +160,7 @@ class SectorElement():
             C.PROPERTIES_KEY: {
                 C.NAME_KEY: self.name,
                 C.TYPE_KEY: C.SECTOR_VALUE,
-                # C.SHAPE_KEY: self.shape.sector_type,
+                C.SHAPE_KEY: self.shape.sector_type,
                 # C.ORIGIN_KEY: self.origin,
                 C.CHILDREN_KEY: {
                     C.SECTOR_VOLUME_VALUE : {C.CHILDREN_NAMES_KEY: [self.hash_sector_coordinates()]},
@@ -237,7 +216,6 @@ class SectorElement():
         """
 
         # point = Point(self.projection(lon, lat))
-        # TODO: SHOULD THIS LON/LAT BE PROJECTED ???
         point = Point(lon, lat)
         return (
             self.shape.polygon.contains(point) and
@@ -291,16 +269,16 @@ class SectorElement():
         """
         parser = sp.SectorParser(sector_geojson)
 
-        shape = ss.SectorShape(
+        shape = ss.PolygonShape(
             polygon = parser.sector_polygon(),
-            fixes = parser.fixes(),
+            fix_names = parser.fix_names(),
+            fix_points = [fix[1] for fix in parser.fixes()],
             routes = parser.routes(),
-            # type = parser.sector_type()
+            sector_type = parser.sector_type(),
+            lower_limit = parser.sector_lower_limit(),
+            upper_limit = parser.sector_upper_limit(),
         )
         return SectorElement(
             shape = shape,
             name = parser.sector_name(),
-            # origin = parser.sector_origin().coords[0],
-            lower_limit = parser.sector_lower_limit(),
-            upper_limit = parser.sector_upper_limit(),
         )

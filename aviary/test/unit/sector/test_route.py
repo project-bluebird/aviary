@@ -13,8 +13,9 @@ import aviary.sector.sector_element as se
 def test_reverse(i_element):
 
     route_index = 1
-
+    print(i_element.routes())
     target = i_element.routes()[route_index]
+    print(target)
     result = i_element.routes()[route_index].copy()
     result.reverse()
 

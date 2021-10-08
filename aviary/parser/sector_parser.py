@@ -5,7 +5,6 @@ Sector (GeoJSON) parser.
 import aviary.constants as C
 import aviary.sector.sector_shape as ss
 import aviary.sector.sector_element as se
-# import aviary.utils.geo_helper as gh
 
 from aviary.sector.route import Route
 
@@ -87,7 +86,7 @@ class SectorParser:
 
     def routes(self):
         """
-        Return a list of aviary.sector.Route instances
+        Return a list of routes (each a  list of fixes)
         """
 
         routes = self.route_features()
@@ -95,7 +94,7 @@ class SectorParser:
         for route in routes:
             fix_points = route[C.GEOMETRY_KEY][C.COORDINATES_KEY]
             names = route[C.PROPERTIES_KEY][C.CHILDREN_KEY][C.FIX_VALUE][C.CHILDREN_NAMES_KEY]
-            result.append(Route(fix_list=list(zip(names, fix_points))))
+            result.append(list(zip(names, fix_points)))
         return result
 
     def route_names(self):

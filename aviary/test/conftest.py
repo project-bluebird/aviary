@@ -21,8 +21,8 @@ def i_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.GeneratedShape(sector_type="I", fix_names = fix_names) #, route_names = route_names)
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    shape = ss.ConstructShape(sector_type="I", fix_names = fix_names, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit) #, route_names = route_names)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")
@@ -35,8 +35,8 @@ def x_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.GeneratedShape(sector_type="X")
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    shape = ss.ConstructShape(sector_type="X", origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")
@@ -50,8 +50,8 @@ def y_element():
     lower_limit = 140
     upper_limit = 400
 
-    shape = ss.GeneratedShape(sector_type="Y")
-    return se.SectorElement(shape = shape, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    shape = ss.ConstructShape(sector_type="Y", origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")

@@ -47,7 +47,7 @@ def test_fix_features(target):
 def test_fix_names(target):
 
     result = target.fix_names()
-    assert result == [name.upper() for name in ss.GeneratedShape(sector_type="I").i_fix_names]
+    assert result == [name.upper() for name in ss.ConstructShape(sector_type="I").i_fix_names]
 
 #
 # def test_route_names(target):

@@ -10,12 +10,15 @@ from aviary.utils.geo_helper import GeoHelper
 def test_sector_shape():
 
     # TODO: implement tests
-    with pytest.raises(AssertionError):
-        target = ss.SectorShape([], [], [])
+    # with pytest.raises(AssertionError):
+    #     target = ss.PolygonShape([], [], [], [], [])
 
-    ishape = ss.GeneratedShape(sector_type = "I")
+    ishape = ss.ConstructShape(sector_type = "I")
     # print(ishape.fixes)
-    target = ss.SectorShape(ishape.polygon, ishape.fixes, ishape.routes)
+    target = ss.PolygonShape(ishape.polygon,
+                            [fix[0] for fix in ishape.fixes],
+                            [fix[1] for fix in ishape.fixes],
+                            ishape.routes)
 
 
 def test_i_polygon():
@@ -23,7 +26,7 @@ def test_i_polygon():
     length_nm = 100
     airway_width_nm = 40
     offset_nm = 20
-    target = ss.GeneratedShape(sector_type = "I",
+    target = ss.ConstructShape(sector_type = "I",
                        length_nm = length_nm,
                        airway_width_nm = airway_width_nm,
                        offset_nm = offset_nm)
@@ -41,10 +44,10 @@ def test_i_polygon():
     assert result.bounds[2] == pytest.approx(airway_width_nm / 2)
     assert result.bounds[3] == pytest.approx(length_nm / 2)
 
-    longShape = ss.GeneratedShape(sector_type = "I",
+    longShape = ss.ConstructShape(sector_type = "I",
                        length_nm = 2 * length_nm,
                        airway_width_nm = airway_width_nm)
-    wideShape = ss.GeneratedShape(sector_type = "I",
+    wideShape = ss.ConstructShape(sector_type = "I",
                        length_nm = length_nm,
                        airway_width_nm = 2 * airway_width_nm)
 
@@ -69,7 +72,7 @@ def test_i_polygon():
 def test_i_route_names():
 
     route_names = ['up', 'down']
-    target = ss.GeneratedShape(sector_type="I",fix_names=['a', 'b', 'c', 'd', 'e']) #, route_names = route_names)
+    target = ss.ConstructShape(sector_type="I",fix_names=['a', 'b', 'c', 'd', 'e']) #, route_names = route_names)
 
     # assert target.route_names == [i.upper() for i in route_names]
 
@@ -77,7 +80,7 @@ def test_i_route_names():
 def test_i_fixes():
 
     fix_names = ['a', 'b', 'c', 'd', 'e']
-    i = ss.GeneratedShape(sector_type="I",fix_names=fix_names)
+    i = ss.ConstructShape(sector_type="I",fix_names=fix_names)
 
     assert list(i.fixes.keys()) == [fix_name.upper() for fix_name in fix_names]
 
@@ -88,13 +91,13 @@ def test_i_fixes():
         assert(i.fixes[current_fix].coords[0][1] > i.fixes[next_fix].coords[0][1])
 
     with pytest.raises(ValueError):
-        ss.GeneratedShape(sector_type="I",fix_names = ['a', 'b', 'c'])
+        ss.ConstructShape(sector_type="I",fix_names = ['a', 'b', 'c'])
 
 
 def test_x_fixes():
 
     fix_names = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i']
-    x = ss.GeneratedShape(sector_type="X",fix_names=fix_names)
+    x = ss.ConstructShape(sector_type="X",fix_names=fix_names)
     assert list(x.fixes.keys()) == [fix_name.upper() for fix_name in fix_names]
 
     # Check the X fix positions.
@@ -114,7 +117,7 @@ def test_x_fixes():
 def test_y_fixes():
 
     fix_names = ['a', 'b', 'c', 'd', 'e', 'f', 'g']
-    y = ss.GeneratedShape(sector_type="Y",fix_names=fix_names)
+    y = ss.ConstructShape(sector_type="Y",fix_names=fix_names)
     assert list(y.fixes.keys()) == [fix_name.upper() for fix_name in fix_names]
 
     # Check the Y fix positions.
@@ -136,7 +139,7 @@ def test_i_routes():
     length_nm = 10
     offset_nm = 25
 
-    i = ss.GeneratedShape(sector_type="I",length_nm=length_nm, offset_nm =  offset_nm)
+    i = ss.ConstructShape(sector_type="I",length_nm=length_nm, offset_nm =  offset_nm)
     result = i.routes
 
     assert isinstance(result, list)
@@ -168,7 +171,7 @@ def test_i_routes():
 def test_x_routes():
 
     length_nm = 10
-    x = ss.GeneratedShape(sector_type="X",length_nm=length_nm)
+    x = ss.ConstructShape(sector_type="X",length_nm=length_nm)
     result = x.routes
 
     assert isinstance(result, list)
@@ -202,7 +205,7 @@ def test_x_routes():
 def test_y_routes():
 
     length_nm = 50
-    y = ss.GeneratedShape(sector_type="Y",length_nm=length_nm)
+    y = ss.ConstructShape(sector_type="Y",length_nm=length_nm)
     result = y.routes
 
     assert isinstance(result, list)

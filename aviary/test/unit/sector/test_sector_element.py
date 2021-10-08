@@ -18,26 +18,17 @@ def test_sector_element():
     length_nm = 50
     airway_width_nm = 10
 
-    shape = ss.GeneratedShape(sector_type="I", length_nm = length_nm,
-                       airway_width_nm = airway_width_nm)
-    sector = se.SectorElement(shape = shape,
-                              name = "I-Sector",
-                              origin = origin,
-                              )
+    shape = ss.ConstructShape(sector_type="I", length_nm = length_nm,
+                       airway_width_nm = airway_width_nm, origin = origin,)
+    sector = se.SectorElement(shape = shape, name = "I-Sector")
 
-    shape = ss.GeneratedShape(sector_type="I", length_nm = 2 * length_nm,
-                       airway_width_nm = airway_width_nm)
-    longSector = se.SectorElement(shape = shape,
-                              name = "Long-I-Sector",
-                              origin = origin,
-                              )
+    shape = ss.ConstructShape(sector_type="I", length_nm = 2 * length_nm,
+                       airway_width_nm = airway_width_nm, origin = origin,)
+    longSector = se.SectorElement(shape = shape, name = "Long-I-Sector")
 
-    shape = ss.GeneratedShape(sector_type="I", length_nm = length_nm,
-                        airway_width_nm = 2 * airway_width_nm)
-    wideSector = se.SectorElement(shape = shape,
-                              name = "Wide-I-Sector",
-                              origin = origin,
-                              )
+    shape = ss.ConstructShape(sector_type="I", length_nm = length_nm,
+                        airway_width_nm = 2 * airway_width_nm, origin = origin,)
+    wideSector = se.SectorElement(shape = shape, name = "Wide-I-Sector")
 
     assert isinstance(sector, se.SectorElement)
     assert isinstance(longSector, se.SectorElement)
@@ -69,12 +60,9 @@ def test_sector_element_with_names():
     # route_names = ['up', 'down']
     fix_names = ['a', 'b', 'c', 'd', 'e']
 
-    shape = ss.GeneratedShape(sector_type="I", fix_names = fix_names)
+    shape = ss.ConstructShape(sector_type="I", fix_names = fix_names, origin = (0, 40))
                       # route_names = route_names)
-    target = se.SectorElement(shape = shape,
-                              name = "I-Sector-with-names",
-                              origin = (0, 40),
-                              )
+    target = se.SectorElement(shape = shape, name = "I-Sector-with-names" )
 
 
     assert isinstance(target, se.SectorElement)
