@@ -379,7 +379,7 @@ class RealWorldShape(SectorShape):
 
     def __init__(self, sector_name, sector_part=1, boundary_limit=0.25,
                     sectors_path = 'sectors.csv', waypoints_path = 'waypoints.csv',
-                    routes_path = 'routes.csv'):
+                    routes_path = None):
 
         self._sector_type = sector_name
         sector, floor, ceil = self.load_sector(sectors_path, sector_name, sector_part)
@@ -393,9 +393,12 @@ class RealWorldShape(SectorShape):
         fix_names, fix_points = self.get_boundary_waypoints(sector_bbox, all_waypoints)
         self._fixes = self.format_fixes(fix_names, fix_points)
 
-        all_routes = self.load_routes(routes_path)
-        routes = self.get_boundary_routes(all_routes, fix_names)
-        self._routes = [self.format_route(route) for route in routes]
+        if routes_path:
+            all_routes = self.load_routes(routes_path)
+            routes = self.get_boundary_routes(all_routes, fix_names)
+            self._routes = [self.format_route(route) for route in routes]
+        else:
+            self._routes = []
 
     def load_sector(self, file_path, sector_name, sector_part):
 
