@@ -378,8 +378,8 @@ class ConstructShape(SectorShape):
 class RealWorldShape(SectorShape):
 
     def __init__(self, sector_name, sector_part=1, boundary_limit=0.25,
-                    sectors_path = 'sectors.csv', waypoints_path = 'waypoints.csv',
-                    routes_path = None):
+                    sectors_path='sectors.csv', waypoints_path='waypoints.csv',
+                    routes_path=None):
 
         self._sector_type = sector_name
         sector, floor, ceil = self.load_sector(sectors_path, sector_name, sector_part)
@@ -462,8 +462,8 @@ class RealWorldShape(SectorShape):
         full_routes = routes[routes['Route_Points'].str.contains("|".join(fix_names), regex=True)]
         bounded_routes = []
         for route in full_routes['Route_Points'].str.split(";").to_list():
-            fix_names = [wpt for wpt in route if wpt in fix_names]
-            fix_points = [self._fixes[fix] for fix in fix_names]
+            route_fix_names = [wpt for wpt in route if wpt in fix_names]
+            fix_points = [self._fixes[fix] for fix in route_fix_names]
             fix_list = list(zip(fix_names, fix_points))
             bounded_routes.append(fix_list)
         return bounded_routes
