@@ -9,7 +9,8 @@ from functools import partial
 
 from geographiclib.geodesic import Geodesic
 
-COORDINATES_KEY = "coordinates"
+import aviary.constants as C
+# COORDINATES_KEY = "coordinates"
 
 class GeoHelper():
     """Helper class containing geometric and geographic functions"""
@@ -20,6 +21,10 @@ class GeoHelper():
 
         return transform(partial(projection, inverse=True), geom)
 
+    @staticmethod
+    def __project__(projection, geom):
+        """Helper for doing a geometric projection"""
+        return transform(projection, geom)
 
     @staticmethod
     def format_coordinates(geojson, key, float_precision, as_geojson = True):
@@ -33,7 +38,7 @@ class GeoHelper():
             raise ValueError(f'Key {key} not found in geojson: {geojson}')
 
         # Ensure the coordinates are in a list, not a tuple.
-        coords = list(geojson[key][COORDINATES_KEY])
+        coords = list(geojson[key][C.COORDINATES_KEY])
 
         # Coordinates list may be nested.
         nested = False
@@ -59,7 +64,7 @@ class GeoHelper():
         else:
             geojson_element = rounded
 
-        geojson[key][COORDINATES_KEY] = geojson_element
+        geojson[key][C.COORDINATES_KEY] = geojson_element
         return geojson
 
 

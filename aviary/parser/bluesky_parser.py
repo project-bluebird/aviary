@@ -6,7 +6,7 @@ import aviary.constants as C
 import aviary.sector.sector_element as se
 import aviary.sector.route as rt
 import aviary.scenario.scenario_generator as sg
-import aviary.utils.geo_helper as gh
+# import aviary.utils.geo_helper as gh
 from aviary.parser.sector_parser import SectorParser
 
 from datetime import datetime, timedelta
@@ -83,7 +83,7 @@ class BlueskyParser(SectorParser):
             orig_len = len(line)
 
             # Parse lat/long info.
-            coords_list = self.sector_polygon()[gh.COORDINATES_KEY]
+            coords_list = list(self.sector_polygon().exterior.coords)
 
             # Coordinates list may be nested.
             while len(coords_list) == 1:
@@ -131,7 +131,7 @@ class BlueskyParser(SectorParser):
 
         # fix coordinates are in long/lat --> turn to lat/lon
         return [
-            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[C.PROPERTIES_KEY][C.NAME_KEY]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LAT_INDEX]} {fix[C.GEOMETRY_KEY][gh.COORDINATES_KEY][LONG_INDEX]}"
+            f"{BS_DEFWPT_PREFIX}{BS_DEFINE_WAYPOINT} {fix[C.PROPERTIES_KEY][C.NAME_KEY]} {fix[C.GEOMETRY_KEY][C.COORDINATES_KEY][LAT_INDEX]} {fix[C.GEOMETRY_KEY][C.COORDINATES_KEY][LONG_INDEX]}"
             for fix in fixes
         ]
 
@@ -278,7 +278,7 @@ class BlueskyParser(SectorParser):
         # get the coordinates of the first waypoint
         # if this is the same as the starting position, get coordinates of second waypoint
         route_coordinates = [
-            wpt[C.GEOMETRY_KEY][gh.COORDINATES_KEY] for wpt in self.route(callsign)
+            wpt[C.GEOMETRY_KEY][C.COORDINATES_KEY] for wpt in self.route(callsign)
         ]
         to_wpt = route_coordinates[0]
         if from_wpt == to_wpt:

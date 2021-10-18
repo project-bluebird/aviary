@@ -26,7 +26,7 @@ class PoissonScenario(ScenarioAlgorithm):
 
         while True:
             current_flight_level = int(self.flight_level())
-            route = self.route()
+            route = self.route().copy()
             start_position = route.fix_points()[0].coords[0]
             departure = self.departure_airport(route)
             destination = self.destination_airport(route)

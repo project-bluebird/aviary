@@ -13,41 +13,45 @@ import aviary.scenario.overflier_climber_scenario as ocs
 def i_element():
     """Test fixture: an I-shaped sector element object."""
 
-    type = ss.SectorType.I
     name = "EARTH"
     origin = (-0.1275, 51.5)
     fix_names = ['a', 'b', 'c', 'd', 'e']
-    route_names = ['up', 'down']
+    # route_names = ['up', 'down']
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit,
-                            fix_names = fix_names, route_names = route_names)
+
+    shape = ss.ConstructShape(sector_type="I", fix_names = fix_names, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit) #, route_names = route_names)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")
 def x_element():
     """Test fixture: an X-shaped sector element object."""
 
-    type = ss.SectorType.X
+    # type = ss.SectorType.X
     name = "HELL"
     origin = (-0.1275, 51.5)
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+
+    shape = ss.ConstructShape(sector_type="X", origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")
 def y_element():
     """Test fixture: a Y-shaped sector element object."""
 
-    type = ss.SectorType.Y
+    # type = ss.SectorType.Y
     name = "HEAVEN"
     origin = (-0.1275, 51.5)
 
     lower_limit = 140
     upper_limit = 400
-    return se.SectorElement(type = type, name = name, origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+
+    shape = ss.ConstructShape(sector_type="Y", origin = origin, lower_limit = lower_limit, upper_limit = upper_limit)
+    return se.SectorElement(shape = shape, name = name)
 
 
 @pytest.fixture(scope="function")
@@ -113,7 +117,7 @@ def i_sector_geojson():
      obtained by calling geojson.dumps() on an I-shaped SectorElement."""
 
     return """
-    {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {}, "properties": {"name": "test_sector", "type": "FIR", "children": {"SECTOR": {"names": ["test_sector"]}, "ROUTE": {"names": ["ASCENSION", "FALLEN"]}, "FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}}, {"type": "Feature", "properties": {"name": "test_sector", "type": "SECTOR", "shape": "I", "origin": [-0.1275, 51.5], "children": {"SECTOR_VOLUME": {"names": ["4878096944804515372"]}, "ROUTE": {"names": ["ASCENSION", "FALLEN"]}}}, "geometry": {}}, {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[-0.3895, 50.6673], [-0.3992, 52.3319], [0.1442, 52.3319], [0.1345, 50.6673], [-0.3895, 50.6673]]]}, "properties": {"name": "4878096944804515372", "type": "SECTOR_VOLUME", "lower_limit": 50, "upper_limit": 450, "length_nm": 100, "airway_width_nm": 20, "offset_nm": 40, "children": {}}}, {"type": "Feature", "properties": {"name": "ASCENSION", "type": "ROUTE", "children": {"FIX": {"names": ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 50.0017], [-0.1275, 50.6676], [-0.1275, 51.5], [-0.1275, 52.3322], [-0.1275, 52.9978]]}}, {"type": "Feature", "properties": {"name": "FALLEN", "type": "ROUTE", "children": {"FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 52.9978], [-0.1275, 52.3322], [-0.1275, 51.5], [-0.1275, 50.6676], [-0.1275, 50.0017]]}}, {"type": "Feature", "properties": {"name": "SPIRT", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.9978]}}, {"type": "Feature", "properties": {"name": "AIR", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.3322]}}, {"type": "Feature", "properties": {"name": "WATER", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.5]}}, {"type": "Feature", "properties": {"name": "EARTH", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.6676]}}, {"type": "Feature", "properties": {"name": "FIYRE", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.0017]}}]}
+    {"type": "FeatureCollection", "features": [{"type": "Feature", "geometry": {}, "properties": {"name": "test_sector", "type": "FIR", "children": {"SECTOR": {"names": ["test_sector"]}, "ROUTE": {"names": ["-3168601326650421337", "487954663116466847"]}, "FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}}, {"type": "Feature", "properties": {"name": "test_sector", "type": "SECTOR", "shape": "I", "origin": [-0.1275, 51.5], "children": {"SECTOR_VOLUME": {"names": ["-6568819329422870270"]}, "ROUTE": {"names": ["-3168601326650421337", "487954663116466847"]}}}, "geometry": {}}, {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": [[[-0.3895, 50.6673], [-0.3992, 52.3319], [0.1442, 52.3319], [0.1345, 50.6673], [-0.3895, 50.6673]]]}, "properties": {"name": "-6568819329422870270", "type": "SECTOR_VOLUME", "lower_limit": 50, "upper_limit": 450, "children": {}}}, {"type": "Feature", "properties": {"name": "ASCENSION", "type": "ROUTE", "children": {"FIX": {"names": ["FIYRE", "EARTH", "WATER", "AIR", "SPIRT"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 50.0017], [-0.1275, 50.6676], [-0.1275, 51.5], [-0.1275, 52.3322], [-0.1275, 52.9978]]}}, {"type": "Feature", "properties": {"name": "FALLEN", "type": "ROUTE", "children": {"FIX": {"names": ["SPIRT", "AIR", "WATER", "EARTH", "FIYRE"]}}}, "geometry": {"type": "LineString", "coordinates": [[-0.1275, 52.9978], [-0.1275, 52.3322], [-0.1275, 51.5], [-0.1275, 50.6676], [-0.1275, 50.0017]]}}, {"type": "Feature", "properties": {"name": "SPIRT", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.9978]}}, {"type": "Feature", "properties": {"name": "AIR", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 52.3322]}}, {"type": "Feature", "properties": {"name": "WATER", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 51.5]}}, {"type": "Feature", "properties": {"name": "EARTH", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.6676]}}, {"type": "Feature", "properties": {"name": "FIYRE", "type": "FIX"}, "geometry": {"type": "Point", "coordinates": [-0.1275, 50.0017]}}]}
     """
 
 
