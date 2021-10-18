@@ -413,7 +413,7 @@ class RealWorldShape(SectorShape):
 
         wpts = pd.read_csv(file_path)
         wpts['lat_dd'] = wpts['lat'].apply(decimal_degrees)
-        wpts['long_dd'] = wpts[' long'].apply(decimal_degrees)
+        wpts['long_dd'] = wpts['long'].apply(decimal_degrees)
         wpts['geometry'] = [geom.Point(lon,lat) for lon,lat in zip(wpts['long_dd'], wpts['lat_dd'])]
         fix_dict = wpts.set_index('waypointname')['geometry'].to_dict()
 
@@ -464,6 +464,6 @@ class RealWorldShape(SectorShape):
         for route in full_routes['Route_Points'].str.split(";").to_list():
             route_fix_names = [wpt for wpt in route if wpt in fix_names]
             fix_points = [self._fixes[fix] for fix in route_fix_names]
-            fix_list = list(zip(fix_names, fix_points))
+            fix_list = list(zip(route_fix_names, fix_points))
             bounded_routes.append(fix_list)
         return bounded_routes
